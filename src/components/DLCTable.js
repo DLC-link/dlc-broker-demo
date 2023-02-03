@@ -5,7 +5,6 @@ import eventBus from '../EventBus';
 import { RepeatClockIcon } from '@chakra-ui/icons';
 import { VStack, Text, HStack, Collapse, IconButton, SimpleGrid, ScaleFade } from '@chakra-ui/react';
 import Card from './Card';
-import { getStacksLoans } from '../blockchainFunctions/stacksFunctions';
 import { getEthereumLoans } from '../blockchainFunctions/ethereumFunctions';
 import InitialCard from './InitialCard';
 
@@ -62,10 +61,6 @@ export default function DLCTable({ isConnected, creator, walletType, blockchain 
   const fetchAllLoans = async () => {
     let loans = undefined;
     switch (walletType) {
-      case 'hiro':
-      case 'xverse':
-        loans = await getStacksLoans(creator, blockchain);
-        break;
       case 'metamask':
         loans = getEthereumLoans(creator);
         break;

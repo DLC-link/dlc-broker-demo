@@ -32,7 +32,6 @@ import {
   formatBitcoinInUSDAmount,
 } from '../utils';
 import eventBus from '../EventBus';
-import { sendLoanContractToStacks } from '../blockchainFunctions/stacksFunctions';
 import { sendLoanContractToEthereum } from '../blockchainFunctions/ethereumFunctions';
 
 export default function DepositModal({ isOpen, closeModal, walletType, blockchain, Z }) {
@@ -85,12 +84,6 @@ export default function DepositModal({ isOpen, closeModal, walletType, blockchai
 
   const sendLoanContract = (loanContract) => {
     switch (walletType) {
-      case 'hiro':
-      case 'xverse':
-        sendLoanContractToStacks(loanContract, blockchain).then(
-          eventBus.dispatch('create-loan', { loan: loanContract })
-        );
-        break;
       case 'metamask':
         sendLoanContractToEthereum(loanContract);
         break;

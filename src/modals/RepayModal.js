@@ -26,7 +26,6 @@ import {
   formatCollateralInUSD,
   formatBitcoinInUSDAmount,
 } from '../utils';
-import { repayStacksLoanContract } from '../blockchainFunctions/stacksFunctions';
 
 export default function RepayModal({
   isOpen,
@@ -81,10 +80,6 @@ export default function RepayModal({
 
   const repayLoanContract = async () => {
     switch (walletType) {
-      case 'hiro':
-      case 'xverse':
-        repayStacksLoanContract(creator, uuid, additionalRepay, blockchain);
-        break;
       case 'metamask':
         break;
       default:

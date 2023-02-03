@@ -1,18 +1,10 @@
 import React from 'react';
 import eventBus from '../EventBus';
 import { Button, Text, HStack, Flex, Image, Spacer } from '@chakra-ui/react';
-import { userSession } from '../hiroWalletUserSession';
 import Account from './Account';
-import { createAccountInformation } from '../factoryFunctions';
 
 export default function Header({ address, isConnected, walletType }) {
   const disconnect = () => {
-    switch (walletType) {
-      case 'hiro':
-      case 'xverse':
-        userSession.signUserOut('/');
-        break;
-    }
     eventBus.dispatch('account-information', {});
   };
 

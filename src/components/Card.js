@@ -7,27 +7,19 @@ import { customShiftValue, fixedTwoDecimalShift } from '../utils';
 import Status from './Status';
 import eventBus from '../EventBus';
 import { useState } from 'react';
-import BorrowModal from '../modals/BorrowModal';
 import RepayModal from '../modals/RepayModal';
-import { liquidateStacksLoanContract, closeStacksLoanContract } from '../blockchainFunctions/stacksFunctions';
 import { liquidateEthereumLoanContract } from '../blockchainFunctions/ethereumFunctions';
 
 export default function Card({ loan, creator, walletType, blockchain, bitCoinValue }) {
-  const [isBorrowModalOpen, setBorrowModalOpen] = useState(false);
   const [isRepayModalOpen, setRepayModalOpen] = useState(false);
 
   useEffect(() => {
     eventBus.on('loan-event', (event) => {
-      if (event.status === 'borrow-requested' || 'repay-requested') {
-        onBorrowModalClose();
+      if (event.status === 'repay-requested') {
         onRepayModalClose();
       }
     });
-  });
-
-  const onBorrowModalClose = () => {
-    setBorrowModalOpen(false);
-  };
+  }, []);
 
   const onRepayModalClose = () => {
     setRepayModalOpen(false);
@@ -60,35 +52,6 @@ export default function Card({ loan, creator, walletType, blockchain, bitCoinVal
           }
         }
       );
-    }
-  };
-
-  const liquidateLoanContract = async () => {
-    switch (walletType) {
-      case 'hiro':
-      case 'xverse':
-        liquidateStacksLoanContract(creator, loan.raw.dlcUUID, blockchain);
-        break;
-      case 'metamask':
-        liquidateEthereumLoanContract(loan.raw.id);
-        break;
-      default:
-        console.error('Unsupported wallet type!');
-        break;
-    }
-  };
-
-  const closeLoanContract = async () => {
-    switch (walletType) {
-      case 'hiro':
-      case 'xverse':
-        closeStacksLoanContract(creator, loan.raw.dlcUUID, blockchain);
-        break;
-      case 'metamask':
-        break;
-      default:
-        console.error('Unsupported wallet type!');
-        break;
     }
   };
 
@@ -227,45 +190,16 @@ export default function Card({ loan, creator, walletType, blockchain, bitCoinVal
             )}
             {loan.raw.status === 'funded' && (
               <VStack>
-                <Button
-                  variant='outline'
-                  onClick={() => setBorrowModalOpen(true)}>
-                  BORROW
-                </Button>
-                {loan.raw.vaultLoan > 0 ? (
                   <Button
                     variant='outline'
                     onClick={() => setRepayModalOpen(true)}>
                     REPAY LOAN
                   </Button>
-                ) : (
-                  <Button
-                    variant='outline'
-                    onClick={() => closeLoanContract()}>
-                    CLOSE LOAN
-                  </Button>
-                )}
-                {countCollateralToDebtRatio(bitCoinValue, loan.raw.vaultCollateral, loan.raw.vaultLoan) < 140 && (
-                  <Button
-                    variant='outline'
-                    onClick={() => liquidateLoanContract()}>
-                    LIQUIDATE
-                  </Button>
-                )}
               </VStack>
             )}
           </Flex>
         </VStack>
       </Flex>
-      <BorrowModal
-        isOpen={isBorrowModalOpen}
-        closeModal={onBorrowModalClose}
-        walletType={walletType}
-        vaultLoanAmount={loan.raw.vaultLoan}
-        BTCDeposit={loan.raw.vaultCollateral}
-        uuid={loan.raw.dlcUUID}
-        creator={creator}
-        blockchain={blockchain}></BorrowModal>
       <RepayModal
         isOpen={isRepayModalOpen}
         closeModal={onRepayModalClose}
