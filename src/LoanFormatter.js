@@ -4,23 +4,6 @@ import { bytesToHex, bytesToUtf8 } from 'micro-stacks/common';
 import { toJson } from './utils';
 
 const loanFormatter = {
-  formatClarityResponse(dlc) {
-    const dlcData = dlc.value.data;
-
-    const rawData = {
-      status: dlcData.status.data,
-      owner: addressToString(dlcData.owner.address),
-      liquidationFee: dlcData['liquidation-fee'].value.toString(),
-      liquidationRatio: dlcData['liquidation-ratio'].value.toString(),
-      vaultCollateral: dlcData['vault-collateral'].value.toString(),
-      vaultLoan: dlcData['vault-loan'].value.toString(),
-      ...(dlcData.dlc_uuid.hasOwnProperty('value') && {
-        dlcUUID: bytesToHex(dlcData.dlc_uuid.value.buffer),
-      }),
-    };
-    return this.formatToReadable(rawData);
-  },
-
   formatSolidityResponse(dlc) {
     const rawData = {
       id: parseInt(dlc.id._hex),

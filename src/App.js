@@ -5,10 +5,12 @@ import Header from './components/Header';
 import Intro from './components/Intro';
 import React, { useEffect } from 'react';
 import DepositModal from './modals/DepositModal';
-import DLCTable from './components/DLCTable';
+import DLCTable from './components/MyContractsTable';
 import { Box, useToast } from '@chakra-ui/react';
 import { useState } from 'react';
 import CustomToast from './components/CustomToast';
+import NFTTabs from './components/NFTTabs';
+import { customShiftValue } from './utils';
 
 /* global BigInt */
 
@@ -24,6 +26,7 @@ export default function App() {
   const [isSelectWalletModalOpen, setSelectWalletModalOpen] = useState(false);
   const [isDepositModalOpen, setDepositModalOpen] = useState(false);
   const [blockchain, setBlockchain] = useState(undefined);
+  const [depositAmount, setDepositAmount] = useState(undefined);
   const toast = useToast();
 
   const handleEvent = (data) => {
@@ -49,9 +52,11 @@ export default function App() {
     eventBus.on('set-loading-state', (data) => setLoading(data.isLoading));
     eventBus.on('is-select-wallet-modal-open', (data) => setSelectWalletModalOpen(data.isSelectWalletOpen));
     eventBus.on('is-deposit-modal-open', (data) => setDepositModalOpen(data.isDepositOpen));
+    eventBus.on('change-deposit-amount', (data) => setDepositAmount(customShiftValue(data.depositAmount, 8, true)));
   }, []);
 
   const handleAccountInformation = (data) => {
+    console.log(data);
     setConnected(!!data.walletType);
     setWalletType(data.walletType);
     setAddress(data.address);
@@ -74,7 +79,9 @@ export default function App() {
         <Header
           isConnected={isConnected}
           walletType={walletType}
-          address={address}></Header>
+          address={address}
+          isLoading={isLoading}
+          depositAmount={depositAmount}></Header>
         <DepositModal
           walletType={walletType}
           address={address}
@@ -88,16 +95,11 @@ export default function App() {
         />
         <Intro isConnected={isConnected}></Intro>
         {isConnected && (
-          <>
-            <DepositWithdraw
-              isConnected={isConnected}
-              isLoading={isLoading}></DepositWithdraw>
-            <DLCTable
-              isConnected={isConnected}
-              walletType={walletType}
-              creator={address}
-              blockchain={blockchain}></DLCTable>
-          </>
+          <NFTTabs
+            isConnected={isConnected}
+            address={address}
+            walletType={walletType}
+            blockchain={blockchain}></NFTTabs>
         )}
       </Box>
     </>

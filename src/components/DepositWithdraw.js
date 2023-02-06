@@ -25,10 +25,6 @@ export default function DepositWithdraw(props) {
   const [depositAmount, setDepositAmount] = useState(0);
   const [loanAmount, setLoanAmount] = useState(0);
 
-  useEffect(() => {
-    eventBus.on('change-deposit-amount', (data) => setDepositAmount(customShiftValue(data.depositAmount, 8, true)));
-    eventBus.on('change-loan-amount', (data) => setLoanAmount(customShiftValue(data.loanAmount, 6, true)));
-  }, []);
 
   const openDepositModal = () => {
     eventBus.dispatch('is-deposit-modal-open', { isDepositOpen: true });
@@ -58,97 +54,6 @@ export default function DepositWithdraw(props) {
               padding='10px 10px'
               boxShadow='dark-lg'>
               <VStack>
-                <TableContainer>
-                  <Table
-                    variant='simple'
-                    color='white'>
-                    <TableCaption fontSize={12}>Deposit Bitcoin</TableCaption>
-                    <Thead>
-                      <Tr>
-                        <Th
-                          fontSize={[8, 12]}
-                          color='white'>
-                          Asset
-                        </Th>
-                        <Th
-                          fontSize={[8, 12]}
-                          color='white'>
-                          Deposit Balance
-                        </Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      <Tr>
-                        <Td>
-                          <Image
-                            src='/btc_logo.png'
-                            alt='Bitcoin Logo'
-                            width={25}
-                            height={25}
-                            borderRadius='3px'></Image>
-                        </Td>
-                        {isLoading ? (
-                          <Td>
-                            <IconButton
-                              _hover={{
-                                background: 'secondary1',
-                              }}
-                              isLoading
-                              variant='outline'
-                              color='white'
-                              borderRadius='full'
-                              width={[25, 35]}
-                              height={[25, 35]}></IconButton>
-                          </Td>
-                        ) : (
-                          <Td>{depositAmount}</Td>
-                        )}
-                      </Tr>
-                    </Tbody>
-                    <Thead>
-                      <Tr>
-                        <Th
-                          fontSize={[8, 12]}
-                          color='white'>
-                          Asset
-                        </Th>
-                        <Th
-                          fontSize={[8, 12]}
-                          color='white'>
-                          Loan Balance
-                        </Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      <Tr>
-                        <Td>
-                          <Image
-                            src='/usdc_logo.png'
-                            alt='USDC Logo'
-                            width={25}
-                            height={25}
-                            borderRadius='3px'></Image>
-                        </Td>
-                        {isLoading ? (
-                          <Td>
-                            <IconButton
-                              _hover={{
-                                background: 'secondary1',
-                              }}
-                              isLoading
-                              variant='outline'
-                              color='white'
-                              borderRadius='full'
-                              width={[25, 35]}
-                              height={[25, 35]}></IconButton>
-                          </Td>
-                        ) : (
-                          <Td>{loanAmount}</Td>
-                        )}
-                      </Tr>
-                    </Tbody>
-                  </Table>
-                </TableContainer>
                 <Button
                   _hover={{
                     color: 'white',

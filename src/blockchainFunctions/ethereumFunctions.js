@@ -31,32 +31,32 @@ export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
       method: 'eth_requestAccounts',
     });
     const metaMaskAddress = accounts[0];
-    createAndDispatchAccountInformation('metamask', blockchain, metaMaskAddress);
+    createAndDispatchAccountInformation('metamask', metaMaskAddress, blockchain);
   } catch (error) {
     console.error(error)
   }
 }
 
-export async function isAllowedInMetamask(creator, vaultLoan) {
-  const desiredAmount = 1000000n * 10n ** 18n;
-  const allowedAmount = await usdcContract.allowance(creator, process.env.REACT_APP_ETHEREUM_CONTRACT_ADDRESS);
+// export async function isAllowedInMetamask(creator, vaultLoan) {
+//   const desiredAmount = 1000000n * 10n ** 18n;
+//   const allowedAmount = await usdcContract.allowance(creator, process.env.REACT_APP_ETHEREUM_CONTRACT_ADDRESS);
 
-  if (fixedTwoDecimalShift(vaultLoan) > parseInt(allowedAmount)) {
-    try {
-      await usdcContract.approve(process.env.REACT_APP_ETHEREUM_CONTRACT_ADDRESS, desiredAmount).then((response) =>
-        eventBus.dispatch('loan-event', {
-          status: 'approve-requested',
-          txId: response.hash,
-        })
-      );
-      return false;
-    } catch (error) {
-      console.error(error);
-    }
-  } else {
-    return true;
-  }
-}
+//   if (fixedTwoDecimalShift(vaultLoan) > parseInt(allowedAmount)) {
+//     try {
+//       await usdcContract.approve(process.env.REACT_APP_ETHEREUM_CONTRACT_ADDRESS, desiredAmount).then((response) =>
+//         eventBus.dispatch('loan-event', {
+//           status: 'approve-requested',
+//           txId: response.hash,
+//         })
+//       );
+//       return false;
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   } else {
+//     return true;
+//   }
+// }
 
 export async function sendLoanContractToEthereum(loanContract) {
   try {
@@ -90,20 +90,20 @@ export async function getEthereumLoans(address) {
   return loans;
 }
 
-export async function repayEthereumLoanContract(loanContractID) {
-  if (await isAllowedInMetamask()) {
-    try {
-      loanManagerETH.repayLoan(loanContractID).then((response) =>
-        eventBus.dispatch('loan-event', {
-          status: 'repay-requested',
-          txId: response.hash,
-        })
-      );
-    } catch (error) {
-      console.error(error);
-    }
-  }
-}
+// export async function repayEthereumLoanContract(loanContractID) {
+//   if (await isAllowedInMetamask()) {
+//     try {
+//       loanManagerETH.repayLoan(loanContractID).then((response) =>
+//         eventBus.dispatch('loan-event', {
+//           status: 'repay-requested',
+//           txId: response.hash,
+//         })
+//       );
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   }
+// }
 
 export async function liquidateEthereumLoanContract(loanContractID) {
   try {

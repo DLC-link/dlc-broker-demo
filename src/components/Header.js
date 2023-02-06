@@ -3,17 +3,7 @@ import eventBus from '../EventBus';
 import { Button, Text, HStack, Flex, Image, Spacer } from '@chakra-ui/react';
 import Account from './Account';
 
-export default function Header({ address, isConnected, walletType }) {
-  const disconnect = () => {
-    eventBus.dispatch('account-information', {});
-  };
-
-  const openSelectWalletModal = () => {
-    eventBus.dispatch('is-select-wallet-modal-open', {
-      isSelectWalletOpen: true,
-    });
-  };
-
+export default function Header({ address, isConnected, walletType, isLoading, depositAmount }) {
   return (
     <>
       <HStack
@@ -30,6 +20,7 @@ export default function Header({ address, isConnected, walletType }) {
           _hover={{
             background: 'none',
           }}
+          shadow='none'
           variant='ghost'
           height={[25, 65]}
           width={100}>
@@ -41,24 +32,12 @@ export default function Header({ address, isConnected, walletType }) {
           />
         </Button>
         <Spacer></Spacer>
-        {!isConnected ? (
-          <Button
-            variant='connect'
-            onClick={openSelectWalletModal}>
-            <Text variant='connect'>Connect Wallet</Text>
-          </Button>
-        ) : (
-          <Button
-            variant='connect'
-            bgGradient='linear(to-r, primary1, primary2)'
-            onClick={disconnect}>
-            <Text variant='connect'>Disconnect</Text>
-          </Button>
-        )}
         <Account
           address={address}
           isConnected={isConnected}
-          walletType={walletType}></Account>
+          walletType={walletType}
+          isLoading={isLoading}
+          depositAmount={depositAmount}></Account>
       </HStack>
     </>
   );

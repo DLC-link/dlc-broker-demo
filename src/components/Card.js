@@ -1,7 +1,7 @@
 /*global chrome*/
 
 import { useEffect } from 'react';
-import { Flex, Text, VStack, Button, TableContainer, Tbody, Table, Tr, Td } from '@chakra-ui/react';
+import { Flex, Text, VStack, Button, TableContainer, Tbody, Table, Tr, Td, Image, Box } from '@chakra-ui/react';
 import { easyTruncateAddress } from '../utils';
 import { customShiftValue, fixedTwoDecimalShift } from '../utils';
 import Status from './Status';
@@ -10,7 +10,7 @@ import { useState } from 'react';
 import RepayModal from '../modals/RepayModal';
 import { liquidateEthereumLoanContract } from '../blockchainFunctions/ethereumFunctions';
 
-export default function Card({ loan, creator, walletType, blockchain, bitCoinValue }) {
+export default function Card({ loan, address, walletType, blockchain, bitCoinValue }) {
   const [isRepayModalOpen, setRepayModalOpen] = useState(false);
 
   useEffect(() => {
@@ -100,9 +100,9 @@ export default function Card({ loan, creator, walletType, blockchain, bitCoinVal
         marginBottom={25}>
         <VStack margin={15}>
           <Flex>
-            <Status status={loan.raw.status}></Status>
+            <Status status={loan.status}></Status>
           </Flex>
-          <TableContainer width={250}>
+          <TableContainer>
             <Table
               size='sm'
               variant='unstyled'>
@@ -112,15 +112,15 @@ export default function Card({ loan, creator, walletType, blockchain, bitCoinVal
                     <Text variant='property'>UUID</Text>
                   </Td>
                   <Td>
-                    <Text>{easyTruncateAddress(loan.formatted.formattedUUID)}</Text>
+                    <Text>{easyTruncateAddress(loan.uuid)}</Text>
                   </Td>
                 </Tr>
                 <Tr>
                   <Td>
-                    <Text variant='property'>Owner</Text>
+                    <Text variant='property'>Depositor</Text>
                   </Td>
                   <Td>
-                    <Text>{easyTruncateAddress(loan.raw.owner)}</Text>
+                    <Text>{easyTruncateAddress(loan.depositor)}</Text>
                   </Td>
                 </Tr>
                 <Tr>
@@ -128,48 +128,21 @@ export default function Card({ loan, creator, walletType, blockchain, bitCoinVal
                     <Text variant='property'>Vault Collateral</Text>
                   </Td>
                   <Td>
-                    <Text>{loan.formatted.formattedVaultCollateral}</Text>
+                    <Text>{customShiftValue(loan.vaultCollateral, 8, true) + ' BTC'}</Text>
                   </Td>
                 </Tr>
-                <Tr>
-                  <Td>
-                    <Text variant='property'>Vault Loan</Text>
-                  </Td>
-                  <Td>
-                    <Text>{loan.formatted.formattedVaultLoan}</Text>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>
-                    <Text variant='property'>Liquidation Fee</Text>
-                  </Td>
-                  <Td>
-                    <Text>{loan.formatted.formattedLiquidationFee}</Text>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>
-                    <Text variant='property'>Liquidation Ratio</Text>
-                  </Td>
-                  <Td>
-                    <Text>{loan.formatted.formattedLiquidationRatio}</Text>
-                  </Td>
-                </Tr>
-                {loan.formatted.formattedClosingPrice && (
-                  <Tr>
-                    <Td>
-                      <Text variant='property'>Closing Price</Text>
-                    </Td>
-                    <Td>
-                      <Text>{loan.formatted.formattedClosingPrice}</Text>
-                    </Td>
-                  </Tr>
-                )}
               </Tbody>
             </Table>
           </TableContainer>
+          <Box padding={15}>
+            <Image
+              src={loan.nftAddress}
+              alt='NFT'
+              shadow='dark-lg'
+              boxSize={[150, 200]}></Image>
+          </Box>
           <Flex>
-            {loan.raw.status === 'ready' && (
+            {loan.status === 'ready' && (
               <VStack>
                 <Button
                   variant='outline'
@@ -178,7 +151,7 @@ export default function Card({ loan, creator, walletType, blockchain, bitCoinVal
                 </Button>
               </VStack>
             )}
-            {loan.raw.status === ('not-ready' || 'pre-liquidated' || 'pre-paid') && (
+            {loan.status === ('not-ready' || 'pre-liquidated' || 'pre-paid') && (
               <Button
                 _hover={{
                   shadow: 'none',
@@ -188,27 +161,27 @@ export default function Card({ loan, creator, walletType, blockchain, bitCoinVal
                 color='gray'
                 variant='outline'></Button>
             )}
-            {loan.raw.status === 'funded' && (
+            {loan.status === 'funded' && loan.depositor.toLowerCase() === address && (
               <VStack>
-                  <Button
-                    variant='outline'
-                    onClick={() => setRepayModalOpen(true)}>
-                    REPAY LOAN
-                  </Button>
+                <Button
+                  variant='outline'
+                  onClick={() => setRepayModalOpen(true)}>
+                  CLOSE VAULT
+                </Button>
+              </VStack>
+            )}
+            {loan.status === 'funded' && loan.depositor.toLowerCase() !== address && (
+              <VStack>
+                <Button
+                  variant='outline'
+                  onClick={() => liquidateEthereumLoanContract(loan.uuid)}>
+                  LIQUIDATE VAULT
+                </Button>
               </VStack>
             )}
           </Flex>
         </VStack>
       </Flex>
-      <RepayModal
-        isOpen={isRepayModalOpen}
-        closeModal={onRepayModalClose}
-        walletType={walletType}
-        vaultLoanAmount={loan.raw.vaultLoan}
-        BTCDeposit={loan.raw.vaultCollateral}
-        uuid={loan.raw.dlcUUID}
-        creator={creator}
-        blockchain={blockchain}></RepayModal>
     </>
   );
 }

@@ -1,9 +1,11 @@
 import { calc, extendTheme } from '@chakra-ui/react';
 import { menuTheme } from './menuTheme';
+import { tabsTheme } from './tabsTheme';
 
 export const theme = extendTheme({
   components: {
     Menu: menuTheme,
+    Tabs: tabsTheme,
     Text: {
       baseStyle: {
         fontSize: '12px',
@@ -48,7 +50,7 @@ export const theme = extendTheme({
     Button: {
       baseStyle: {
         margin: '15px',
-        width: '100px',
+        width: '200px',
         shadow: '2xl',
         fontSize: 'sm',
         fontWeight: 'bold',
@@ -56,11 +58,11 @@ export const theme = extendTheme({
       variants: {
         outline: {
           fontSize: 'sm',
-          color: 'accent',
+          color: 'white',
           bg: 'transparent',
           _hover: {
             color: 'white',
-            bg: 'accent',
+            bg: 'secondary1',
           },
         },
         connect: {

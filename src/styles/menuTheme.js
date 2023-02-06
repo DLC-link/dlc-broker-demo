@@ -19,17 +19,17 @@ const baseStyle = definePartsStyle({
   },
   list: {
     borderRadius: 'md',
-    border: '1px',
-    borderColor: 'accent',
-    bg: 'white', 
-    width: '250px'
+    width: '250px',
+    bg: 'white',
+    dropShadow: '2xl',
   },
   item: {
-    bg: 'transparent',
-    justifyContent:'center',
-    _hover: {
-      bg: 'accent',
-    },
+    bgGradient: 'linear(to-r, secondary1, secondary2)',
+    bgClip: 'text',
+    padding: '15px',
+    justifyContent: 'center',
+    fontWeight: 'extrabold',
+    _hover: {},
   },
 });
 export const menuTheme = defineMultiStyleConfig({ baseStyle });
