@@ -62,7 +62,8 @@ export const theme = extendTheme({
           borderColor: 'accent',
           _hover: {
             bg: 'secondary1',
-            borderColor: 'white'
+            borderColor: 'white',
+            transform: 'translateY(-2.5px)',
           },
         },
         connect: {

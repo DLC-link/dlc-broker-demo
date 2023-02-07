@@ -135,11 +135,17 @@ export default function Card({ loan, address, walletType, blockchain, bitCoinVal
             </Table>
           </TableContainer>
           <Box padding={15}>
-            <Image
-              src={loan.nftAddress}
-              alt='NFT'
-              shadow='dark-lg'
-              boxSize={[150, 200]}></Image>
+            {loan.nftAddress !== undefined ? (
+              <Image
+                src={loan.nftAddress}
+                alt='NFT'
+                shadow='dark-lg'
+                boxSize={[150, 200]}></Image>
+            ) : (
+              <Box
+                padding={15}
+                height={[150, 200]}></Box>
+            )}
           </Box>
           <Flex>
             {loan.status === 'ready' && (

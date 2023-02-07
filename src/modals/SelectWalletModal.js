@@ -19,7 +19,7 @@ import { Image } from '@chakra-ui/react';
 import { requestAndDispatchMetaMaskAccountInformation } from '../blockchainFunctions/ethereumFunctions';
 
 export default function SelectWalletModal({ isOpen, closeModal }) {
-  const blockchains = [{ id: 'ethereum:2', name: 'Testnet' }];
+  const blockchains = [{ id: 'ethereum:2', name: 'Gooerli Testnet' }];
 
   return (
     <Modal

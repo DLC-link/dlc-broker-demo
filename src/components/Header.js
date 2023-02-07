@@ -2,8 +2,9 @@ import React from 'react';
 import eventBus from '../EventBus';
 import { Button, Text, HStack, Flex, Image, Spacer } from '@chakra-ui/react';
 import Account from './Account';
+import Balance from './Balance';
 
-export default function Header({ address, isConnected, walletType, isLoading, depositAmount }) {
+export default function Header({ address, isConnected, walletType, isLoading, depositAmount, walletBalance}) {
   return (
     <>
       <HStack
@@ -37,7 +38,8 @@ export default function Header({ address, isConnected, walletType, isLoading, de
           isConnected={isConnected}
           walletType={walletType}
           isLoading={isLoading}
-          depositAmount={depositAmount}></Account>
+          depositAmount={depositAmount}
+          walletBalance={walletBalance}></Account>
       </HStack>
     </>
   );

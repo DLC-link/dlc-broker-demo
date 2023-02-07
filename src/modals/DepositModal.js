@@ -53,6 +53,7 @@ export default function DepositModal({ isOpen, closeModal, walletType, blockchai
 
   useEffect(() => {
     setUSDAmount(formatCollateralInUSD(collateralAmount, bitCoinInUSDAsNumber));
+    setCollateralError(collateralAmount < 0.0001 || collateralAmount === undefined);
   }, [collateralAmount, bitCoinInUSDAsNumber]);
 
   const handleCollateralChange = (collateralAmount) => setCollateralAmount(collateralAmount.target.value);

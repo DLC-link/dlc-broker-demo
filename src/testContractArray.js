@@ -9,8 +9,7 @@ export const testContractArray = [
   },
   {
     depositor: '0x8BC0bf8B561a75d8c76834f11F35F905c09EeE76',
-    nftAddress:
-      'https://api.reservoir.tools/assets/v1?asset=d13dd00e722beffaf6c818fc35b7e75a9e06597dac3915bbbb344d7f469754080b5bc02b79b703155cbdb62cdd826d62454ca4e8fb9166ad90696a6e27af416dea4ed5a4d740f5709928267c775f4eff2573e7e40288fee9530d283ebd0a413d',
+    nftAddress: undefined,
     uuid: 'b35d1f54-a61d-11ed-afa1-0242ac120002',
     vaultCollateral: 55000000,
     status: 'ready',

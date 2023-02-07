@@ -13,21 +13,30 @@ import {
   VStack,
   IconButton,
   HStack,
+  Table,
+  TableContainer,
+  Thead,
+  Tbody,
+  Th,
+  Td,
+  Tr,
+  TableCaption,
+  Image,
 } from '@chakra-ui/react';
 import { RepeatClockIcon } from '@chakra-ui/icons';
 import MyContractsTable from './MyContractsTable';
+import Balance from './Balance';
 import LiquidatableContractsTable from './LiquidatableContractsTable';
 import eventBus from '../EventBus';
 import { getEthereumLoans } from '../blockchainFunctions/ethereumFunctions';
 import { testContractArray } from '../testContractArray';
 
-export default function NFTTabs({ isConnected, address, walletType, blockchain }) {
+export default function NFTTabs({ isConnected, address, walletType, blockchain, depositAmount, nftQuantity }) {
   const [bitCoinValue, setBitCoinValue] = useState(0);
   const [isLoading, setLoading] = useState(true);
   const [isManualLoading, setManualLoading] = useState(undefined);
   const [initialLoans, setInitialLoans] = useState([]);
-  const [depositedContracts, setDepositedContracts] = useState([]);
-  const [liquidatableContracts, setLiquidatableContracts] = useState([]);
+  const [loans, setLoans] = useState([]);
 
   useEffect(() => {
     fetchBitcoinValue().then((bitCoinValue) => setBitCoinValue(bitCoinValue));
@@ -68,13 +77,7 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain }
         console.error('Unsupported wallet type!');
         break;
     }
-    return filterAllLoans(loans);
-  };
-
-  const filterAllLoans = (loans) => {
-    const currentDepositedContracts = loans.filter((loan) => loan.depositor.toLowerCase() === address);
-    const currentLiquidatableContracts = loans.filter((loan) => loan.depositor.toLowerCase() !== address);
-    return { currentDepositedContracts, currentLiquidatableContracts };
+    return loans;
   };
 
   const countBalance = (loans) => {
@@ -87,6 +90,9 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain }
     eventBus.dispatch('change-deposit-amount', {
       depositAmount: depositAmount,
     });
+    eventBus.dispatch('change-nft-quantity', {
+      nftQuantity: loans.length,
+    });
   };
 
   const refreshLoansTable = (isManual) => {
@@ -94,10 +100,9 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain }
     setLoading(true);
     eventBus.dispatch('set-loading-state', { isLoading: true });
     fetchAllLoans()
-      .then(({ currentDepositedContracts, currentLiquidatableContracts }) => {
-        setDepositedContracts(currentDepositedContracts);
-        setLiquidatableContracts(currentLiquidatableContracts);
-        countBalance(currentDepositedContracts);
+      .then((loans) => {
+        setLoans(loans);
+        countBalance(loans);
       })
       .then(() => {
         setLoading(false);
@@ -108,57 +113,44 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain }
   return (
     <>
       <Collapse in={isConnected}>
-        <Tabs
-          isLazy
-          size='md'
-          align='center'
-          defaultIndex={0}>
+        <VStack marginBottom='50px'>
           <HStack justifyContent='center'>
             <IconButton
               _hover={{
-  
                 color: 'accent',
-                borderColor: 'accent'
+                borderColor: 'accent',
+                transform: 'translateY(-2.5px)',
               }}
               isLoading={isLoading && isManualLoading}
               variant='outline'
               borderRadius='full'
               borderColor='white'
               color='white'
-              width={[35, 45]}
-              height={[35, 45]}
+              width='25px'
+              height='25px'
               onClick={() => refreshLoansTable(true)}>
               <RepeatClockIcon color='inherit'></RepeatClockIcon>
             </IconButton>
-            <TabList>
-              <Tab fontWeight='bold' fontSize='md'>MY CONTRACTS</Tab>
-              <Tab fontWeight='bold' fontSize='md'>CONTRACTS TO LIQUIDATE</Tab>
-            </TabList>
+            <Text
+              fontWeight='extrabold'
+              fontSize='3xl'>
+              NFT CONTRACTS
+            </Text>
           </HStack>
-          <TabPanels>
-            <TabPanel>
-              <MyContractsTable
-                loans={depositedContracts}
-                initialLoans={initialLoans}
-                isConnected={isConnected}
-                walletType={walletType}
-                address={address}
-                blockchain={blockchain}
-                isLoading={isLoading}
-                bitCoinValue={bitCoinValue}></MyContractsTable>
-            </TabPanel>
-            <TabPanel>
-              <LiquidatableContractsTable
-                loans={liquidatableContracts}
-                isConnected={isConnected}
-                walletType={walletType}
-                address={address}
-                blockchain={blockchain}
-                isLoading={isLoading}
-                bitCoinValue={bitCoinValue}></LiquidatableContractsTable>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
+          <Balance
+            isConnected={isConnected}
+            depositAmount={depositAmount}
+            nftQuantity={nftQuantity}></Balance>
+        </VStack>
+        <MyContractsTable
+          loans={loans}
+          initialLoans={initialLoans}
+          isConnected={isConnected}
+          walletType={walletType}
+          address={address}
+          blockchain={blockchain}
+          isLoading={isLoading}
+          bitCoinValue={bitCoinValue}></MyContractsTable>
       </Collapse>
     </>
   );

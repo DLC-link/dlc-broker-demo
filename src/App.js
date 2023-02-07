@@ -27,6 +27,8 @@ export default function App() {
   const [isDepositModalOpen, setDepositModalOpen] = useState(false);
   const [blockchain, setBlockchain] = useState(undefined);
   const [depositAmount, setDepositAmount] = useState(undefined);
+  const [nftQuantity, setNftQuantity] = useState(undefined);
+  const [walletBalance, setWalletBalance] = useState(3.5)
   const toast = useToast();
 
   const handleEvent = (data) => {
@@ -53,6 +55,7 @@ export default function App() {
     eventBus.on('is-select-wallet-modal-open', (data) => setSelectWalletModalOpen(data.isSelectWalletOpen));
     eventBus.on('is-deposit-modal-open', (data) => setDepositModalOpen(data.isDepositOpen));
     eventBus.on('change-deposit-amount', (data) => setDepositAmount(customShiftValue(data.depositAmount, 8, true)));
+    eventBus.on('change-nft-quantity', (data) => setNftQuantity(data.nftQuantity));
   }, []);
 
   const handleAccountInformation = (data) => {
@@ -80,7 +83,8 @@ export default function App() {
           walletType={walletType}
           address={address}
           isLoading={isLoading}
-          depositAmount={depositAmount}></Header>
+          depositAmount={depositAmount}
+          walletBalance={walletBalance}></Header>
         <DepositModal
           walletType={walletType}
           address={address}
@@ -98,7 +102,9 @@ export default function App() {
             isConnected={isConnected}
             address={address}
             walletType={walletType}
-            blockchain={blockchain}></NFTTabs>
+            blockchain={blockchain}
+            depositAmount={depositAmount}
+            nftQuantity={nftQuantity}></NFTTabs>
         )}
       </Box>
     </>

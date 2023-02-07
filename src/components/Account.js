@@ -4,7 +4,7 @@ import { Text, HStack, Image, IconButton, Menu, MenuButton, MenuList, MenuItem }
 import { easyTruncateAddress } from '../utils';
 import eventBus from '../EventBus';
 
-export default function Account({ address, isConnected, walletType, isLoading, depositAmount }) {
+export default function Account({ address, isConnected, walletType, walletBalance }) {
   const [walletLogo, setWalletLogo] = useState(undefined);
 
   const walletLogos = {
@@ -15,10 +15,6 @@ export default function Account({ address, isConnected, walletType, isLoading, d
     const currentWalletLogo = walletLogos[walletType];
     setWalletLogo(currentWalletLogo);
   }, [walletType]);
-
-  const openDepositModal = () => {
-    eventBus.dispatch('is-deposit-modal-open', { isDepositOpen: true });
-  };
 
   const openSelectWalletModal = () => {
     eventBus.dispatch('is-select-wallet-modal-open', {
@@ -60,12 +56,11 @@ export default function Account({ address, isConnected, walletType, isLoading, d
                   alt='Bitcoin Logo'
                   boxSize={[3, 6]}
                   borderRadius='3px'></Image>
-                <Text>{depositAmount}</Text>
+                <Text>{walletBalance}</Text>
               </HStack>
             </HStack>
           </MenuButton>
           <MenuList width={350}>
-            <MenuItem onClick={openDepositModal}>Setup Vault</MenuItem>
             <MenuItem onClick={disconnect}>Disconnect Wallet</MenuItem>
           </MenuList>
         </>

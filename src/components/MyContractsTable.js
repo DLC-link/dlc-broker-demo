@@ -4,6 +4,7 @@ import React from 'react';
 import { VStack, HStack, Collapse, SimpleGrid, ScaleFade } from '@chakra-ui/react';
 import Card from './Card';
 import InitialCard from './InitialCard';
+import SetupVaultCard from './SetupVaultCard'
 
 export default function MyContractsTable({
   isConnected,
@@ -19,7 +20,6 @@ export default function MyContractsTable({
     <>
       <Collapse in={isConnected}>
         <VStack
-          margin={25}
           alignContent='center'
           justifyContent='center'>
           <HStack spacing={15}></HStack>
@@ -27,6 +27,7 @@ export default function MyContractsTable({
             <SimpleGrid
               columns={[1, 4]}
               spacing={[0, 15]}>
+                <SetupVaultCard></SetupVaultCard>
               {loans?.map((loan) => (
                 <Card
                   key={loan.uuid}
