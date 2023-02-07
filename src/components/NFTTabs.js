@@ -131,8 +131,8 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain }
               <RepeatClockIcon color='inherit'></RepeatClockIcon>
             </IconButton>
             <TabList>
-              <Tab>My Contracts</Tab>
-              <Tab>Contracts To Liquidate</Tab>
+              <Tab fontWeight='extrabold' fontSize='lg'>My Contracts</Tab>
+              <Tab fontWeight='extrabold' fontSize='lg'>Contracts To Liquidate</Tab>
             </TabList>
           </HStack>
           <TabPanels>

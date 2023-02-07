@@ -6,7 +6,7 @@ const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpe
 const baseStyle = definePartsStyle({
   tab: {
     margin: '15px',
-    padding: '22px',
+    padding: '20px',
     shadow: '2xl',
     color: 'white',
     borderRadius: 'lg',

@@ -23,8 +23,7 @@ const baseStyle = definePartsStyle({
     dropShadow: '2xl',
   },
   item: {
-    bgGradient: 'linear(to-r, secondary1, secondary2)',
-    bgClip: 'text',
+    color: 'secondary2',
     padding: '15px',
     justifyContent: 'center',
     fontWeight: 'extrabold',
