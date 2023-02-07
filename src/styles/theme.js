@@ -16,8 +16,7 @@ export const theme = extendTheme({
         selector: {
           fontSize: 'md',
           fontWeight: 'extrabold',
-          bgGradient: 'linear(to-r, primary1, primary2)',
-          bgClip: 'text',
+          color:'white'
         },
         property: {
           fontWeight: 'extrabold',
@@ -60,9 +59,10 @@ export const theme = extendTheme({
           fontSize: 'sm',
           color: 'white',
           bg: 'transparent',
+          borderColor: 'accent',
           _hover: {
-            color: 'white',
             bg: 'secondary1',
+            borderColor: 'white'
           },
         },
         connect: {

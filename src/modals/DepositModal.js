@@ -36,19 +36,13 @@ import { sendLoanContractToEthereum } from '../blockchainFunctions/ethereumFunct
 
 export default function DepositModal({ isOpen, closeModal, walletType, blockchain, Z }) {
   const [collateralAmount, setCollateralAmount] = useState(undefined);
-  const [vaultLoanAmount, setVaultLoanAmount] = useState(undefined);
-  const [collateralToDebtRatio, setCollateralToDebtRatio] = useState();
   //setLiquidation, setLiquidationFee will be used in the future
   const [liquidationRatio, setLiquidationRatio] = useState(140);
   const [liquidationFee, setLiquidationFee] = useState(10);
   const [bitCoinInUSDAsString, setBitCoinInUSDAsString] = useState();
   const [bitCoinInUSDAsNumber, setBitCoinInUSDAsNumber] = useState();
   const [USDAmount, setUSDAmount] = useState(0);
-  const [isError, setError] = useState(true);
   const [isCollateralError, setCollateralError] = useState(true);
-  const [isLoanError, setLoanError] = useState(true);
-  const [isCollateralToDebtRatioError, setCollateralToDebtRatioError] = useState(false);
-  const errorArray = [isCollateralError, isLoanError, isCollateralToDebtRatioError];
 
   useEffect(() => {
     async function fetchData() {
@@ -59,23 +53,15 @@ export default function DepositModal({ isOpen, closeModal, walletType, blockchai
 
   useEffect(() => {
     setUSDAmount(formatCollateralInUSD(collateralAmount, bitCoinInUSDAsNumber));
-    setCollateralToDebtRatio(countCollateralToDebtRatio(collateralAmount, bitCoinInUSDAsNumber, vaultLoanAmount, 0));
-    setCollateralError(collateralAmount < 0.0001 || collateralAmount === undefined);
-    setLoanError(vaultLoanAmount < 1 || vaultLoanAmount === undefined);
-    setCollateralToDebtRatioError(collateralToDebtRatio < 140);
-    setError(errorArray.includes(true));
-  }, [collateralAmount, vaultLoanAmount, collateralToDebtRatio, isCollateralToDebtRatioError]);
+  }, [collateralAmount, bitCoinInUSDAsNumber]);
 
   const handleCollateralChange = (collateralAmount) => setCollateralAmount(collateralAmount.target.value);
-
-  const handleLoanChange = (vaultLoanAmount) => setVaultLoanAmount(vaultLoanAmount.target.value);
 
   const createAndSendLoanContract = () => {
     sendLoanContract(createLoanContract());
   };
 
   const createLoanContract = () => ({
-    vaultLoanAmount: parseInt(fixedTwoDecimalUnshift(vaultLoanAmount)),
     BTCDeposit: parseInt(customShiftValue(collateralAmount, 8, false)),
     liquidationRatio: fixedTwoDecimalUnshift(liquidationRatio),
     liquidationFee: fixedTwoDecimalUnshift(liquidationFee),
@@ -112,15 +98,12 @@ export default function DepositModal({ isOpen, closeModal, walletType, blockchai
       isCentered>
       <ModalOverlay />
       <ModalContent
-        borderColor='black'
-        color='white'
+        bg='background2'
+        border='1px'
+        color='accent'
         width={350}>
         <VStack>
-          <ModalHeader
-            bgGradient='linear(to-r, primary1, primary2)'
-            bgClip='text'>
-            Request Vault
-          </ModalHeader>
+          <ModalHeader color='white'>Request Vault</ModalHeader>
           <ModalCloseButton
             _focus={{
               boxShadow: 'none',
@@ -128,33 +111,39 @@ export default function DepositModal({ isOpen, closeModal, walletType, blockchai
           />
           <ModalBody>
             <FormControl isInvalid={isCollateralError}>
-              <FormLabel>Collateral Amount</FormLabel>
+              <FormLabel
+                color='white'
+                marginTop='15px'
+                marginBottom='15px'
+                marginLeft='40px'>
+                Collateral Amount
+              </FormLabel>
               {!isCollateralError ? (
                 <FormHelperText
+                  color='accent'
                   fontSize='x-small'
-                  marginTop={15}
-                  marginBottom={15}
-                  marginLeft={50}>
+                  marginTop='15px'
+                  marginBottom='15px'
+                  marginLeft='40px'>
                   Enter the amount of Bitcoin you would like to deposit.
                 </FormHelperText>
               ) : (
                 <FormErrorMessage
                   fontSize='x-small'
-                  marginTop={15}
-                  marginBottom={15}
-                  marginLeft={50}>
+                  marginTop='15px'
+                  marginBottom='15px'
+                  marginLeft='40px'>
                   Enter a valid amount of BTC
                 </FormErrorMessage>
               )}
               <HStack
-                marginLeft={50}
+                marginLeft='40px'
                 marginRight={50}
-                spacing={35}>
-                <NumberInput>
+                spacing={45}>
+                <NumberInput focusBorderColor='accent'>
                   <NumberInputField
                     padding={15}
-                    bgGradient='linear(to-r, primary1, primary2)'
-                    bgClip='text'
+                    color='white'
                     value={collateralAmount}
                     width={200}
                     onChange={handleCollateralChange}
@@ -168,101 +157,38 @@ export default function DepositModal({ isOpen, closeModal, walletType, blockchai
               </HStack>
               <Text
                 fontSize='x-small'
-                color='gray'
-                marginLeft={50}>
+                color='white'
+                marginLeft='40px'
+                marginTop='15px'>
                 ${USDAmount} at 1 BTC = ${bitCoinInUSDAsString}
               </Text>
             </FormControl>
-            {walletType === 'metamask' && (
-              <FormControl isInvalid={isLoanError}>
-                <FormLabel>Loan Amount</FormLabel>
-                {!isLoanError ? (
-                  <FormHelperText
-                    fontSize='x-small'
-                    marginTop={15}
-                    marginBottom={15}
-                    marginLeft={50}>
-                    Enter the amount of USDC you would like to loan.
-                  </FormHelperText>
-                ) : (
-                  <FormErrorMessage
-                    fontSize='x-small'
-                    marginTop={15}
-                    marginBottom={15}
-                    marginLeft={50}>
-                    Enter a valid amount of USDC
-                  </FormErrorMessage>
-                )}
-                <HStack
-                  marginLeft={50}
-                  marginRight={50}
-                  spacing={35}>
-                  <NumberInput>
-                    <NumberInputField
-                      padding={15}
-                      bgGradient='linear(to-r, primary1, primary2)'
-                      bgClip='text'
-                      value={vaultLoanAmount}
-                      width={200}
-                      onChange={handleLoanChange}
-                    />
-                  </NumberInput>
-                  <Image
-                    src='/usdc_logo.png'
-                    alt='USD Coin Logo'
-                    width={25}
-                    height={25}></Image>
-                </HStack>
-              </FormControl>
-            )}
             <TableContainer
               margin='15px'
               width='350px'>
-              <Table>
+              <Table variant='unstyled'>
                 <Tbody>
-                  {walletType === 'metamask' && (
-                    <Tr>
-                      <Td
-                        fontSize='sm'
-                        color='gray'>
-                        Collateral to debt ratio:
-                      </Td>
-                      {!isCollateralToDebtRatioError ? (
-                        <Td
-                          fontSize='sm'
-                          color='green'>
-                          {collateralToDebtRatio}%
-                        </Td>
-                      ) : (
-                        <Td
-                          fontSize='sm'
-                          color='red'>
-                          {collateralToDebtRatio}%
-                        </Td>
-                      )}
-                    </Tr>
-                  )}
                   <Tr>
                     <Td
                       fontSize='sm'
-                      color='gray'>
+                      color='white'>
                       Liquidation ratio:
                     </Td>
                     <Td
                       fontSize='sm'
-                      color='gray'>
+                      color='white'>
                       {liquidationRatio}%
                     </Td>
                   </Tr>
                   <Tr>
                     <Td
                       fontSize='sm'
-                      color='gray'>
+                      color='white'>
                       Liquidation fee:
                     </Td>
                     <Td
                       fontSize='sm'
-                      color='gray'>
+                      color='white'>
                       {liquidationFee}%
                     </Td>
                   </Tr>
@@ -271,22 +197,11 @@ export default function DepositModal({ isOpen, closeModal, walletType, blockchai
             </TableContainer>
             <Flex justifyContent='center'>
               <Button
-                _hover={{
-                  color: 'white',
-                  bg: 'accent',
-                }}
                 // isDisabled={isError}
-                background='white'
-                bgGradient='linear(to-r, primary1, primary2)'
-                bgClip='text'
-                width='150px'
-                shadow='2xl'
                 variant='outline'
-                fontSize='sm'
-                fontWeight='bold'
                 type='submit'
                 onClick={createAndSendLoanContract}>
-                Request Vault
+                REQUEST VAULT
               </Button>
             </Flex>
           </ModalBody>

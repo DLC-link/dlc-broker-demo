@@ -6,24 +6,22 @@ const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpe
 const baseStyle = definePartsStyle({
   tab: {
     margin: '15px',
-    padding: '15px',
+    padding: '22px',
     shadow: '2xl',
     color: 'white',
     borderRadius: 'lg',
     border: '1px',
-    borderColor: 'white',
+    borderColor: 'accent',
     bg: 'transparent',
     _selected: {
-      color: 'white',
-      bg: 'secondary1',
+      bg: 'white',
+      color: 'secondary2',
       border: '1px',
-      borderColor: 'white'
+      borderColor: 'accent',
     },
     _hover: {
-      color: 'white',
-      bg: 'secondary1',
       border: '1px',
-      borderColor: 'white'
+      borderColor: 'white',
     },
   },
 });

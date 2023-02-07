@@ -47,7 +47,8 @@ export default function SelectWalletModal({ isOpen, closeModal }) {
                 <>
                     <MenuButton
                       width='100%'
-                      variant='outline'>
+                      variant='outline'
+                      bgGradient='linear(to-r, secondary1, secondary2)'>
                       <HStack
                         w='100%'
                         justifyContent='center'>
@@ -69,7 +70,7 @@ export default function SelectWalletModal({ isOpen, closeModal }) {
                             requestAndDispatchMetaMaskAccountInformation();
                             closeModal();
                           }}>
-                          <Text variant='selector'>{blockchain.name}</Text>
+                          {blockchain.name}
                         </MenuItem>
                       );
                     })}

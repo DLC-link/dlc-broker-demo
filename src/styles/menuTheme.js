@@ -13,8 +13,7 @@ const baseStyle = definePartsStyle({
     borderColor: 'accent',
     bg: 'transparent',
     _hover: {
-      color: 'white',
-      bg: 'accent',
+      borderColor: 'white',
     },
   },
   list: {
@@ -29,7 +28,6 @@ const baseStyle = definePartsStyle({
     padding: '15px',
     justifyContent: 'center',
     fontWeight: 'extrabold',
-    _hover: {},
   },
 });
 export const menuTheme = defineMultiStyleConfig({ baseStyle });
