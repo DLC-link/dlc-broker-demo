@@ -27,40 +27,37 @@ export default function SelectWalletModal({ isOpen, closeModal }) {
       onClose={closeModal}
       isCentered>
       <ModalOverlay />
-      <ModalContent w='300px'>
-        <ModalHeader
-          bgGradient='linear(to-r, primary1, primary2)'
-          bgClip='text'>
-          Select Wallet
-        </ModalHeader>
+      <ModalContent
+        bg='background2'
+        border='1px'
+        color='accent'
+        w='300px'>
+        <ModalHeader textAlign='center' color='white'>Select Wallet</ModalHeader>
         <ModalCloseButton
-          color='white'
           _focus={{
             boxShadow: 'none',
           }}
-          bgGradient='linear(to-r, primary1, primary2)'
         />
         <ModalBody padding='25px'>
           <VStack>
             <Menu>
               {({ isOpen }) => (
                 <>
-                    <MenuButton
-                      width='100%'
-                      variant='outline'
-                      bgGradient='linear(to-r, secondary1, secondary2)'>
-                      <HStack
-                        w='100%'
-                        justifyContent='center'>
-                        <Image
-                          src='/mm_logo.png'
-                          alt='Metamask Logo'
-                          width={25}
-                          height={25}
-                        />
-                        <Text variant='selector'>{isOpen ? 'Choose Network' : 'Metamask'}</Text>
-                      </HStack>
-                    </MenuButton>
+                  <MenuButton
+                    width='100%'
+                    variant='outline'>
+                    <HStack
+                      w='100%'
+                      justifyContent='center'>
+                      <Image
+                        src='/mm_logo.png'
+                        alt='Metamask Logo'
+                        width={25}
+                        height={25}
+                      />
+                      <Text variant='selector'>{isOpen ? 'Choose Network' : 'Metamask'}</Text>
+                    </HStack>
+                  </MenuButton>
                   <MenuList>
                     {blockchains.map((blockchain, idx) => {
                       return (

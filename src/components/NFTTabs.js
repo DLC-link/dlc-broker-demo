@@ -117,13 +117,13 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain }
             <IconButton
               _hover={{
   
-                color: 'white',
-                borderColor: 'white'
+                color: 'accent',
+                borderColor: 'accent'
               }}
               isLoading={isLoading && isManualLoading}
               variant='outline'
               borderRadius='full'
-              borderColor='accent'
+              borderColor='white'
               color='white'
               width={[35, 45]}
               height={[35, 45]}
@@ -131,8 +131,8 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain }
               <RepeatClockIcon color='inherit'></RepeatClockIcon>
             </IconButton>
             <TabList>
-              <Tab fontWeight='extrabold' fontSize='lg'>My Contracts</Tab>
-              <Tab fontWeight='extrabold' fontSize='lg'>Contracts To Liquidate</Tab>
+              <Tab fontWeight='bold' fontSize='md'>MY CONTRACTS</Tab>
+              <Tab fontWeight='bold' fontSize='md'>CONTRACTS TO LIQUIDATE</Tab>
             </TabList>
           </HStack>
           <TabPanels>

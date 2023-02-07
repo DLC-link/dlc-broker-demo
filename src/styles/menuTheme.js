@@ -10,23 +10,30 @@ const baseStyle = definePartsStyle({
     shadow: '2xl',
     borderRadius: 'md',
     border: '1px',
-    borderColor: 'accent',
-    bg: 'transparent',
+    borderColor: 'white',
+    bg: 'background2',
     _hover: {
-      borderColor: 'white',
+      borderColor: 'accent',
     },
   },
   list: {
-    borderRadius: 'md',
+    padding: '1px',
+    borderRadius: 'sm',
+    border: '1px',
+    borderColor: 'accent',
     width: '250px',
-    bg: 'white',
+    bg: 'background2',
     dropShadow: '2xl',
   },
   item: {
-    color: 'secondary2',
+    color: 'white',
+    bg: 'background2',
     padding: '15px',
     justifyContent: 'center',
     fontWeight: 'extrabold',
+    _hover: {
+      color: 'accent'
+    }
   },
 });
 export const menuTheme = defineMultiStyleConfig({ baseStyle });

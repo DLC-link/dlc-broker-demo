@@ -56,7 +56,6 @@ export default function App() {
   }, []);
 
   const handleAccountInformation = (data) => {
-    console.log(data);
     setConnected(!!data.walletType);
     setWalletType(data.walletType);
     setAddress(data.address);
