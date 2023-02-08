@@ -1,108 +1,73 @@
-/*global chrome*/
-
 import React, { useEffect, useState } from 'react';
-import {
-  Text,
-  Collapse,
-  Tabs,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Box,
-  VStack,
-  IconButton,
-  HStack,
-  Table,
-  TableContainer,
-  Thead,
-  Tbody,
-  Th,
-  Td,
-  Tr,
-  TableCaption,
-  Image,
-} from '@chakra-ui/react';
+import { Text, Collapse, VStack, IconButton, HStack } from '@chakra-ui/react';
 import { RepeatClockIcon } from '@chakra-ui/icons';
 import MyContractsTable from './MyContractsTable';
 import Balance from './Balance';
-import LiquidatableContractsTable from './LiquidatableContractsTable';
 import eventBus from '../EventBus';
-import { getEthereumLoans } from '../blockchainFunctions/ethereumFunctions';
-import { testContractArray } from '../testContractArray';
+import { getAllVaultAndNFTDataForAddress } from '../blockchainFunctions/ethereumFunctions';
+import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 
 export default function NFTTabs({ isConnected, address, walletType, blockchain, depositAmount, nftQuantity }) {
   const [bitCoinValue, setBitCoinValue] = useState(0);
   const [isLoading, setLoading] = useState(true);
   const [isManualLoading, setManualLoading] = useState(undefined);
-  const [initialLoans, setInitialLoans] = useState([]);
-  const [loans, setLoans] = useState([]);
+  const [initialVaults, setInitialVaults] = useState([]);
+  const [vaults, setVaults] = useState([]);
 
   useEffect(() => {
-    fetchBitcoinValue().then((bitCoinValue) => setBitCoinValue(bitCoinValue));
-    refreshLoansTable(false);
-    eventBus.on('loan-event', (data) => {
+    fetchBitcoinPrice().then((bitcoinPrice) => setBitCoinValue(bitcoinPrice));
+    refreshVaultsTable(false);
+    eventBus.on('vault-event', (data) => {
       if (data.status === 'setup') {
-        initialLoans.shift();
+        initialVaults.shift();
+      } else if (data.status === 'created') {
+        console.log(data)
+        initialVaults.push(data.vaultContract);
       }
-      refreshLoansTable(true);
-    });
-    eventBus.on('create-loan', (data) => {
-      initialLoans.push(data.loan);
+      refreshVaultsTable(true);
     });
   }, []);
 
-  useEffect(() => {
-    refreshLoansTable(false);
-  }, [initialLoans]);
-
-  const fetchBitcoinValue = async () => {
-    let bitCoinValue = undefined;
-    await fetch('/.netlify/functions/get-bitcoin-price', {
-      headers: { accept: 'Accept: application/json' },
-    })
-      .then((x) => x.json())
-      .then(({ msg }) => (bitCoinValue = Number(msg.bpi.USD.rate.replace(/[^0-9.-]+/g, ''))));
-    return bitCoinValue;
-  };
-
-  const fetchAllLoans = async () => {
-    let loans = undefined;
+  const fetchAllVaults = async () => {
+    let vaults = [];
     switch (walletType) {
       case 'metamask':
-        // loans = getEthereumLoans(address);
-        loans = testContractArray;
+        vaults = getAllVaultAndNFTDataForAddress(address);
         break;
       default:
         console.error('Unsupported wallet type!');
         break;
     }
-    return loans;
+    return vaults;
   };
 
-  const countBalance = (loans) => {
+  const countBalance = (vaults) => {
     let depositAmount = 0;
-    for (const loan of loans) {
-      if (loan.status === 'funded') {
-        depositAmount += Number(loan.vaultCollateral);
+    let nftQuantity = 0;
+    for (const vault of vaults) {
+      if ([3, 4].includes(vault.raw.status)) {
+        depositAmount += Number(vault.raw.vaultCollateral);
+      }
+      if (vault.raw.status === 4) {
+        nftQuantity++;
       }
     }
     eventBus.dispatch('change-deposit-amount', {
       depositAmount: depositAmount,
     });
     eventBus.dispatch('change-nft-quantity', {
-      nftQuantity: loans.length,
+      nftQuantity: nftQuantity,
     });
   };
 
-  const refreshLoansTable = (isManual) => {
+  const refreshVaultsTable = (isManual) => {
     setManualLoading(isManual);
     setLoading(true);
     eventBus.dispatch('set-loading-state', { isLoading: true });
-    fetchAllLoans()
-      .then((loans) => {
-        setLoans(loans);
-        countBalance(loans);
+    fetchAllVaults()
+      .then((vaults) => {
+        setVaults(vaults);
+        countBalance(vaults);
       })
       .then(() => {
         setLoading(false);
@@ -125,10 +90,11 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain, 
               variant='outline'
               borderRadius='full'
               borderColor='white'
+              padding='10px'
               color='white'
               width='25px'
               height='25px'
-              onClick={() => refreshLoansTable(true)}>
+              onClick={() => refreshVaultsTable(true)}>
               <RepeatClockIcon color='inherit'></RepeatClockIcon>
             </IconButton>
             <Text
@@ -143,8 +109,8 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain, 
             nftQuantity={nftQuantity}></Balance>
         </VStack>
         <MyContractsTable
-          loans={loans}
-          initialLoans={initialLoans}
+          vaults={vaults}
+          initialVaults={initialVaults}
           isConnected={isConnected}
           walletType={walletType}
           address={address}

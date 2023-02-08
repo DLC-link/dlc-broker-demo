@@ -17,39 +17,29 @@ import {
   Flex,
   Text,
   Image,
-  Table,
-  Tr,
-  Td,
-  Tbody,
-  TableContainer,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import {
-  customShiftValue,
-  fixedTwoDecimalUnshift,
-  countCollateralToDebtRatio,
-  formatCollateralInUSD,
-  formatBitcoinInUSDAmount,
-} from '../utils';
+import { customShiftValue, formatCollateralInUSD, formatBitcoinInUSDAmount } from '../utilities/format';
+import { setupVault } from '../blockchainFunctions/ethereumFunctions';
+import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 import eventBus from '../EventBus';
-import { sendLoanContractToEthereum } from '../blockchainFunctions/ethereumFunctions';
 
-export default function DepositModal({ isOpen, closeModal, walletType, blockchain, Z }) {
+export default function DepositModal({ isOpen, closeModal, walletType }) {
   const [collateralAmount, setCollateralAmount] = useState(undefined);
-  //setLiquidation, setLiquidationFee will be used in the future
-  const [liquidationRatio, setLiquidationRatio] = useState(140);
-  const [liquidationFee, setLiquidationFee] = useState(10);
+  const [isCollateralError, setCollateralError] = useState(true);
   const [bitCoinInUSDAsString, setBitCoinInUSDAsString] = useState();
   const [bitCoinInUSDAsNumber, setBitCoinInUSDAsNumber] = useState();
   const [USDAmount, setUSDAmount] = useState(0);
-  const [isCollateralError, setCollateralError] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
-      await fetchBitcoinPrice();
+      await fetchBitcoinPrice().then((bitcoinPrice) => {
+        setBitCoinInUSDAsNumber(bitcoinPrice);
+        setBitCoinInUSDAsString(new Intl.NumberFormat().format(bitcoinPrice));
+      });
     }
     fetchData();
-  }, []);
+  }, [isOpen]);
 
   useEffect(() => {
     setUSDAmount(formatCollateralInUSD(collateralAmount, bitCoinInUSDAsNumber));
@@ -59,37 +49,25 @@ export default function DepositModal({ isOpen, closeModal, walletType, blockchai
   const handleCollateralChange = (collateralAmount) => setCollateralAmount(collateralAmount.target.value);
 
   const createAndSendLoanContract = () => {
-    sendLoanContract(createLoanContract());
+    sendLoanContract(createVaultContract());
   };
 
-  const createLoanContract = () => ({
+  const createVaultContract = () => ({
     BTCDeposit: parseInt(customShiftValue(collateralAmount, 8, false)),
-    liquidationRatio: fixedTwoDecimalUnshift(liquidationRatio),
-    liquidationFee: fixedTwoDecimalUnshift(liquidationFee),
     emergencyRefundTime: 5,
   });
 
-  const sendLoanContract = (loanContract) => {
+  const sendLoanContract = (vaultContract) => {
     switch (walletType) {
       case 'metamask':
-        sendLoanContractToEthereum(loanContract);
+        setupVault(vaultContract).then(
+          eventBus.dispatch('vault-event', { status: 'created', vaultContract: vaultContract })
+        );
         break;
       default:
         console.log('Unsupported wallet type!');
         break;
     }
-  };
-
-  const fetchBitcoinPrice = async () => {
-    await fetch('/.netlify/functions/get-bitcoin-price', {
-      headers: { accept: 'Accept: application/json' },
-    })
-      .then((x) => x.json())
-      .then(({ msg }) => {
-        const bitcoinValue = formatBitcoinInUSDAmount(msg);
-        setBitCoinInUSDAsNumber(bitcoinValue);
-        setBitCoinInUSDAsString(new Intl.NumberFormat().format(bitcoinValue));
-      });
   };
 
   return (
@@ -164,41 +142,8 @@ export default function DepositModal({ isOpen, closeModal, walletType, blockchai
                 ${USDAmount} at 1 BTC = ${bitCoinInUSDAsString}
               </Text>
             </FormControl>
-            <TableContainer
-              margin='15px'
-              width='350px'>
-              <Table variant='unstyled'>
-                <Tbody>
-                  <Tr>
-                    <Td
-                      fontSize='sm'
-                      color='white'>
-                      Liquidation ratio:
-                    </Td>
-                    <Td
-                      fontSize='sm'
-                      color='white'>
-                      {liquidationRatio}%
-                    </Td>
-                  </Tr>
-                  <Tr>
-                    <Td
-                      fontSize='sm'
-                      color='white'>
-                      Liquidation fee:
-                    </Td>
-                    <Td
-                      fontSize='sm'
-                      color='white'>
-                      {liquidationFee}%
-                    </Td>
-                  </Tr>
-                </Tbody>
-              </Table>
-            </TableContainer>
             <Flex justifyContent='center'>
               <Button
-                // isDisabled={isError}
                 variant='outline'
                 type='submit'
                 onClick={createAndSendLoanContract}>

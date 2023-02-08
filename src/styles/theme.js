@@ -60,6 +60,7 @@ export const theme = extendTheme({
           color: 'white',
           bg: 'transparent',
           borderColor: 'accent',
+          transition: 'all .25s ease',
           _hover: {
             bg: 'secondary1',
             borderColor: 'white',

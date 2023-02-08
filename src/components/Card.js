@@ -1,90 +1,12 @@
 /*global chrome*/
 
-import { useEffect } from 'react';
 import { Flex, Text, VStack, Button, TableContainer, Tbody, Table, Tr, Td, Image, Box } from '@chakra-ui/react';
-import { easyTruncateAddress } from '../utils';
-import { customShiftValue, fixedTwoDecimalShift } from '../utils';
+import { easyTruncateAddress } from '../utilities/format';
 import Status from './Status';
-import eventBus from '../EventBus';
-import { useState } from 'react';
-import RepayModal from '../modals/RepayModal';
-import { liquidateEthereumLoanContract } from '../blockchainFunctions/ethereumFunctions';
+import { closeVault } from '../blockchainFunctions/ethereumFunctions';
+import { lockBTC } from '../blockchainFunctions/bitcoinFunctions';
 
-export default function Card({ loan, address, walletType, blockchain, bitCoinValue }) {
-  const [isRepayModalOpen, setRepayModalOpen] = useState(false);
-
-  useEffect(() => {
-    eventBus.on('loan-event', (event) => {
-      if (event.status === 'repay-requested') {
-        onRepayModalClose();
-      }
-    });
-  }, []);
-
-  const onRepayModalClose = () => {
-    setRepayModalOpen(false);
-  };
-
-  const sendOfferForSigning = async (offer) => {
-    console.log('Offer: ', offer);
-    const extensionIDs = [
-      'nminefocgojkadkocbddiddjmoooonhe',
-      'gjjgfnpmfpealbpggmhfafcddjiopbpa',
-      'kmidoigmjbbecngmenanflcogbjojlhf',
-      'niinmdkjgghdkkmlilpngkccihjmefin',
-      'bdadpbnmclplacnjpjoigpmbcinccnep',
-      'pijajlnoadmfancnckejodabelilkcoa', // Niel's
-    ];
-
-    for (let i = 0; i < extensionIDs.length; i++) {
-      chrome.runtime.sendMessage(
-        extensionIDs[i],
-        {
-          action: 'get-offer',
-          data: { offer: offer },
-        },
-        {},
-        function () {
-          if (chrome.runtime.lastError) {
-            console.log('Failure: ' + chrome.runtime.lastError.message);
-          } else {
-            console.log('Success: Found receiving end.');
-          }
-        }
-      );
-    }
-  };
-
-  const lockBTC = async () => {
-    const URL = process.env.REACT_APP_WALLET_DOMAIN + `/offer`;
-    try {
-      const response = await fetch(URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uuid: loan.formatted.formattedUUID,
-          acceptCollateral: parseInt(loan.raw.vaultCollateral),
-          offerCollateral: 1000,
-          totalOutcomes: 100,
-        }),
-      });
-      const responseStream = await response.json();
-      if (!response.ok) {
-        console.error(responseStream.errors[0].message);
-      }
-      sendOfferForSigning(responseStream);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const countCollateralToDebtRatio = (bitCoinValue, vaultCollateral, loan) => {
-    const formattedVaultCollateral = customShiftValue(vaultCollateral, 8, true);
-    const formattedVaultLoan = customShiftValue(loan, 6, true);
-    const collateralToDebtRatio = ((bitCoinValue * formattedVaultCollateral) / formattedVaultLoan) * 100;
-    const roundedCollateralToDebtRatio = Math.round((collateralToDebtRatio + Number.EPSILON) * 100) / 100;
-    return roundedCollateralToDebtRatio;
-  };
+export default function Card({ vault, address }) {
 
   return (
     <>
@@ -93,6 +15,7 @@ export default function Card({ loan, address, walletType, blockchain, bitCoinVal
         borderRadius='lg'
         justifyContent='center'
         shadow='dark-lg'
+        height={450}
         width={250}
         marginLeft={15}
         marginRight={15}
@@ -100,7 +23,7 @@ export default function Card({ loan, address, walletType, blockchain, bitCoinVal
         marginBottom={25}>
         <VStack margin={15}>
           <Flex>
-            <Status status={loan.status}></Status>
+            <Status status={vault.raw.status}></Status>
           </Flex>
           <TableContainer>
             <Table
@@ -112,15 +35,15 @@ export default function Card({ loan, address, walletType, blockchain, bitCoinVal
                     <Text variant='property'>UUID</Text>
                   </Td>
                   <Td>
-                    <Text>{easyTruncateAddress(loan.uuid)}</Text>
+                    <Text>{easyTruncateAddress(vault.raw.uuid)}</Text>
                   </Td>
                 </Tr>
                 <Tr>
                   <Td>
-                    <Text variant='property'>Depositor</Text>
+                    <Text variant='property'>Owner</Text>
                   </Td>
                   <Td>
-                    <Text>{easyTruncateAddress(loan.depositor)}</Text>
+                    <Text>{easyTruncateAddress(vault.raw.owner)}</Text>
                   </Td>
                 </Tr>
                 <Tr>
@@ -128,36 +51,36 @@ export default function Card({ loan, address, walletType, blockchain, bitCoinVal
                     <Text variant='property'>Vault Collateral</Text>
                   </Td>
                   <Td>
-                    <Text>{customShiftValue(loan.vaultCollateral, 8, true) + ' BTC'}</Text>
+                    <Text>{vault.formatted.vaultCollateral}</Text>
                   </Td>
                 </Tr>
               </Tbody>
             </Table>
           </TableContainer>
           <Box padding={15}>
-            {loan.nftAddress !== undefined ? (
+            {![0, 1, 2, 3].includes(vault.raw.status) ? (
               <Image
-                src={loan.nftAddress}
+                src={vault.raw.nftImageURL}
                 alt='NFT'
                 shadow='dark-lg'
-                boxSize={[150, 200]}></Image>
+                boxSize='150px'></Image>
             ) : (
               <Box
                 padding={15}
-                height={[150, 200]}></Box>
+                height='150px'></Box>
             )}
           </Box>
           <Flex>
-            {loan.status === 'ready' && (
+            {vault.raw.status === 2 && (
               <VStack>
                 <Button
                   variant='outline'
-                  onClick={lockBTC}>
+                  onClick={() => lockBTC(vault)}>
                   LOCK BTC
                 </Button>
               </VStack>
             )}
-            {loan.status === ('not-ready' || 'pre-liquidated' || 'pre-paid') && (
+            {[1, 5, 7].includes(vault.raw.status) && (
               <Button
                 _hover={{
                   shadow: 'none',
@@ -167,22 +90,18 @@ export default function Card({ loan, address, walletType, blockchain, bitCoinVal
                 color='gray'
                 variant='outline'></Button>
             )}
-            {loan.status === 'funded' && loan.depositor.toLowerCase() === address && (
+            {vault.raw.status === 4 && vault.raw.owner.toLowerCase() === address && (
               <VStack>
                 <Button
                   variant='outline'
-                  onClick={() => setRepayModalOpen(true)}>
+                  onClick={() => closeVault(vault.raw.uuid)}>
                   CLOSE VAULT
                 </Button>
               </VStack>
             )}
-            {loan.status === 'funded' && loan.depositor.toLowerCase() !== address && (
+            {vault.raw.status === 4 && vault.raw.owner.toLowerCase() !== address && (
               <VStack>
-                <Button
-                  variant='outline'
-                  onClick={() => liquidateEthereumLoanContract(loan.uuid)}>
-                  LIQUIDATE VAULT
-                </Button>
+                <Button variant='outline'>LIQUIDATE VAULT</Button>
               </VStack>
             )}
           </Flex>

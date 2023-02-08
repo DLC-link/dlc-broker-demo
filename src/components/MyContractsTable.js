@@ -13,8 +13,8 @@ export default function MyContractsTable({
   blockchain,
   isLoading,
   bitCoinValue,
-  loans,
-  initialLoans,
+  vaults,
+  initialVaults,
 }) {
   return (
     <>
@@ -28,19 +28,19 @@ export default function MyContractsTable({
               columns={[1, 4]}
               spacing={[0, 15]}>
                 <SetupVaultCard></SetupVaultCard>
-              {loans?.map((loan) => (
+              {vaults?.map((vault) => (
                 <Card
-                  key={loan.uuid}
-                  loan={loan}
+                  key={vault.raw.uuid}
+                  vault={vault}
                   address={address}
                   walletType={walletType}
                   blockchain={blockchain}
                   bitCoinValue={bitCoinValue}></Card>
               ))}
-              {initialLoans?.map((loan) => (
+              {initialVaults?.map((vault) => (
                 <InitialCard
-                  loan={loan}
-                  address={address}
+                  vault={vault}
+                  creator={address}
                   walletType={walletType}
                   bitCoinValue={bitCoinValue}></InitialCard>
               ))}

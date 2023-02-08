@@ -1,22 +1,14 @@
 import SelectWalletModal from './modals/SelectWalletModal';
 import eventBus from './EventBus';
-import DepositWithdraw from './components/DepositWithdraw';
 import Header from './components/Header';
 import Intro from './components/Intro';
 import React, { useEffect } from 'react';
 import DepositModal from './modals/DepositModal';
-import DLCTable from './components/MyContractsTable';
 import { Box, useToast } from '@chakra-ui/react';
 import { useState } from 'react';
 import CustomToast from './components/CustomToast';
 import NFTTabs from './components/NFTTabs';
-import { customShiftValue } from './utils';
-
-/* global BigInt */
-
-BigInt.prototype.toJSON = function () {
-  return this.toString();
-};
+import { customShiftValue } from './utilities/format';
 
 export default function App() {
   const [isConnected, setConnected] = useState(false);
@@ -50,7 +42,7 @@ export default function App() {
 
   useEffect(() => {
     eventBus.on('account-information', handleAccountInformation);
-    eventBus.on('loan-event', (data) => handleEvent(data));
+    eventBus.on('vault-event', (data) => handleEvent(data));
     eventBus.on('set-loading-state', (data) => setLoading(data.isLoading));
     eventBus.on('is-select-wallet-modal-open', (data) => setSelectWalletModalOpen(data.isSelectWalletOpen));
     eventBus.on('is-deposit-modal-open', (data) => setDepositModalOpen(data.isDepositOpen));

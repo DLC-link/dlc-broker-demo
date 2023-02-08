@@ -1,21 +1,18 @@
 import { ethers } from 'ethers';
-import { abi as usdcForDLCsABI } from '../usdcForDLCsABI';
-import { abi as loanManagerABI } from '../loanManagerABI';
-import { fixedTwoDecimalShift } from '../utils';
+import { abi as dlcBrokerABI } from '../abis/dlcBrokerABI';
+import { abi as btcNftABI } from '../abis/btcNftABI';
 import eventBus from '../EventBus';
-import loanFormatter from '../LoanFormatter';
-import { createAndDispatchAccountInformation } from '../accountInformation';
+import { formatAllVaults } from '../utilities/vaultFormatter';
 
-
-let loanManagerETH;
-let usdcContract;
+let vaultManagerETH;
+let nftManagerETH;
 
 try {
   const { ethereum } = window;
   const provider = new ethers.providers.Web3Provider(ethereum);
   const signer = provider.getSigner();
-  loanManagerETH = new ethers.Contract(process.env.REACT_APP_ETHEREUM_CONTRACT_ADDRESS, loanManagerABI, signer);
-  usdcContract = new ethers.Contract(process.env.REACT_APP_USDC_CONTRACT_ADDRESS, usdcForDLCsABI, signer);
+  vaultManagerETH = new ethers.Contract(process.env.REACT_APP_GOERLI_BROKER_CONTRACT_ADDRESS, dlcBrokerABI, signer);
+  nftManagerETH = new ethers.Contract(process.env.REACT_APP_GOERLI_NFT_CONTRACT_ADDRESS, btcNftABI, signer);
 } catch (error) {
   console.error(error);
 }
@@ -30,86 +27,89 @@ export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
     const accounts = await ethereum.request({
       method: 'eth_requestAccounts',
     });
-    const metaMaskAddress = accounts[0];
-    createAndDispatchAccountInformation('metamask', metaMaskAddress, blockchain);
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-// export async function isAllowedInMetamask(creator, vaultLoan) {
-//   const desiredAmount = 1000000n * 10n ** 18n;
-//   const allowedAmount = await usdcContract.allowance(creator, process.env.REACT_APP_ETHEREUM_CONTRACT_ADDRESS);
-
-//   if (fixedTwoDecimalShift(vaultLoan) > parseInt(allowedAmount)) {
-//     try {
-//       await usdcContract.approve(process.env.REACT_APP_ETHEREUM_CONTRACT_ADDRESS, desiredAmount).then((response) =>
-//         eventBus.dispatch('loan-event', {
-//           status: 'approve-requested',
-//           txId: response.hash,
-//         })
-//       );
-//       return false;
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   } else {
-//     return true;
-//   }
-// }
-
-export async function sendLoanContractToEthereum(loanContract) {
-  try {
-    loanManagerETH
-      .setupLoan(
-        loanContract.vaultLoanAmount,
-        loanContract.BTCDeposit,
-        loanContract.liquidationRatio,
-        loanContract.liquidationFee,
-        loanContract.emergencyRefundTime
-      )
-      .then((response) =>
-        eventBus.dispatch('loan-event', {
-          status: 'created',
-          txId: response.hash,
-        })
-      );
+    const accountInformation = {
+      walletType: 'metamask',
+      address: accounts[0],
+      blockchain,
+    };
+    eventBus.dispatch('account-information', accountInformation);
   } catch (error) {
     console.error(error);
   }
 }
 
-export async function getEthereumLoans(address) {
-  let loans = [];
+export async function setupVault(vaultContract) {
   try {
-    const response = await loanManagerETH.getAllLoansForAddress(address);
-    loans = loanFormatter.formatAllDLC(response, 'solidity');
+    vaultManagerETH.setupVault(vaultContract.BTCDeposit, vaultContract.emergencyRefundTime);
   } catch (error) {
     console.error(error);
   }
-  return loans;
 }
 
-// export async function repayEthereumLoanContract(loanContractID) {
-//   if (await isAllowedInMetamask()) {
-//     try {
-//       loanManagerETH.repayLoan(loanContractID).then((response) =>
-//         eventBus.dispatch('loan-event', {
-//           status: 'repay-requested',
-//           txId: response.hash,
-//         })
-//       );
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   }
-// }
+export async function getAllVaultAndNFTDataForAddress(address) {
+  const [vaults, NFTs] = await Promise.all([getAllVaultsForAddress(address), getAllNFTsForAddress(address)]);
+  const NFTMetadataPromises = NFTs.map((NFT) => getNFTMetadata(NFT.uri));
+  const NFTMetadata = await Promise.all(NFTMetadataPromises);
+  vaults.forEach((vault, i) => {
+    NFTs.forEach((NFT) => {
+      if (NFT.id === vault.nftId) {
+        vault.nftImageURL = NFTMetadata[i].url;
+      }
+    });
+  });
+  const formattedVaults = formatAllVaults(vaults);
+  return formattedVaults;
+}
 
-export async function liquidateEthereumLoanContract(loanContractID) {
+async function getAllVaultsForAddress(address) {
+  let vaults = [];
   try {
-    loanManagerETH.liquidateLoan(loanContractID).then((response) =>
-      eventBus.dispatch('loan-event', {
-        status: 'liquidation-requested',
+    vaults = await vaultManagerETH.getAllVaultsForAddress(address);
+  } catch (error) {
+    console.error(error);
+  }
+  console.log(vaults);
+  return vaults;
+}
+
+async function getAllNFTsForAddress(address) {
+  let NFTs = [];
+  try {
+    NFTs = await nftManagerETH.getDLCNFTsByOwner(address);
+  } catch (error) {
+    console.error(error);
+  }
+  return NFTs;
+}
+
+async function getNFTMetadata(nftURI) {
+  let NFTMetadata;
+  const modifiedNftURI = nftURI.replace('ipfs://', 'https://nftstorage.link/ipfs/');
+  try {
+    NFTMetadata = await fetch(modifiedNftURI);
+  } catch (error) {
+    console.error(error);
+  }
+  return NFTMetadata;
+}
+
+async function getVaultByUUID(vaultContractUUID) {
+  let vault;
+  try {
+    vault = await vaultManagerETH.getVaultByUUID(vaultContractUUID);
+  } catch (error) {
+    console.error(error);
+  }
+  return vault;
+}
+
+export async function closeVault(vaultContractUUID) {
+  const vault = await getVaultByUUID(vaultContractUUID);
+  const vaultID = vault.id;
+  try {
+    vaultManagerETH.closeVault(vaultID).then((response) =>
+      eventBus.dispatch('vault-event', {
+        status: 'repay-requested',
         txId: response.hash,
       })
     );

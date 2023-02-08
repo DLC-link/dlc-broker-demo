@@ -1,16 +1,9 @@
 /*global chrome*/
 
-import { useEffect } from 'react';
-import { Flex, Text, VStack, Button, TableContainer, Tbody, Table, Tr, Td, Image, Box } from '@chakra-ui/react';
-import { easyTruncateAddress } from '../utils';
-import { customShiftValue, fixedTwoDecimalShift } from '../utils';
-import Status from './Status';
+import { Flex, Text, VStack } from '@chakra-ui/react';
 import eventBus from '../EventBus';
-import { useState } from 'react';
-import RepayModal from '../modals/RepayModal';
-import { liquidateEthereumLoanContract } from '../blockchainFunctions/ethereumFunctions';
 
-export default function Card({ loan, address, walletType, blockchain, bitCoinValue }) {
+export default function SetupVaultCard() {
   const openDepositModal = () => {
     eventBus.dispatch('is-deposit-modal-open', { isDepositOpen: true });
   };
@@ -22,11 +15,13 @@ export default function Card({ loan, address, walletType, blockchain, bitCoinVal
         borderRadius='lg'
         justifyContent='center'
         shadow='dark-lg'
+        height={450}
         width={250}
         marginLeft={15}
         marginRight={15}
         marginTop={25}
         marginBottom={25}
+        transition= 'all .25s ease'
         _hover={{
           bg: 'accent',
           cursor: 'pointer',

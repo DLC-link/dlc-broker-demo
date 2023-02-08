@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
-import { Text, HStack, Image, IconButton, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
-import { easyTruncateAddress } from '../utils';
+import { Text, HStack, Image, IconButton, Menu, MenuButton, MenuList, MenuItem, Tooltip } from '@chakra-ui/react';
+import { easyTruncateAddress } from '../utilities/format';
 import eventBus from '../EventBus';
 
 export default function Account({ address, isConnected, walletType, walletBalance }) {
@@ -71,35 +71,16 @@ export default function Account({ address, isConnected, walletType, walletBalanc
           borderRadius='lg'
           shadow='dark-lg'
           onClick={openSelectWalletModal}>
-          <HStack>
-            <HStack width={250}>
-              <WarningIcon
-                boxSize={[1, 3]}
-                color='primary1'
-              />
-              <Text
-                fontWeight='extrabold'
-                fontSize={[5, 15]}>
-                Connect Wallet
-              </Text>
-            </HStack>
-            <HStack>
-              <Image
-                src='/btc_logo.png'
-                alt='Bitcoin Logo'
-                boxSize={[3, 6]}
-                borderRadius='3px'></Image>
-              <IconButton
-                _hover={{
-                  background: 'secondary1',
-                }}
-                isLoading
-                variant='outline'
-                color='white'
-                borderRadius='full'
-                width={[20, 30]}
-                height={[20, 30]}></IconButton>
-            </HStack>
+          <HStack width={250}>
+            <WarningIcon
+              boxSize={[1, 3]}
+              color='primary1'
+            />
+            <Text
+              fontWeight='extrabold'
+              fontSize={[5, 15]}>
+              Connect Wallet
+            </Text>
           </HStack>
         </MenuButton>
       )}
