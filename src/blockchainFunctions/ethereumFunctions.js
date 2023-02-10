@@ -47,30 +47,57 @@ export async function setupVault(vaultContract) {
 }
 
 export async function getAllVaultAndNFTDataForAddress(address) {
-  const [vaults, NFTs] = await Promise.all([getAllVaultsForAddress(address), getAllNFTsForAddress(address)]);
+  const [formattedVaults, NFTs] = await Promise.all([getAllVaultsForAddress(address), getAllNFTsForAddress(address)]);
   const NFTMetadataPromises = NFTs.map((NFT) => getNFTMetadata(NFT.uri));
   const NFTMetadata = await Promise.all(NFTMetadataPromises);
-  const formattedVaults = formatAllVaults(vaults);
+  console.log('NFTMetadatas:' )
+  console.log(NFTMetadata)
+
   formattedVaults.forEach((vault, i) => {
     NFTs.forEach((NFT) => {
       if (parseInt(NFT.id) == parseInt(vault.raw.nftID)) {
         vault.raw.nftImageURL = NFTMetadata[i].url;
       }
-      console.log(vault)
     });
   });
   return formattedVaults;
 }
 
 async function getAllVaultsForAddress(address) {
-  let vaults = [];
+  let formattedVaults = [];
   try {
-    vaults = await vaultManagerETH.getAllVaultsForAddress(address);
+    const vaults = await vaultManagerETH.getAllVaultsForAddress(address);
+    formattedVaults = formatAllVaults(vaults);
+    formattedVaults.forEach((formattedVault) => {
+      if (formattedVault.raw.status === 4) {
+        getApproved(formattedVault.raw.nftID).then((isApproved) => {
+          formattedVault.raw.approved = isApproved;
+        });
+      }
+    });
   } catch (error) {
     console.error(error);
   }
-  console.log(vaults);
-  return vaults;
+  return formattedVaults;
+}
+
+export async function approveNFTBurn(nftID) {
+  try {
+    nftManagerETH.approve(process.env.REACT_APP_GOERLI_BROKER_CONTRACT_ADDRESS, nftID).then((response) =>
+      eventBus.dispatch('vault-event', {
+        status: 'approve-requested',
+        txId: response.hash,
+      })
+    );
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function getApproved(nftID) {
+  const approvedAddresses = await nftManagerETH.getApproved(nftID);
+  const approved = approvedAddresses.includes(process.env.REACT_APP_GOERLI_BROKER_CONTRACT_ADDRESS);
+  return approved;
 }
 
 async function getAllNFTsForAddress(address) {

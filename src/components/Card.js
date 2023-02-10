@@ -3,11 +3,10 @@
 import { Flex, Text, VStack, Button, TableContainer, Tbody, Table, Tr, Td, Image, Box } from '@chakra-ui/react';
 import { easyTruncateAddress } from '../utilities/format';
 import Status from './Status';
-import { closeVault } from '../blockchainFunctions/ethereumFunctions';
+import { approveNFTBurn, closeVault } from '../blockchainFunctions/ethereumFunctions';
 import { lockBTC } from '../blockchainFunctions/bitcoinFunctions';
 
 export default function Card({ vault, address }) {
-
   return (
     <>
       <Flex
@@ -57,8 +56,8 @@ export default function Card({ vault, address }) {
               </Tbody>
             </Table>
           </TableContainer>
-          <Box padding={15}>
-            {![0, 1, 2, 3].includes(vault.raw.status) ? (
+          <Box padding={5}>
+            {![0, 1, 2, 3, 5, 6].includes(vault.raw.status) ? (
               <Image
                 src={vault.raw.nftImageURL}
                 alt='NFT'
@@ -90,12 +89,21 @@ export default function Card({ vault, address }) {
                 color='gray'
                 variant='outline'></Button>
             )}
-            {vault.raw.status === 4 && vault.raw.owner.toLowerCase() === address && (
+            {vault.raw.status === 4 && vault.raw.owner.toLowerCase() === address && vault.raw.approved === true && (
               <VStack>
                 <Button
                   variant='outline'
                   onClick={() => closeVault(vault.raw.uuid)}>
                   CLOSE VAULT
+                </Button>
+              </VStack>
+            )}
+            {vault.raw.status === 4 && vault.raw.owner.toLowerCase() === address && vault.raw.approved === false && (
+              <VStack>
+                <Button
+                  variant='outline'
+                  onClick={() => approveNFTBurn(vault.raw.nftID)}>
+                  APPROVE
                 </Button>
               </VStack>
             )}

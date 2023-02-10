@@ -32,7 +32,7 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain, 
     let vaults = [];
     switch (walletType) {
       case 'metamask':
-        vaults = getAllVaultAndNFTDataForAddress(address);
+        vaults = await getAllVaultAndNFTDataForAddress(address);
         break;
       default:
         console.error('Unsupported wallet type!');
