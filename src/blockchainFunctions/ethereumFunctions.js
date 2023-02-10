@@ -55,7 +55,7 @@ export async function getAllVaultAndNFTDataForAddress(address) {
 
   formattedVaults.forEach((vault, i) => {
     NFTs.forEach((NFT) => {
-      if (parseInt(NFT.id) == parseInt(vault.raw.nftID)) {
+      if (parseInt(NFT.id) == parseInt(vault.raw.nftID) && NFTMetadata[i].url) {
         vault.raw.nftImageURL = NFTMetadata[i].url;
       }
     });
