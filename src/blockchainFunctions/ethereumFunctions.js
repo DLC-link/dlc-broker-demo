@@ -50,14 +50,15 @@ export async function getAllVaultAndNFTDataForAddress(address) {
   const [vaults, NFTs] = await Promise.all([getAllVaultsForAddress(address), getAllNFTsForAddress(address)]);
   const NFTMetadataPromises = NFTs.map((NFT) => getNFTMetadata(NFT.uri));
   const NFTMetadata = await Promise.all(NFTMetadataPromises);
-  vaults.forEach((vault, i) => {
+  const formattedVaults = formatAllVaults(vaults);
+  formattedVaults.forEach((vault, i) => {
     NFTs.forEach((NFT) => {
-      if (NFT.id === vault.nftId) {
-        vault.nftImageURL = NFTMetadata[i].url;
+      if (parseInt(NFT.id) == parseInt(vault.raw.nftID)) {
+        vault.raw.nftImageURL = NFTMetadata[i].url;
       }
+      console.log(vault)
     });
   });
-  const formattedVaults = formatAllVaults(vaults);
   return formattedVaults;
 }
 

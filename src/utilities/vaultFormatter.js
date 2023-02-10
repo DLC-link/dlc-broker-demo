@@ -8,7 +8,7 @@ function formatVault(vaultContract) {
     vaultCollateral: parseInt(vaultContract.vaultCollateral._hex),
     nftID: parseInt(vaultContract.nftId._hex),
     owner: vaultContract.owner,
-    nftImageURL: vaultContract.nftImageURL,
+    nftImageURL: undefined,
   };
   return createVaultObject(rawVaultData);
 }
