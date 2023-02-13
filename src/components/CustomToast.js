@@ -4,21 +4,11 @@ import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
 export default function CustomToast({ data }) {
   const eventMap = {
     refresh: '',
-    created: 'Vault created!',
     setup: 'Vault established!',
-    ready: 'Loan is ready!',
-    minting: 'Minting NFT!',
-    burning: 'Burning NFT!',
-    funded: 'Loan funded!',
-    'repay-requested': 'Requested repayment!',
-    repaying: 'Processing repayment!',
-    repaid: 'USDC repaid!',
-    'liquidation-requested': 'Requested liquidation!',
-    'attempting-liquidation': 'Attempting liquidation!',
-    liquidating: 'Processing liquidation!',
-    liquidated: 'Loan liquidated!',
-    'borrow-requested': 'Requested borrow!',
-    borrowed: 'USDC borrowed!',
+    created: 'Vault is ready!',
+    funded: 'Vault is funded!',
+    minted: 'Minted NFT!',
+    burned: 'Burned NFT!',
     'closing-requested': 'Requested closing!',
     closing: 'Processing closing!',
     closed: 'Vault closed!',
@@ -26,6 +16,10 @@ export default function CustomToast({ data }) {
     approved: 'Approved!',
     cancelled: 'Transaction cancelled!',
     failed: 'Transaction failed!',
+    'liquidation-requested': 'Requested liquidation!',
+    'attempting-liquidation': 'Attempting liquidation!',
+    liquidating: 'Processing liquidation!',
+    liquidated: 'Loan liquidated!',
   };
 
   const explorerAddressMap = {
@@ -35,7 +29,7 @@ export default function CustomToast({ data }) {
 
   const success = !(data.status === ('cancelled' || 'failed'));
   const message = eventMap[data.status];
-  const explorerAddress = explorerAddressMap[data.chain];
+  const explorerAddress = data.status === 'minted' ? data.nftPage : explorerAddressMap[data.chain];
 
   if (data.status !== 'refresh') {
     return (

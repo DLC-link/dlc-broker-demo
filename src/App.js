@@ -24,7 +24,7 @@ export default function App() {
   const toast = useToast();
 
   const handleEvent = (data) => {
-    if (data.status === 'created') {
+    if (data.status === 'initialized') {
       onDepositModalClose();
     }
     if (!toast.isActive(data.status)) {

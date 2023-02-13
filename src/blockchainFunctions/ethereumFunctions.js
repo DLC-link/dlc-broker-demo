@@ -41,10 +41,7 @@ export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
 export async function setupVault(vaultContract) {
   try {
     vaultManagerETH.setupVault(vaultContract.BTCDeposit, vaultContract.emergencyRefundTime).then((response) =>
-      eventBus.dispatch('vault-event', {
-        status: 'setup',
-        txId: response.hash,
-      })
+    eventBus.dispatch('vault-event', { status: 'initalized', vaultContract: vaultContract })
     );
   } catch (error) {
     console.error(error);
@@ -55,15 +52,17 @@ export async function getAllVaultAndNFTDataForAddress(address) {
   const [formattedVaults, NFTs] = await Promise.all([getAllVaultsForAddress(address), getAllNFTsForAddress(address)]);
   const NFTMetadataPromises = NFTs.map((NFT) => getNFTMetadata(NFT.uri));
   const NFTMetadata = await Promise.all(NFTMetadataPromises);
-  console.log('Vaults: ')
-  console.log(formattedVaults)
+
   console.log('NFTs: ')
   console.log(NFTs)
+
+  console.log('Vaults: ')
+  console.log(formattedVaults)
 
   NFTs.forEach((NFT, i) => {
     formattedVaults.forEach((vault) => {
       if (parseInt(NFT.id) == vault.raw.nftID) {
-        vault.raw.nftImageURL = NFTMetadata[i].url;
+        vault.raw.nftImageURL = NFTMetadata[i];
       }
     });
   });
@@ -118,14 +117,34 @@ async function getAllNFTsForAddress(address) {
 }
 
 async function getNFTMetadata(nftURI) {
-  let NFTMetadata;
+  let imageURL;
   const modifiedNftURI = nftURI.replace('ipfs://', 'https://nftstorage.link/ipfs/');
   try {
-    NFTMetadata = await fetch(modifiedNftURI);
+    const response = await fetch(modifiedNftURI);
+    const metadata = await response.json();
+    const imageURI = metadata.image;
+    const modifiedImageURI = imageURI.replace('ipfs://', 'https://nftstorage.link/ipfs/');
+    const image = await fetch(modifiedImageURI);
+    imageURL = image.url;
   } catch (error) {
     console.error(error);
   }
-  return NFTMetadata;
+  return imageURL;
+}
+
+async function getImageFromMetadata(metadataURL) {
+  let image;
+  try {
+    
+    image = fetch(metadataURL).then((imageURL) => {
+      console.log('Metadata URL: ')
+      console.log(metadataURL)
+      console.log(imageURL)
+    })
+  } catch (error) {
+    console.error(error)
+  }
+  return image.url;
 }
 
 async function getVaultByUUID(vaultContractUUID) {
