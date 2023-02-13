@@ -62,11 +62,12 @@ export default function Card({ vault, address }) {
                 src={vault.raw.nftImageURL}
                 alt='NFT'
                 shadow='dark-lg'
-                boxSize='150px'></Image>
+                boxSize='125px'
+                margin='15px'></Image>
             ) : (
               <Box
-                padding={15}
-                height='150px'></Box>
+                margin='15px'
+                height='125x'></Box>
             )}
           </Box>
           <Flex>

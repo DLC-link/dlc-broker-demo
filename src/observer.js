@@ -16,7 +16,28 @@ function startEthObserver() {
 
     dlcBrokerETH.on('StatusUpdate', (...args) =>
       eventBus.dispatch('vault-event', {
+        status: 'refresh',
+        txId: args[args.length - 1].transactionHash,
+      })
+    );
+
+    dlcBrokerETH.on('SetupVault', (...args) =>
+      eventBus.dispatch('vault-event', {
         status: 'setup',
+        txId: args[args.length - 1].transactionHash,
+      })
+    );
+
+    dlcBrokerETH.on('MintBtcNft', (...args) =>
+      eventBus.dispatch('vault-event', {
+        status: 'minting',
+        txId: args[args.length - 1].transactionHash,
+      })
+    );
+
+    dlcBrokerETH.on('BurnBtcNft', (...args) =>
+      eventBus.dispatch('vault-event', {
+        status: 'burning',
         txId: args[args.length - 1].transactionHash,
       })
     );

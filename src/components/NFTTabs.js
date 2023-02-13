@@ -21,7 +21,7 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain, 
       if (data.status === 'setup') {
         initialVaults.shift();
       } else if (data.status === 'created') {
-        console.log(data)
+        console.log(data);
         initialVaults.push(data.vaultContract);
       }
       refreshVaultsTable(true);

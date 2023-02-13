@@ -40,7 +40,12 @@ export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
 
 export async function setupVault(vaultContract) {
   try {
-    vaultManagerETH.setupVault(vaultContract.BTCDeposit, vaultContract.emergencyRefundTime);
+    vaultManagerETH.setupVault(vaultContract.BTCDeposit, vaultContract.emergencyRefundTime).then((response) =>
+      eventBus.dispatch('vault-event', {
+        status: 'setup',
+        txId: response.hash,
+      })
+    );
   } catch (error) {
     console.error(error);
   }
@@ -50,12 +55,14 @@ export async function getAllVaultAndNFTDataForAddress(address) {
   const [formattedVaults, NFTs] = await Promise.all([getAllVaultsForAddress(address), getAllNFTsForAddress(address)]);
   const NFTMetadataPromises = NFTs.map((NFT) => getNFTMetadata(NFT.uri));
   const NFTMetadata = await Promise.all(NFTMetadataPromises);
-  console.log('NFTMetadatas:' )
-  console.log(NFTMetadata)
+  console.log('Vaults: ')
+  console.log(formattedVaults)
+  console.log('NFTs: ')
+  console.log(NFTs)
 
-  formattedVaults.forEach((vault, i) => {
-    NFTs.forEach((NFT) => {
-      if (parseInt(NFT.id) == parseInt(vault.raw.nftID) && NFTMetadata[i]) {
+  NFTs.forEach((NFT, i) => {
+    formattedVaults.forEach((vault) => {
+      if (parseInt(NFT.id) == vault.raw.nftID) {
         vault.raw.nftImageURL = NFTMetadata[i].url;
       }
     });

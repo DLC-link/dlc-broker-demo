@@ -20,7 +20,7 @@ export default function App() {
   const [blockchain, setBlockchain] = useState(undefined);
   const [depositAmount, setDepositAmount] = useState(undefined);
   const [nftQuantity, setNftQuantity] = useState(undefined);
-  const [walletBalance, setWalletBalance] = useState(3.5)
+  const [walletBalance, setWalletBalance] = useState(0)
   const toast = useToast();
 
   const handleEvent = (data) => {
