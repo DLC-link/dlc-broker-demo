@@ -4,7 +4,7 @@ import React from 'react';
 import { VStack, HStack, Collapse, SimpleGrid, ScaleFade } from '@chakra-ui/react';
 import Card from './Card';
 import InitialCard from './InitialCard';
-import SetupVaultCard from './SetupVaultCard'
+import SetupVaultCard from './SetupVaultCard';
 
 export default function MyContractsTable({
   isConnected,
@@ -27,7 +27,7 @@ export default function MyContractsTable({
             <SimpleGrid
               columns={[1, 4]}
               spacing={[0, 15]}>
-                <SetupVaultCard></SetupVaultCard>
+              <SetupVaultCard></SetupVaultCard>
               {vaults?.map((vault) => (
                 <Card
                   key={vault.raw.uuid}

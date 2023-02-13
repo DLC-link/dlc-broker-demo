@@ -1,15 +1,32 @@
 /*global chrome*/
 
-import { Flex, Text, VStack, Button, TableContainer, Tbody, Table, Tr, Td, Image, Box, Spacer } from '@chakra-ui/react';
+import { Flex, Text, VStack, TableContainer, Tbody, Table, Tr, Td, Image, Box, Spacer } from '@chakra-ui/react';
 import { easyTruncateAddress } from '../utilities/format';
 import Status from './Status';
-import { approveNFTBurn, closeVault } from '../blockchainFunctions/ethereumFunctions';
-import { lockBTC } from '../blockchainFunctions/bitcoinFunctions';
+import { ActionButtons } from './ActionButtons';
+import { useState, useEffect } from 'react';
 
 export default function Card({ vault, address }) {
-  const showCloseVault = vault.raw.status === 4 && vault.raw.owner.toLowerCase() === address && vault.raw.approved === true;
-  const showApproveVault = vault.raw.status === 4 && vault.raw.owner.toLowerCase() === address && vault.raw.approved === false;
-  const showLiquidateVault = vault.raw.status === 4 && vault.raw.owner.toLowerCase() !== address;
+  const [action, setAction] = useState();
+
+  useEffect(() => {
+    if (vault.raw.status === 2) {
+      setAction('lockBTC');
+    } else if (vault.raw.status === 4) {
+      if (vault.raw.owner.toLowerCase() === address) {
+        if (vault.raw.approved === true) {
+          setAction('closeVault');
+        } else {
+          setAction('approveVault');
+        }
+      } else {
+        setAction('liquidateVault');
+      }
+    } else if ([1, 5, 7].includes(vault.raw.status)) {
+      setAction('pendingVault');
+    }
+  }, []);
+
   return (
     <>
       <Flex
@@ -60,59 +77,22 @@ export default function Card({ vault, address }) {
             </Table>
           </TableContainer>
           <Box padding={5}>
-            {vault.raw.status === 4 && (
+            {vault.raw.status === 4 ? (
               <Image
                 src={vault.raw.nftImageURL}
                 alt='NFT'
                 shadow='dark-lg'
                 boxSize='100px'
                 margin='15px'></Image>
+            ) : (
+              <Spacer
+                height='100px'
+                margin='15px'></Spacer>
             )}
           </Box>
-          <Flex>
-            {vault.raw.status === 2 && (
-              <VStack>
-                <Button
-                  variant='outline'
-                  onClick={() => lockBTC(vault)}>
-                  LOCK BTC
-                </Button>
-              </VStack>
-            )}
-            {[1, 5, 7].includes(vault.raw.status) && (
-              <Button
-                _hover={{
-                  shadow: 'none',
-                }}
-                isLoading
-                loadingText='PENDING'
-                color='gray'
-                variant='outline'></Button>
-            )}
-            {showCloseVault && (
-              <VStack>
-                <Button
-                  variant='outline'
-                  onClick={() => closeVault(vault.raw.uuid)}>
-                  CLOSE VAULT
-                </Button>
-              </VStack>
-            )}
-            {showApproveVault && (
-              <VStack>
-                <Button
-                  variant='outline'
-                  onClick={() => approveNFTBurn(vault.raw.nftID)}>
-                  APPROVE
-                </Button>
-              </VStack>
-            )}
-            {showLiquidateVault && (
-              <VStack>
-                <Button variant='outline'>LIQUIDATE VAULT</Button>
-              </VStack>
-            )}
-          </Flex>
+          <ActionButtons
+            action={action}
+            vault={vault}></ActionButtons>
         </VStack>
       </Flex>
     </>

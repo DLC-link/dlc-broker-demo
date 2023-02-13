@@ -21,10 +21,12 @@ export default function SetupVaultCard() {
         marginRight={15}
         marginTop={25}
         marginBottom={25}
-        transition= 'all .25s ease'
+        transition='all .25s ease'
+        color='transparent'
         _hover={{
           bg: 'accent',
           cursor: 'pointer',
+          color: 'white',
           transition: '0.5s',
           transform: 'translateY(-35px)',
         }}
@@ -33,6 +35,13 @@ export default function SetupVaultCard() {
           margin={15}
           justifyContent='center'>
           <Text fontSize='9xl'>+</Text>
+          <Text
+            fontSize='5xl'
+            textAlign='center'
+            color='inherit'
+            fontWeight='extrabold'>
+            SETUP VAULT
+          </Text>
         </VStack>
       </Flex>
     </>

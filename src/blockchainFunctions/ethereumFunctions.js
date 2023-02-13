@@ -40,9 +40,9 @@ export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
 
 export async function setupVault(vaultContract) {
   try {
-    vaultManagerETH.setupVault(vaultContract.BTCDeposit, vaultContract.emergencyRefundTime).then((response) =>
-    eventBus.dispatch('vault-event', { status: 'initalized', vaultContract: vaultContract })
-    );
+    vaultManagerETH
+      .setupVault(vaultContract.BTCDeposit, vaultContract.emergencyRefundTime)
+      .then(() => eventBus.dispatch('vault-event', { status: 'initialized', vaultContract: vaultContract }));
   } catch (error) {
     console.error(error);
   }
@@ -53,11 +53,11 @@ export async function getAllVaultAndNFTDataForAddress(address) {
   const NFTMetadataPromises = NFTs.map((NFT) => getNFTMetadata(NFT.uri));
   const NFTMetadata = await Promise.all(NFTMetadataPromises);
 
-  console.log('NFTs: ')
-  console.log(NFTs)
+  console.log('NFTs: ');
+  console.log(NFTs);
 
-  console.log('Vaults: ')
-  console.log(formattedVaults)
+  console.log('Vaults: ');
+  console.log(formattedVaults);
 
   NFTs.forEach((NFT, i) => {
     formattedVaults.forEach((vault) => {
@@ -135,14 +135,13 @@ async function getNFTMetadata(nftURI) {
 async function getImageFromMetadata(metadataURL) {
   let image;
   try {
-    
     image = fetch(metadataURL).then((imageURL) => {
-      console.log('Metadata URL: ')
-      console.log(metadataURL)
-      console.log(imageURL)
-    })
+      console.log('Metadata URL: ');
+      console.log(metadataURL);
+      console.log(imageURL);
+    });
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
   return image.url;
 }
