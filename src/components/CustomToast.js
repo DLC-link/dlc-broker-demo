@@ -4,6 +4,7 @@ import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
 export default function CustomToast({ data }) {
   const eventMap = {
     refresh: '',
+    initialized: 'Vault initialized!',
     setup: 'Vault established!',
     created: 'Vault is ready!',
     funded: 'Vault is funded!',
@@ -67,13 +68,19 @@ export default function CustomToast({ data }) {
                   fontWeight='extrabold'>
                   {message}
                 </Text>
-                {success && (
+                {success && data.status !== 'initialized' && data.status !== 'minted' && (
                   <Text
                     fontSize={8}
                     fontWeight='bold'>
                     Click to show transaction in the explorer!
                   </Text>
                 )}
+                {data.status === 'minted' && 
+                <Text
+                    fontSize={8}
+                    fontWeight='bold'>
+                    Click to show NFT on OpenSea!
+                  </Text>}
               </HStack>
             </Flex>
           </Box>

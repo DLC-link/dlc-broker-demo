@@ -74,13 +74,6 @@ async function getAllVaultsForAddress(address) {
   try {
     const vaults = await vaultManagerETH.getAllVaultsForAddress(address);
     formattedVaults = formatAllVaults(vaults);
-    formattedVaults.forEach((formattedVault) => {
-      if (formattedVault.raw.status === 4) {
-        getApproved(formattedVault.raw.nftID).then((isApproved) => {
-          formattedVault.raw.approved = isApproved;
-        });
-      }
-    });
   } catch (error) {
     console.error(error);
   }
@@ -100,7 +93,7 @@ export async function approveNFTBurn(nftID) {
   }
 }
 
-async function getApproved(nftID) {
+export async function getApproved(nftID) {
   const approvedAddresses = await nftManagerETH.getApproved(nftID);
   const approved = approvedAddresses.includes(process.env.REACT_APP_GOERLI_BROKER_CONTRACT_ADDRESS);
   return approved;

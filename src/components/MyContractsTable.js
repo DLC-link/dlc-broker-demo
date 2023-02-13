@@ -35,7 +35,8 @@ export default function MyContractsTable({
                   address={address}
                   walletType={walletType}
                   blockchain={blockchain}
-                  bitCoinValue={bitCoinValue}></Card>
+                  bitCoinValue={bitCoinValue}
+                  status={vault.raw.status}></Card>
               ))}
               {initialVaults?.map((vault) => (
                 <InitialCard
