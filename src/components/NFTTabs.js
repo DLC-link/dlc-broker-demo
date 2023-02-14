@@ -32,7 +32,13 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain, 
     let vaults = [];
     switch (walletType) {
       case 'metamask':
-        vaults = await getAllVaultAndNFTDataForAddress(address);
+        const allVaults = await getAllVaultAndNFTDataForAddress(address);
+        const pendingVaults = allVaults.filter((vault) => [0, 1, 5, 7].includes(vault.raw.status));
+        const readyVaults = allVaults.filter((vault) => vault.raw.status === 2);
+        const fundedVaults = allVaults.filter((vault) => vault.raw.status === 3);
+        const nftIssuedVaults = allVaults.filter((vault) => vault.raw.status === 4);
+        const closedVaults = allVaults.filter((vault) => [6, 8].includes(vault.raw.status));
+        vaults = [...nftIssuedVaults, ...fundedVaults, ...readyVaults, ...pendingVaults, ...closedVaults];
         break;
       default:
         console.error('Unsupported wallet type!');
@@ -95,8 +101,7 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain, 
               width='35px'
               height='35px'
               icon={<RefreshOutlined color='inherit'></RefreshOutlined>}
-              onClick={() => refreshVaultsTable(true)}>
-            </IconButton>
+              onClick={() => refreshVaultsTable(true)}></IconButton>
             <Text
               fontWeight='extrabold'
               fontSize='3xl'>

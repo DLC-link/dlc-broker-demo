@@ -9,6 +9,7 @@ import { getApproved } from '../blockchainFunctions/ethereumFunctions';
 
 export default function Card({ vault, status }) {
   const [action, setAction] = useState(undefined);
+  console.log(vault)
 
   async function handleApproval() {
     const isApproved = await getApproved(vault.raw.nftID);
@@ -96,7 +97,7 @@ export default function Card({ vault, status }) {
             ) : (
               <Spacer
                 height='200px'
-                margin='15px'></Spacer>
+                margin='0px'></Spacer>
             )}
           </Box>
           {action !== undefined && (
