@@ -10,7 +10,7 @@ export default function CustomToast({ data }) {
     funded: 'Vault is funded!',
     minted: 'Minted NFT!',
     burned: 'Burned NFT!',
-    'closing-requested': 'Requested closing!',
+    'close-requested': 'Requested closing!',
     closing: 'Processing closing!',
     closed: 'Vault closed!',
     'approve-requested': 'Approve requested!',
@@ -32,60 +32,60 @@ export default function CustomToast({ data }) {
   const message = eventMap[data.status];
   const explorerAddress = data.status === 'minted' ? data.nftPage : explorerAddressMap[data.chain];
 
+
   if (data.status !== 'refresh') {
     return (
-      <>
+      <Flex
+        py='95px'
+        marginRight='18px'>
         <Link
           href={explorerAddress}
           isExternal
           _hover={{
             textDecoration: 'none',
           }}>
-          <Box
-            marginTop={150}
-            paddingRight={15}>
-            <Flex
-              color='white'
-              bgColor='rgba(4, 186, 178, 0.8)'
-              borderRadius='sm'
-              boxShadow='dark-lg'
-              height={45}
-              width={350}
-              justifyContent='center'
-              alignItems='center'
-              _hover={{
-                opacity: '100%',
-                bg: 'accent',
-              }}>
-              <HStack spacing={3.5}>
-                {success === true ? (
-                  <CheckCircleIcon color='green'></CheckCircleIcon>
-                ) : (
-                  <WarningIcon color='red'></WarningIcon>
-                )}
+          <Flex
+            color='white'
+            bgColor='rgba(4, 186, 178, 0.8)'
+            borderRadius='sm'
+            boxShadow='dark-lg'
+            height={45}
+            width={350}
+            justifyContent='center'
+            alignItems='center'
+            _hover={{
+              opacity: '100%',
+              bg: 'accent',
+            }}>
+            <HStack spacing={3.5}>
+              {success === true ? (
+                <CheckCircleIcon color='green'></CheckCircleIcon>
+              ) : (
+                <WarningIcon color='red'></WarningIcon>
+              )}
+              <Text
+                fontSize={12}
+                fontWeight='extrabold'>
+                {message}
+              </Text>
+              {success && data.status !== 'initialized' && data.status !== 'minted' && (
                 <Text
-                  fontSize={12}
-                  fontWeight='extrabold'>
-                  {message}
+                  fontSize={8}
+                  fontWeight='bold'>
+                  Click to show transaction in the explorer!
                 </Text>
-                {success && data.status !== 'initialized' && data.status !== 'minted' && (
-                  <Text
-                    fontSize={8}
-                    fontWeight='bold'>
-                    Click to show transaction in the explorer!
-                  </Text>
-                )}
-                {data.status === 'minted' && 
+              )}
+              {data.status === 'minted' && (
                 <Text
-                    fontSize={8}
-                    fontWeight='bold'>
-                    Click to show NFT on OpenSea!
-                  </Text>}
-              </HStack>
-            </Flex>
-          </Box>
+                  fontSize={8}
+                  fontWeight='bold'>
+                  Click to show NFT on OpenSea!
+                </Text>
+              )}
+            </HStack>
+          </Flex>
         </Link>
-      </>
+      </Flex>
     );
   }
 }

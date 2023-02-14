@@ -5,26 +5,36 @@ import { easyTruncateAddress } from '../utilities/format';
 import Status from './Status';
 import { ActionButtons } from './ActionButtons';
 import { useState, useEffect } from 'react';
-import { getApproved } from '../blockchainFunctions/ethereumFunctions'
+import { getApproved } from '../blockchainFunctions/ethereumFunctions';
 
-export default function Card({ vault, address, status }) {
-  const [action, setAction] = useState();
-  const [isApproved, setApproved] = useState(undefined);
+export default function Card({ vault, status }) {
+  const [action, setAction] = useState(undefined);
+
+  async function handleApproval() {
+    const isApproved = await getApproved(vault.raw.nftID);
+    return isApproved;
+  }
 
   useEffect(() => {
-    async function handleApproval(){
-      const isApproved = await getApproved(vault.raw.nftID)
-      setApproved(isApproved)
+    switch (status) {
+      case 2:
+        setAction('lockVault');
+        break;
+      case 4:
+        handleApproval().then((isApproved) => {
+          setAction(isApproved ? 'closeVault' : 'approveVault');
+        });
+        break;
+      case 1:
+      case 3:
+      case 5:
+      case 7:
+        setAction('pendingVault');
+        break;
+      case 6:
+        setAction('closedVault');
     }
-    handleApproval();
-    if (status === 2) {
-      setAction('lockBTC');
-    } else if (status === 4) {
-      setAction('closeOrApproveVault');
-    } else if ([1, 5, 7].includes(status)) {
-      setAction('pendingVault');
-    }
-  }, []);
+  }, [vault, status]);
 
   return (
     <>
@@ -89,10 +99,9 @@ export default function Card({ vault, address, status }) {
                 margin='15px'></Spacer>
             )}
           </Box>
-          {isApproved !== undefined && (
+          {action !== undefined && (
             <ActionButtons
               action={action}
-              isApproved={isApproved}
               vault={vault}></ActionButtons>
           )}
         </VStack>

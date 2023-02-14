@@ -3,49 +3,44 @@ import { Flex, VStack, Button } from '@chakra-ui/react';
 import { approveNFTBurn, closeVault } from '../blockchainFunctions/ethereumFunctions';
 import { lockBTC } from '../blockchainFunctions/bitcoinFunctions';
 
-export function ActionButtons({ action, vault, isApproved }) {
-    console.log(action)
+export function ActionButtons({ action, vault }) {
   switch (action) {
-    case 'lockBTC':
+    case 'lockVault':
       return (
         <Flex>
-          {vault.raw.status === 2 && (
-            <VStack>
-              <Button
-                variant='outline'
-                onClick={() => lockBTC(vault)}>
-                LOCK BTC
-              </Button>
-            </VStack>
-          )}
+          <VStack>
+            <Button
+              variant='outline'
+              onClick={() => lockBTC(vault)}>
+              LOCK BTC
+            </Button>
+          </VStack>
         </Flex>
       );
-    case 'closeOrApproveVault':
-      if (isApproved) {
-        return (
-          <Flex>
-            <VStack>
-              <Button
-                variant='outline'
-                onClick={() => closeVault(vault.raw.uuid)}>
-                CLOSE VAULT
-              </Button>
-            </VStack>
-          </Flex>
-        );
-      } else {
-        return (
-          <Flex>
-            <VStack>
-              <Button
-                variant='outline'
-                onClick={() => approveNFTBurn(vault.raw.nftID)}>
-                APPROVE
-              </Button>
-            </VStack>
-          </Flex>
-        );
-      }
+    case 'closeVault':
+      return (
+        <Flex>
+          <VStack>
+            <Button
+              variant='outline'
+              onClick={() => closeVault(vault.raw.uuid)}>
+              CLOSE VAULT
+            </Button>
+          </VStack>
+        </Flex>
+      );
+    case 'approveVault':
+      return (
+        <Flex>
+          <VStack>
+            <Button
+              variant='outline'
+              onClick={() => approveNFTBurn(vault.raw.nftID)}>
+              APPROVE
+            </Button>
+          </VStack>
+        </Flex>
+      );
     case 'liquidateVault':
       return (
         <Flex>
@@ -67,5 +62,10 @@ export function ActionButtons({ action, vault, isApproved }) {
             variant='outline'></Button>
         </Flex>
       );
+    case 'closedVault':
+      break;
+    default:
+      console.error('Unknow action type!');
+      break;
   }
 }

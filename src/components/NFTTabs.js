@@ -6,6 +6,7 @@ import Balance from './Balance';
 import eventBus from '../EventBus';
 import { getAllVaultAndNFTDataForAddress } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
+import { RefreshOutlined } from '@mui/icons-material';
 
 export default function NFTTabs({ isConnected, address, walletType, blockchain, depositAmount, nftQuantity }) {
   const [bitCoinValue, setBitCoinValue] = useState(0);
@@ -94,7 +95,7 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain, 
               width='25px'
               height='25px'
               onClick={() => refreshVaultsTable(true)}>
-              <RepeatClockIcon color='inherit'></RepeatClockIcon>
+              <RefreshOutlined color='inherit'></RefreshOutlined>
             </IconButton>
             <Text
               fontWeight='extrabold'

@@ -1,4 +1,4 @@
-import { Flex, Text, VStack, Button, TableContainer, Tbody, Table, Tr, Td, Box } from '@chakra-ui/react';
+import { Flex, Text, VStack, Button, TableContainer, Tbody, Table, Tr, Td, Box, Spacer } from '@chakra-ui/react';
 import { easyTruncateAddress, customShiftValue } from '../utilities/format';
 import Status from './Status';
 
@@ -57,9 +57,11 @@ export default function InitialCard({ vault, creator }) {
               </Tbody>
             </Table>
           </TableContainer>
-          <Box
-            padding={30}
-            height='150px'></Box>
+          <Box padding={5}>
+            <Spacer
+              height='100px'
+              margin='15px'></Spacer>
+          </Box>
           <Button
             _hover={{
               shadow: 'none',

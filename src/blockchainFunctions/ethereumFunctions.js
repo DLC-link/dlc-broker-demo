@@ -86,6 +86,7 @@ export async function approveNFTBurn(nftID) {
       eventBus.dispatch('vault-event', {
         status: 'approve-requested',
         txId: response.hash,
+        chain: 'ethereum'
       })
     );
   } catch (error) {
@@ -125,20 +126,6 @@ async function getNFTMetadata(nftURI) {
   return imageURL;
 }
 
-async function getImageFromMetadata(metadataURL) {
-  let image;
-  try {
-    image = fetch(metadataURL).then((imageURL) => {
-      console.log('Metadata URL: ');
-      console.log(metadataURL);
-      console.log(imageURL);
-    });
-  } catch (error) {
-    console.error(error);
-  }
-  return image.url;
-}
-
 async function getVaultByUUID(vaultContractUUID) {
   let vault;
   try {
@@ -155,8 +142,9 @@ export async function closeVault(vaultContractUUID) {
   try {
     vaultManagerETH.closeVault(vaultID).then((response) =>
       eventBus.dispatch('vault-event', {
-        status: 'repay-requested',
+        status: 'close-requested',
         txId: response.hash,
+        chain: 'ethereum'
       })
     );
   } catch (error) {

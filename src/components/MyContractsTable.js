@@ -28,9 +28,9 @@ export default function MyContractsTable({
               columns={[1, 4]}
               spacing={[0, 15]}>
               <SetupVaultCard></SetupVaultCard>
-              {vaults?.map((vault) => (
+              {vaults?.map((vault, i) => (
                 <Card
-                  key={vault.raw.uuid}
+                  key={i}
                   vault={vault}
                   address={address}
                   walletType={walletType}
@@ -38,8 +38,9 @@ export default function MyContractsTable({
                   bitCoinValue={bitCoinValue}
                   status={vault.raw.status}></Card>
               ))}
-              {initialVaults?.map((vault) => (
+              {initialVaults?.map((vault, j) => (
                 <InitialCard
+                  key={j}
                   vault={vault}
                   creator={address}
                   walletType={walletType}

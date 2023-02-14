@@ -30,7 +30,7 @@ export default function App() {
     if (!toast.isActive(data.status)) {
       return toast({
         id: data.status,
-        position: 'right-top',
+        position: 'top-right',
         render: () => (
           <CustomToast
             data={data}

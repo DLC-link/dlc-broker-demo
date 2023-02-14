@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { abi as dlcBrokerABI } from './abis/dlcBrokerABI';
-import { abi as dlcManagerABI } from './abis/dlcManagerABI'
+import { abi as dlcManagerABI } from './abis/dlcManagerABI';
+import { abi as btcNftABI } from './abis/btcNftABI';
 import eventBus from './EventBus';
 
 function startEthObserver() {
@@ -21,18 +22,21 @@ function startEthObserver() {
       signer
     );
 
+    const btcNftETH = new ethers.Contract(process.env.REACT_APP_GOERLI_NFT_CONTRACT_ADDRESS, btcNftABI, signer);
+
     dlcBrokerETH.on('StatusUpdate', (...args) =>
       eventBus.dispatch('vault-event', {
         status: 'refresh',
         txId: args[args.length - 1].transactionHash,
+        chain: 'ethereum'
       })
     );
 
     dlcBrokerETH.on('SetupVault', (...args) => {
-      console.log('szetupojja');
       eventBus.dispatch('vault-event', {
         status: 'setup',
         txId: args[args.length - 1].transactionHash,
+        chain: 'ethereum'
       });
     });
 
@@ -40,6 +44,23 @@ function startEthObserver() {
       eventBus.dispatch('vault-event', {
         status: 'created',
         txId: args[args.length - 1].transactionHash,
+        chain: 'ethereum'
+      });
+    });
+
+    dlcManagerETH.on('SetStatusFunded', (...args) => {
+      eventBus.dispatch('vault-event', {
+        status: 'funded',
+        txId: args[args.length - 1].transactionHash,
+        chain: 'ethereum'
+      });
+    });
+
+    btcNftETH.on('Approval', (...args) => {
+      eventBus.dispatch('vault-event', {
+        status: 'approved',
+        txId: args[args.length - 1].transactionHash,
+        chain: 'ethereum'
       });
     });
 
@@ -47,6 +68,7 @@ function startEthObserver() {
       eventBus.dispatch('vault-event', {
         status: 'minted',
         txId: args[args.length - 1].transactionHash,
+        chain: 'ethereum',
         nftPage: 'https://testnets.opensea.io/account',
       })
     );
@@ -55,6 +77,7 @@ function startEthObserver() {
       eventBus.dispatch('vault-event', {
         status: 'burned',
         txId: args[args.length - 1].transactionHash,
+        chain: 'ethereum'
       })
     );
   } catch (error) {
