@@ -36,7 +36,7 @@ export function ActionButtons({ action, vault }) {
             <Button
               variant='outline'
               onClick={() => approveNFTBurn(vault.raw.nftID)}>
-              APPROVE
+              REQUEST CLOSE VAULT
             </Button>
           </VStack>
         </Flex>

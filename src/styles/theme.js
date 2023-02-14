@@ -16,7 +16,7 @@ export const theme = extendTheme({
         selector: {
           fontSize: 'md',
           fontWeight: 'extrabold',
-          color:'white'
+          color: 'white',
         },
         property: {
           fontWeight: 'extrabold',

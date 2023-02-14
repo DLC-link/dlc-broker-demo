@@ -85,17 +85,17 @@ export default function Card({ vault, status }) {
               </Tbody>
             </Table>
           </TableContainer>
-          <Box padding={5}>
+          <Box padding='5px'>
             {vault.raw.status === 4 ? (
               <Image
                 src={vault.raw.nftImageURL}
                 alt='NFT'
                 shadow='dark-lg'
-                boxSize='100px'
-                margin='15px'></Image>
+                boxSize='200px'
+                margin='0px'></Image>
             ) : (
               <Spacer
-                height='100px'
+                height='200px'
                 margin='15px'></Spacer>
             )}
           </Box>

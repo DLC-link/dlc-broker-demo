@@ -88,19 +88,19 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain, 
               }}
               isLoading={isLoading && isManualLoading}
               variant='outline'
-              borderRadius='full'
+              borderRadius='lg'
               borderColor='white'
-              padding='10px'
               color='white'
-              width='25px'
-              height='25px'
+              marginLeft='0px'
+              width='35px'
+              height='35px'
+              icon={<RefreshOutlined color='inherit'></RefreshOutlined>}
               onClick={() => refreshVaultsTable(true)}>
-              <RefreshOutlined color='inherit'></RefreshOutlined>
             </IconButton>
             <Text
               fontWeight='extrabold'
               fontSize='3xl'>
-              NFT CONTRACTS
+              BITCOIN VAULTS
             </Text>
           </HStack>
           <Balance

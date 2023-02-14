@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
-import { Text, HStack, Image, IconButton, Menu, MenuButton, MenuList, MenuItem, Tooltip } from '@chakra-ui/react';
+import { Text, HStack, Image, IconButton, Menu, MenuButton, MenuList, MenuItem, Tooltip, Spacer } from '@chakra-ui/react';
 import { easyTruncateAddress } from '../utilities/format';
 import eventBus from '../EventBus';
 
@@ -32,7 +32,7 @@ export default function Account({ address, isConnected, walletType, walletBalanc
         <>
           <MenuButton
             height={[25, 50]}
-            width={[250, 350]}
+            width={[250, 250]}
             borderRadius='lg'
             shadow='dark-lg'>
             <HStack>
@@ -50,24 +50,24 @@ export default function Account({ address, isConnected, walletType, walletBalanc
                 />
                 <Text fontSize={[5, 15]}>Account:{easyTruncateAddress(address)}</Text>
               </HStack>
-              <HStack>
+              {/* <HStack>
                 <Image
                   src='/btc_logo.png'
                   alt='Bitcoin Logo'
                   boxSize={[3, 6]}
                   borderRadius='3px'></Image>
                 <Text>{walletBalance}</Text>
-              </HStack>
+              </HStack> */}
             </HStack>
           </MenuButton>
-          <MenuList width={350}>
+          <MenuList width={250}>
             <MenuItem onClick={disconnect}>Disconnect Wallet</MenuItem>
           </MenuList>
         </>
       ) : (
         <MenuButton
           height={[25, 50]}
-          width={[250, 350]}
+          width={[250, 250]}
           borderRadius='lg'
           shadow='dark-lg'
           onClick={openSelectWalletModal}>
