@@ -17,6 +17,7 @@ export const abi = [
   'function burn(uint256 tokenId)',
   'function getApproved(uint256 tokenId) view returns (address)',
   'function getDLCNFTsByOwner(address owner) view returns (tuple(uint256 id, string uri, address originalDepositor, address broker)[])',
+  'function getNextMintId() view returns (uint256)',
   'function getRoleAdmin(bytes32 role) view returns (bytes32)',
   'function grantRole(bytes32 role, address account)',
   'function hasRole(bytes32 role, address account) view returns (bool)',

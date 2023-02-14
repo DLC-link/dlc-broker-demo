@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
-import { Text, HStack, Image, IconButton, Menu, MenuButton, MenuList, MenuItem, Tooltip, Spacer } from '@chakra-ui/react';
+import { Text, HStack, Image, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
 import { easyTruncateAddress } from '../utilities/format';
 import eventBus from '../EventBus';
 
-export default function Account({ address, isConnected, walletType, walletBalance }) {
+export default function Account({ address, isConnected, walletType }) {
   const [walletLogo, setWalletLogo] = useState(undefined);
 
   const walletLogos = {
