@@ -5,6 +5,19 @@ import { lockBTC } from '../blockchainFunctions/bitcoinFunctions';
 
 export function ActionButtons({ action, vault }) {
   switch (action) {
+    case 'pendingVault':
+      return (
+        <Flex>
+          <Button
+            variant='outline'
+            isLoading
+            loadingText='PENDING'
+            color='gray'
+            _hover={{
+              shadow: 'none',
+            }}></Button>
+        </Flex>
+      );
     case 'lockVault':
       return (
         <Flex>
@@ -13,18 +26,6 @@ export function ActionButtons({ action, vault }) {
               variant='outline'
               onClick={() => lockBTC(vault)}>
               LOCK BTC
-            </Button>
-          </VStack>
-        </Flex>
-      );
-    case 'closeVault':
-      return (
-        <Flex>
-          <VStack>
-            <Button
-              variant='outline'
-              onClick={() => closeVault(vault.raw.uuid)}>
-              CLOSE VAULT
             </Button>
           </VStack>
         </Flex>
@@ -41,6 +42,18 @@ export function ActionButtons({ action, vault }) {
           </VStack>
         </Flex>
       );
+    case 'closeVault':
+      return (
+        <Flex>
+          <VStack>
+            <Button
+              variant='outline'
+              onClick={() => closeVault(vault.raw.uuid)}>
+              CLOSE VAULT
+            </Button>
+          </VStack>
+        </Flex>
+      );
     case 'liquidateVault':
       return (
         <Flex>
@@ -49,23 +62,10 @@ export function ActionButtons({ action, vault }) {
           </VStack>
         </Flex>
       );
-    case 'pendingVault':
-      return (
-        <Flex>
-          <Button
-            _hover={{
-              shadow: 'none',
-            }}
-            isLoading
-            loadingText='PENDING'
-            color='gray'
-            variant='outline'></Button>
-        </Flex>
-      );
     case 'closedVault':
       break;
     default:
-      console.error('Unknow action type!');
+      console.error('Unknown action type!');
       break;
   }
 }

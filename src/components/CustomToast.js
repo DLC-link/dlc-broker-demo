@@ -1,12 +1,13 @@
 import { Link, Flex, HStack, Text, Box } from '@chakra-ui/react';
 import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
 
-export default function CustomToast({ data }) {
+export default function CustomToast({ isMobile, data }) {
+  console.log(isMobile)
   const eventMap = {
     refresh: '',
     initialized: 'Vault initialized!',
     setup: 'Vault established!',
-    created: 'Vault is ready!',
+    ready: 'Vault is ready!',
     funded: 'Vault is funded!',
     minted: 'Minted NFT!',
     burned: 'Burned NFT!',
@@ -32,30 +33,28 @@ export default function CustomToast({ data }) {
   const message = eventMap[data.status];
   const explorerAddress = data.status === 'minted' ? data.nftPage : explorerAddressMap[data.chain];
 
-
   if (data.status !== 'refresh') {
     return (
-      <Flex
-        py='95px'
-        marginRight='18px'>
+      <Flex>
         <Link
+          py={isMobile ? '0px' : '100px'}
+          px={isMobile ? '0px' : '20px'}
           href={explorerAddress}
           isExternal
           _hover={{
             textDecoration: 'none',
           }}>
           <Flex
-            color='white'
+            height='45px'
+            width='350px'
+            borderRadius='lg'
             bgColor='rgba(4, 186, 178, 0.8)'
-            borderRadius='sm'
-            boxShadow='dark-lg'
-            height={45}
-            width={350}
+            color='white'
             justifyContent='center'
             alignItems='center'
             _hover={{
               opacity: '100%',
-              bg: 'accent',
+              bg: 'secondary1',
             }}>
             <HStack spacing={3.5}>
               {success === true ? (
@@ -64,20 +63,20 @@ export default function CustomToast({ data }) {
                 <WarningIcon color='red'></WarningIcon>
               )}
               <Text
-                fontSize={12}
+                fontSize='12px'
                 fontWeight='extrabold'>
                 {message}
               </Text>
               {success && data.status !== 'initialized' && data.status !== 'minted' && (
                 <Text
-                  fontSize={8}
+                  fontSize='8px'
                   fontWeight='bold'>
                   Click to show transaction in the explorer!
                 </Text>
               )}
               {data.status === 'minted' && (
                 <Text
-                  fontSize={8}
+                  fontSize='8px'
                   fontWeight='bold'>
                   Click to show NFT on OpenSea!
                 </Text>

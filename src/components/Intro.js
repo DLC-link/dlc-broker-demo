@@ -1,30 +1,28 @@
 import React from 'react';
 import { Text, Collapse, Image, VStack } from '@chakra-ui/react';
 
-export default function Header(props) {
-  const isConnected = props.isConnected;
-
+export default function Header({ isConnected }) {
   return (
     <Collapse in={!isConnected}>
       <VStack
+        marginTop='215px'
         justifyContent='center'
-        alignItems='center'
-        marginTop={215}>
+        alignItems='center'>
         <Image
-          width={917.4}
           src='/BTC_Graphic_2.png'
           position='absolute'
+          width='950px'
           blendMode='screen'></Image>
         <Text
-          fontSize={[25, 50]}
+          height={['25px', '50px']}
+          fontSize={['25px', '50px']}
           fontWeight='semibold'
-          color='accent'
-          height={50}>
+          color='accent'>
           Use Native Bitcoin
         </Text>
         <Text
+          fontSize={['25px', '50px']}
           fontWeight='normal'
-          fontSize={[25, 50]}
           color='white'>
           without wrapping
         </Text>

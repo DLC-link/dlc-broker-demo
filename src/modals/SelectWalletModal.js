@@ -19,7 +19,7 @@ import { Image } from '@chakra-ui/react';
 import { requestAndDispatchMetaMaskAccountInformation } from '../blockchainFunctions/ethereumFunctions';
 
 export default function SelectWalletModal({ isOpen, closeModal }) {
-  const blockchains = [{ id: 'ethereum:2', name: 'Gooerli Testnet' }];
+  const blockchains = [{ id: 'ethereum:2', name: 'Goerli Testnet' }];
 
   return (
     <Modal
@@ -28,11 +28,15 @@ export default function SelectWalletModal({ isOpen, closeModal }) {
       isCentered>
       <ModalOverlay />
       <ModalContent
-        bg='background2'
+        width='300px'
         border='1px'
-        color='accent'
-        w='300px'>
-        <ModalHeader textAlign='center' color='white'>Select Wallet</ModalHeader>
+        bg='background2'
+        color='accent'>
+        <ModalHeader
+          color='white'
+          textAlign='center'>
+          Select Wallet
+        </ModalHeader>
         <ModalCloseButton
           _focus={{
             boxShadow: 'none',
@@ -43,26 +47,21 @@ export default function SelectWalletModal({ isOpen, closeModal }) {
             <Menu>
               {({ isOpen }) => (
                 <>
-                  <MenuButton
-                    width='100%'
-                    variant='outline'>
-                    <HStack
-                      w='100%'
-                      justifyContent='center'>
+                  <MenuButton variant='outline'>
+                    <HStack justifyContent='center'>
                       <Image
                         src='/mm_logo.png'
                         alt='Metamask Logo'
-                        width={25}
-                        height={25}
+                        boxSize='25px'
                       />
                       <Text variant='selector'>{isOpen ? 'Choose Network' : 'Metamask'}</Text>
                     </HStack>
                   </MenuButton>
                   <MenuList>
-                    {blockchains.map((blockchain, idx) => {
+                    {blockchains.map((blockchain, i) => {
                       return (
                         <MenuItem
-                          key={`chain-${idx}`}
+                          key={i}
                           onClick={() => {
                             requestAndDispatchMetaMaskAccountInformation();
                             closeModal();

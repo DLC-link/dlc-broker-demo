@@ -5,18 +5,6 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import PaidIcon from '@mui/icons-material/Paid';
 
 export default function Status({ status }) {
-  const statuses = {
-    0: 'None',
-    1: 'NotReady',
-    2: 'Ready',
-    3: 'Funded',
-    4: 'NftIssued',
-    5: 'PreRepaid',
-    6: 'Repaid',
-    7: 'PreLiquidated',
-    8: 'Liquidated',
-  };
-
   const setStatusComponent = (status) => {
     switch (status) {
       case 0:
@@ -24,8 +12,8 @@ export default function Status({ status }) {
           <HStack spacing={2}>
             <CurrencyBitcoinIcon sx={{ color: 'orange' }} />
             <Text
-              color='white'
-              fontSize={12}>
+              fontSize='12px'
+              color='white'>
               Unfunded
             </Text>
           </HStack>
@@ -35,8 +23,8 @@ export default function Status({ status }) {
           <HStack spacing={2}>
             <HourglassEmptyIcon sx={{ color: 'orange' }} />
             <Text
-              color='white'
-              fontSize={12}>
+              fontSize='12px'
+              color='white'>
               Not ready
             </Text>
           </HStack>
@@ -46,8 +34,8 @@ export default function Status({ status }) {
           <HStack spacing={2}>
             <CurrencyBitcoinIcon sx={{ color: 'orange' }} />
             <Text
-              color='white'
-              fontSize={12}>
+              fontSize='12px'
+              color='white'>
               Ready
             </Text>
           </HStack>
@@ -57,8 +45,8 @@ export default function Status({ status }) {
           <HStack spacing={2}>
             <CurrencyBitcoinIcon sx={{ color: 'green' }} />
             <Text
-              color='white'
-              fontSize={12}>
+              fontSize='12px'
+              color='white'>
               Funded
             </Text>
           </HStack>
@@ -68,8 +56,8 @@ export default function Status({ status }) {
           <HStack spacing={2}>
             <CurrencyBitcoinIcon sx={{ color: 'green' }} />
             <Text
-              color='white'
-              fontSize={12}>
+              fontSize='12px'
+              color='white'>
               NFT Issued
             </Text>
           </HStack>
@@ -79,8 +67,8 @@ export default function Status({ status }) {
           <HStack spacing={2}>
             <HourglassEmptyIcon sx={{ color: 'orange' }} />
             <Text
-              color='white'
-              fontSize={12}>
+              fontSize='12px'
+              color='white'>
               Waiting to be repaid
             </Text>
           </HStack>
@@ -90,8 +78,8 @@ export default function Status({ status }) {
           <HStack spacing={2}>
             <PaidIcon sx={{ color: 'green' }} />
             <Text
-              color='white'
-              fontSize={12}>
+              fontSize='12px'
+              color='white'>
               Closed
             </Text>
           </HStack>
@@ -101,8 +89,8 @@ export default function Status({ status }) {
           <HStack spacing={2}>
             <HourglassEmptyIcon sx={{ color: 'orange' }} />
             <Text
-              color='white'
-              fontSize={12}>
+              fontSize='12px'
+              color='white'>
               Waiting to be liquidated
             </Text>
           </HStack>
@@ -112,8 +100,8 @@ export default function Status({ status }) {
           <HStack spacing={2}>
             <CurrencyExchangeIcon sx={{ color: 'green' }} />
             <Text
-              color='white'
-              fontSize={12}>
+              fontSize='12px'
+              color='white'>
               Liquidated
             </Text>
           </HStack>

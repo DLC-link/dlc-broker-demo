@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Text, Collapse, VStack, IconButton, HStack } from '@chakra-ui/react';
 import { RepeatClockIcon } from '@chakra-ui/icons';
-import MyContractsTable from './MyContractsTable';
+import VaultsGrid from './VaultsGrid';
 import Balance from './Balance';
-import eventBus from '../EventBus';
+import eventBus from '../utilities/eventBus';
 import { getAllVaultAndNFTDataForAddress } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 import { RefreshOutlined } from '@mui/icons-material';
 
-export default function NFTTabs({ isConnected, address, walletType, blockchain, depositAmount, nftQuantity }) {
+export default function VaultsPage({ isConnected, address, walletType, blockchain, depositAmount, nftQuantity }) {
   const [bitCoinValue, setBitCoinValue] = useState(0);
   const [isLoading, setLoading] = useState(true);
   const [isManualLoading, setManualLoading] = useState(undefined);
@@ -30,21 +30,23 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain, 
 
   const fetchAllVaults = async () => {
     let vaults = [];
+    let sortedVaults = [];
     switch (walletType) {
       case 'metamask':
-        const allVaults = await getAllVaultAndNFTDataForAddress(address);
-        const pendingVaults = allVaults.filter((vault) => [0, 1, 5, 7].includes(vault.raw.status));
-        const readyVaults = allVaults.filter((vault) => vault.raw.status === 2);
-        const fundedVaults = allVaults.filter((vault) => vault.raw.status === 3);
-        const nftIssuedVaults = allVaults.filter((vault) => vault.raw.status === 4);
-        const closedVaults = allVaults.filter((vault) => [6, 8].includes(vault.raw.status));
-        vaults = [...nftIssuedVaults, ...fundedVaults, ...readyVaults, ...pendingVaults, ...closedVaults];
+        vaults = await getAllVaultAndNFTDataForAddress(address);
         break;
       default:
         console.error('Unsupported wallet type!');
         break;
     }
-    return vaults;
+    const pendingVaults = vaults.filter((vault) => [0, 1, 5, 7].includes(vault.raw.status));
+    const readyVaults = vaults.filter((vault) => vault.raw.status === 2);
+    const fundedVaults = vaults.filter((vault) => vault.raw.status === 3);
+    const nftIssuedVaults = vaults.filter((vault) => vault.raw.status === 4);
+    const closedVaults = vaults.filter((vault) => [6, 8].includes(vault.raw.status));
+    sortedVaults = [...nftIssuedVaults, ...fundedVaults, ...readyVaults, ...pendingVaults, ...closedVaults];
+    eventBus.dispatch('vaults', vaults)
+    return sortedVaults;
   };
 
   const countBalance = (vaults) => {
@@ -88,23 +90,23 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain, 
           <HStack justifyContent='center'>
             <IconButton
               _hover={{
-                color: 'accent',
                 borderColor: 'accent',
+                color: 'accent',
                 transform: 'translateY(-2.5px)',
               }}
-              isLoading={isLoading && isManualLoading}
               variant='outline'
+              isLoading={isLoading && isManualLoading}
+              marginLeft='0px'
+              height='35px'
+              width='35px'
               borderRadius='lg'
               borderColor='white'
               color='white'
-              marginLeft='0px'
-              width='35px'
-              height='35px'
               icon={<RefreshOutlined color='inherit'></RefreshOutlined>}
               onClick={() => refreshVaultsTable(true)}></IconButton>
             <Text
-              fontWeight='extrabold'
-              fontSize='3xl'>
+              fontSize='3xl'
+              fontWeight='extrabold'>
               BITCOIN VAULTS
             </Text>
           </HStack>
@@ -113,15 +115,15 @@ export default function NFTTabs({ isConnected, address, walletType, blockchain, 
             depositAmount={depositAmount}
             nftQuantity={nftQuantity}></Balance>
         </VStack>
-        <MyContractsTable
-          vaults={vaults}
-          initialVaults={initialVaults}
+        <VaultsGrid
+          isLoading={isLoading}
           isConnected={isConnected}
           walletType={walletType}
           address={address}
           blockchain={blockchain}
-          isLoading={isLoading}
-          bitCoinValue={bitCoinValue}></MyContractsTable>
+          initialVaults={initialVaults}
+          vaults={vaults}
+          bitCoinValue={bitCoinValue}></VaultsGrid>
       </Collapse>
     </>
   );

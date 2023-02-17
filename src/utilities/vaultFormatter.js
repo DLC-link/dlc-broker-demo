@@ -1,4 +1,4 @@
-import { customShiftValue } from './format';
+import { customShiftValue } from './formatFunctions';
 
 function formatVault(vaultContract) {
   const rawVaultData = {

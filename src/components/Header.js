@@ -1,35 +1,26 @@
 import React from 'react';
-import eventBus from '../EventBus';
+import eventBus from '../utilities/eventBus';
 import { Button, Text, HStack, Flex, Image, Spacer } from '@chakra-ui/react';
 import Account from './Account';
 import Balance from './Balance';
 
-export default function Header({ address, isConnected, walletType, isLoading, depositAmount, walletBalance}) {
+export default function Header({ isLoading, isConnected, walletType, address, depositAmount, walletBalance }) {
   return (
     <>
-      <HStack
-        height='auto'
-        width='auto'
-        spacing={[5, 55]}
-        marginTop={[5, 25]}
-        marginBottom={[5, 25]}
-        marginLeft={5}
-        marginRight={25}>
+      <HStack margin={['15px', '30px']}>
         <Button
+          variant='ghost'
           as='a'
+          margin='0px'
+          boxSize={['65px', '97.5px']}
+          borderRadius='lg'
           href='https://www.dlc.link/'
           _hover={{
-            background: 'none',
-          }}
-          shadow='none'
-          variant='ghost'
-          height={[25, 65]}
-          width={100}>
+            background: 'secondary1',
+          }}>
           <Image
             src='/dlc.link_logo.svg'
             alt='DLC.Link Logo'
-            height={[25, 65]}
-            width={[25, 65]}
           />
         </Button>
         <Spacer></Spacer>

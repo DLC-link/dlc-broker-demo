@@ -1,11 +1,9 @@
-import { calc, extendTheme } from '@chakra-ui/react';
+import { extendTheme } from '@chakra-ui/react';
 import { menuTheme } from './menuTheme';
-import { tabsTheme } from './tabsTheme';
 
-export const theme = extendTheme({
+export const appTheme = extendTheme({
   components: {
     Menu: menuTheme,
-    Tabs: tabsTheme,
     Text: {
       baseStyle: {
         fontSize: '12px',

@@ -1,20 +1,22 @@
 import { ethers } from 'ethers';
 import { abi as dlcBrokerABI } from '../abis/dlcBrokerABI';
 import { abi as btcNftABI } from '../abis/btcNftABI';
-import eventBus from '../EventBus';
+import eventBus from '../utilities/eventBus';
 import { formatAllVaults } from '../utilities/vaultFormatter';
 
-let vaultManagerETH;
-let nftManagerETH;
+let dlcBrokerETH;
+let btcNftETH;
 
-try {
-  const { ethereum } = window;
-  const provider = new ethers.providers.Web3Provider(ethereum);
-  const signer = provider.getSigner();
-  vaultManagerETH = new ethers.Contract(process.env.REACT_APP_GOERLI_BROKER_CONTRACT_ADDRESS, dlcBrokerABI, signer);
-  nftManagerETH = new ethers.Contract(process.env.REACT_APP_GOERLI_NFT_CONTRACT_ADDRESS, btcNftABI, signer);
-} catch (error) {
-  console.error(error);
+export async function setEthereumProvider() {
+  try {
+    const { ethereum } = window;
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const signer = provider.getSigner();
+    dlcBrokerETH = new ethers.Contract(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS, dlcBrokerABI, signer);
+    btcNftETH = new ethers.Contract(process.env.REACT_APP_GOERLI_BTC_NFT_ADDRESS, btcNftABI, signer);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
@@ -40,7 +42,7 @@ export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
 
 export async function setupVault(vaultContract) {
   try {
-    vaultManagerETH
+    dlcBrokerETH
       .setupVault(vaultContract.BTCDeposit, vaultContract.emergencyRefundTime)
       .then(() => eventBus.dispatch('vault-event', { status: 'initialized', vaultContract: vaultContract }));
   } catch (error) {
@@ -72,7 +74,7 @@ export async function getAllVaultAndNFTDataForAddress(address) {
 async function getAllVaultsForAddress(address) {
   let formattedVaults = [];
   try {
-    const vaults = await vaultManagerETH.getAllVaultsForAddress(address);
+    const vaults = await dlcBrokerETH.getAllVaultsForAddress(address);
     formattedVaults = formatAllVaults(vaults);
   } catch (error) {
     console.error(error);
@@ -82,11 +84,11 @@ async function getAllVaultsForAddress(address) {
 
 export async function approveNFTBurn(nftID) {
   try {
-    nftManagerETH.approve(process.env.REACT_APP_GOERLI_BROKER_CONTRACT_ADDRESS, nftID).then((response) =>
+    btcNftETH.approve(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS, nftID).then((response) =>
       eventBus.dispatch('vault-event', {
         status: 'approve-requested',
         txId: response.hash,
-        chain: 'ethereum'
+        chain: 'ethereum',
       })
     );
   } catch (error) {
@@ -95,15 +97,15 @@ export async function approveNFTBurn(nftID) {
 }
 
 export async function getApproved(nftID) {
-  const approvedAddresses = await nftManagerETH.getApproved(nftID);
-  const approved = approvedAddresses.includes(process.env.REACT_APP_GOERLI_BROKER_CONTRACT_ADDRESS);
+  const approvedAddresses = await btcNftETH.getApproved(nftID);
+  const approved = approvedAddresses.includes(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS);
   return approved;
 }
 
 async function getAllNFTsForAddress(address) {
   let NFTs = [];
   try {
-    NFTs = await nftManagerETH.getDLCNFTsByOwner(address);
+    NFTs = await btcNftETH.getDLCNFTsByOwner(address);
   } catch (error) {
     console.error(error);
   }
@@ -129,7 +131,7 @@ async function getNFTMetadata(nftURI) {
 async function getVaultByUUID(vaultContractUUID) {
   let vault;
   try {
-    vault = await vaultManagerETH.getVaultByUUID(vaultContractUUID);
+    vault = await dlcBrokerETH.getVaultByUUID(vaultContractUUID);
   } catch (error) {
     console.error(error);
   }
@@ -140,11 +142,11 @@ export async function closeVault(vaultContractUUID) {
   const vault = await getVaultByUUID(vaultContractUUID);
   const vaultID = vault.id;
   try {
-    vaultManagerETH.closeVault(vaultID).then((response) =>
+    dlcBrokerETH.closeVault(vaultID).then((response) =>
       eventBus.dispatch('vault-event', {
         status: 'close-requested',
         txId: response.hash,
-        chain: 'ethereum'
+        chain: 'ethereum',
       })
     );
   } catch (error) {

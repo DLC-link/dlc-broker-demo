@@ -1,22 +1,21 @@
 import React from 'react';
 import { Text, HStack, Flex } from '@chakra-ui/react';
 
-export default function Balance({ isConnected, depositAmount, nftQuantity }) {
+export default function Balance({ depositAmount, nftQuantity }) {
   return (
     <>
-      {isConnected && (
         <>
           <Flex
-            height='15px'
-            width='350px'
-            borderRadius='lg'
-            border='1px'
-            borderColor='white'
-            shadow='dark-lg'
             paddingTop='15px'
             paddingBottom='15px'
-            align='center'
-            justifyContent='center'>
+            height='15px'
+            width='350px'
+            border='1px'
+            borderRadius='lg'
+            borderColor='white'
+            shadow='dark-lg'
+            justifyContent='center'
+            align='center'>
             <HStack>
               <Text
                 fontSize='small'
@@ -26,17 +25,16 @@ export default function Balance({ isConnected, depositAmount, nftQuantity }) {
               </Text>
               <Text paddingRight='25px'>{depositAmount} BTC</Text>
               <Text
+                paddingLeft='25px'
                 fontSize='small'
                 fontWeight='extrabold'
-                color='accent'
-                paddingLeft='25px'>
+                color='accent'>
                 Owned NFTs:{' '}
               </Text>
               <Text>{nftQuantity}</Text>
             </HStack>
           </Flex>
         </>
-      )}
     </>
   );
 }

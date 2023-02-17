@@ -1,5 +1,5 @@
 import SelectWalletModal from './modals/SelectWalletModal';
-import eventBus from './EventBus';
+import eventBus from './utilities/eventBus';
 import Header from './components/Header';
 import Intro from './components/Intro';
 import React, { useEffect } from 'react';
@@ -7,8 +7,9 @@ import DepositModal from './modals/DepositModal';
 import { Box, useToast } from '@chakra-ui/react';
 import { useState } from 'react';
 import CustomToast from './components/CustomToast';
-import NFTTabs from './components/NFTTabs';
-import { customShiftValue } from './utilities/format';
+import VaultsPage from './components/VaultsPage';
+import { customShiftValue } from './utilities/formatFunctions';
+import { setEthereumProvider } from './blockchainFunctions/ethereumFunctions';
 
 export default function App() {
   const [isConnected, setConnected] = useState(false);
@@ -20,7 +21,7 @@ export default function App() {
   const [blockchain, setBlockchain] = useState(undefined);
   const [depositAmount, setDepositAmount] = useState(undefined);
   const [nftQuantity, setNftQuantity] = useState(undefined);
-  const [walletBalance, setWalletBalance] = useState(0)
+  const [walletBalance, setWalletBalance] = useState(0);
   const toast = useToast();
 
   const handleEvent = (data) => {
@@ -28,17 +29,25 @@ export default function App() {
       onDepositModalClose();
     }
     if (!toast.isActive(data.status)) {
+      const isMobile = window.innerWidth <= 768;
       return toast({
         id: data.status,
-        position: 'top-right',
+        position: isMobile ? 'bottom' : 'top-right',
         render: () => (
           <CustomToast
             data={data}
-            walletType={walletType}></CustomToast>
+            isMobile={isMobile}></CustomToast>
         ),
       });
     }
   };
+
+  useEffect(() => {
+    async function setup() {
+      setEthereumProvider().then(() => console.log('Ethereum provider and contracts set!'));
+    }
+    setup();
+  }, []);
 
   useEffect(() => {
     eventBus.on('account-information', handleAccountInformation);
@@ -67,22 +76,20 @@ export default function App() {
 
   return (
     <>
-      <Box
-        height='auto'
-        padding={0}>
+      <Box>
         <Header
+          isLoading={isLoading}
           isConnected={isConnected}
           walletType={walletType}
+          walletBalance={walletBalance}
           address={address}
-          isLoading={isLoading}
-          depositAmount={depositAmount}
-          walletBalance={walletBalance}></Header>
+          depositAmount={depositAmount}></Header>
         <DepositModal
           walletType={walletType}
           address={address}
+          blockchain={blockchain}
           isOpen={isDepositModalOpen}
           closeModal={onDepositModalClose}
-          blockchain={blockchain}
         />
         <SelectWalletModal
           isOpen={isSelectWalletModalOpen}
@@ -90,13 +97,13 @@ export default function App() {
         />
         <Intro isConnected={isConnected}></Intro>
         {isConnected && (
-          <NFTTabs
+          <VaultsPage
             isConnected={isConnected}
-            address={address}
             walletType={walletType}
+            address={address}
             blockchain={blockchain}
             depositAmount={depositAmount}
-            nftQuantity={nftQuantity}></NFTTabs>
+            nftQuantity={nftQuantity}></VaultsPage>
         )}
       </Box>
     </>

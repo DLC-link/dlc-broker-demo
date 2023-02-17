@@ -1,7 +1,5 @@
-/*global chrome*/
-
 import { Flex, Text, VStack } from '@chakra-ui/react';
-import eventBus from '../EventBus';
+import eventBus from '../../utilities/eventBus';
 
 export default function SetupVaultCard() {
   const openDepositModal = () => {
@@ -11,35 +9,35 @@ export default function SetupVaultCard() {
   return (
     <>
       <Flex
-        bgGradient='linear(to-d, secondary1, secondary2)'
+        marginLeft='15px'
+        marginRight='15px'
+        marginTop='25px'
+        marginBottom='25px'
+        height='450px'
+        width='250px'
         borderRadius='lg'
-        justifyContent='center'
         shadow='dark-lg'
-        height={450}
-        width={250}
-        marginLeft={15}
-        marginRight={15}
-        marginTop={25}
-        marginBottom={25}
-        transition='all .25s ease'
+        bgGradient='linear(to-d, secondary1, secondary2)'
         color='transparent'
+        justifyContent='center'
+        transition='all .25s ease'
         _hover={{
           bg: 'accent',
-          cursor: 'pointer',
           color: 'white',
+          cursor: 'pointer',
           transition: '0.5s',
           transform: 'translateY(-35px)',
         }}
         onClick={openDepositModal}>
         <VStack
-          margin={15}
+          margin='15px'
           justifyContent='center'>
           <Text fontSize='9xl'>+</Text>
           <Text
             fontSize='5xl'
-            textAlign='center'
+            fontWeight='bold'
             color='inherit'
-            fontWeight='extrabold'>
+            textAlign='center'>
             SETUP VAULT
           </Text>
         </VStack>

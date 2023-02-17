@@ -19,10 +19,10 @@ import {
   Image,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { customShiftValue, formatCollateralInUSD, formatBitcoinInUSDAmount } from '../utilities/format';
+import { customShiftValue, formatCollateralInUSD, formatBitcoinInUSDAmount } from '../utilities/formatFunctions';
 import { setupVault } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
-import eventBus from '../EventBus';
+import eventBus from '../utilities/eventBus';
 
 export default function DepositModal({ isOpen, closeModal, walletType }) {
   const [collateralAmount, setCollateralAmount] = useState(undefined);
@@ -63,7 +63,7 @@ export default function DepositModal({ isOpen, closeModal, walletType }) {
         setupVault(vaultContract);
         break;
       default:
-        console.log('Unsupported wallet type!');
+        console.error('Unsupported wallet type!');
         break;
     }
   };
@@ -75,10 +75,10 @@ export default function DepositModal({ isOpen, closeModal, walletType }) {
       isCentered>
       <ModalOverlay />
       <ModalContent
-        bg='background2'
+        width='350px'
         border='1px'
-        color='accent'
-        width={350}>
+        bg='background2'
+        color='accent'>
         <VStack>
           <ModalHeader color='white'>Request Vault</ModalHeader>
           <ModalCloseButton
@@ -89,54 +89,54 @@ export default function DepositModal({ isOpen, closeModal, walletType }) {
           <ModalBody>
             <FormControl isInvalid={isCollateralError}>
               <FormLabel
-                color='white'
                 marginTop='15px'
                 marginBottom='15px'
-                marginLeft='40px'>
+                marginLeft='40px'
+                color='white'>
                 Collateral Amount
               </FormLabel>
               {!isCollateralError ? (
                 <FormHelperText
-                  color='accent'
-                  fontSize='x-small'
                   marginTop='15px'
                   marginBottom='15px'
-                  marginLeft='40px'>
+                  marginLeft='40px'
+                  fontSize='x-small'
+                  color='accent'>
                   Enter the amount of Bitcoin you would like to deposit.
                 </FormHelperText>
               ) : (
                 <FormErrorMessage
-                  fontSize='x-small'
                   marginTop='15px'
                   marginBottom='15px'
-                  marginLeft='40px'>
+                  marginLeft='40px'
+                  fontSize='x-small'>
                   Enter a valid amount of BTC
                 </FormErrorMessage>
               )}
               <HStack
                 marginLeft='40px'
-                marginRight={50}
+                marginRight='50px'
                 spacing={45}>
                 <NumberInput focusBorderColor='accent'>
                   <NumberInputField
-                    padding={15}
+                    padding='15px'
+                    width='200px'
                     color='white'
                     value={collateralAmount}
-                    width={200}
                     onChange={handleCollateralChange}
                   />
                 </NumberInput>
                 <Image
                   src='/btc_logo.png'
                   alt='Bitcoin Logo'
-                  width={25}
-                  height={25}></Image>
+                  width='25px'
+                  height='25px'></Image>
               </HStack>
               <Text
-                fontSize='x-small'
-                color='white'
+                marginTop='15px'
                 marginLeft='40px'
-                marginTop='15px'>
+                fontSize='x-small'
+                color='white'>
                 ${USDAmount} at 1 BTC = ${bitCoinInUSDAsString}
               </Text>
             </FormControl>

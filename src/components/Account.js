@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
 import { Text, HStack, Image, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
-import { easyTruncateAddress } from '../utilities/format';
-import eventBus from '../EventBus';
+import { easyTruncateAddress } from '../utilities/formatFunctions';
+import eventBus from '../utilities/eventBus';
 
-export default function Account({ address, isConnected, walletType }) {
+export default function Account({ isConnected, walletType, address }) {
   const [walletLogo, setWalletLogo] = useState(undefined);
 
   const walletLogos = {
-    metamask: { src: '/mm_logo.png', alt: 'Metamask Logo', boxSize: [3, 6] },
+    metamask: { src: '/mm_logo.png', alt: 'Metamask Logo', boxSize: '25px' },
   };
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function Account({ address, isConnected, walletType }) {
     });
   };
 
-  const disconnect = () => {
+  const disconnectWallet = () => {
     eventBus.dispatch('account-information', {});
   };
 
@@ -31,54 +31,45 @@ export default function Account({ address, isConnected, walletType }) {
       {isConnected ? (
         <>
           <MenuButton
-            height={[25, 50]}
-            width={[250, 250]}
+            margin='0px'
+            height='50px'
+            width='250px'
             borderRadius='lg'
             shadow='dark-lg'>
             <HStack>
-              <HStack width={250}>
-                {walletLogo && (
-                  <Image
-                    src={walletLogo.src}
-                    alt={walletLogo.alt}
-                    boxSize={walletLogo.boxSize}
-                  />
-                )}
-                <CheckCircleIcon
-                  boxSize={[2, 4]}
-                  color='secondary1'
-                />
-                <Text fontSize={[5, 15]}>Account:{easyTruncateAddress(address)}</Text>
-              </HStack>
-              {/* <HStack>
+              {walletLogo && (
                 <Image
-                  src='/btc_logo.png'
-                  alt='Bitcoin Logo'
-                  boxSize={[3, 6]}
-                  borderRadius='3px'></Image>
-                <Text>{walletBalance}</Text>
-              </HStack> */}
+                  src={walletLogo.src}
+                  alt={walletLogo.alt}
+                  boxSize={walletLogo.boxSize}
+                />
+              )}
+              <CheckCircleIcon
+                boxSize='15px'
+                color='secondary1'
+              />
+              <Text fontSize='15px'>Account:{easyTruncateAddress(address)}</Text>
             </HStack>
           </MenuButton>
-          <MenuList width={250}>
-            <MenuItem onClick={disconnect}>Disconnect Wallet</MenuItem>
+          <MenuList width='250px' margin='0px'>
+            <MenuItem onClick={disconnectWallet}>Disconnect Wallet</MenuItem>
           </MenuList>
         </>
       ) : (
         <MenuButton
-          height={[25, 50]}
-          width={[250, 250]}
+          height='50px'
+          width='250px'
           borderRadius='lg'
           shadow='dark-lg'
           onClick={openSelectWalletModal}>
-          <HStack width={250}>
+          <HStack>
             <WarningIcon
-              boxSize={[1, 3]}
-              color='primary1'
+              boxSize='15px'
+              color='secondary2'
             />
             <Text
-              fontWeight='extrabold'
-              fontSize={[5, 15]}>
+              fontSize='15px'
+              fontWeight='bold'>
               Connect Wallet
             </Text>
           </HStack>
