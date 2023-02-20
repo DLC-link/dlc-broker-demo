@@ -22,7 +22,6 @@ import { useEffect, useState } from 'react';
 import { customShiftValue, formatCollateralInUSD, formatBitcoinInUSDAmount } from '../utilities/formatFunctions';
 import { setupVault } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
-import eventBus from '../utilities/eventBus';
 
 export default function DepositModal({ isOpen, closeModal, walletType }) {
   const [collateralAmount, setCollateralAmount] = useState(undefined);

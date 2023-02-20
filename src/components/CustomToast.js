@@ -2,7 +2,6 @@ import { Link, Flex, HStack, Text, Box } from '@chakra-ui/react';
 import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
 
 export default function CustomToast({ isMobile, data }) {
-  console.log(isMobile)
   const eventMap = {
     refresh: '',
     initialized: 'Vault initialized!',

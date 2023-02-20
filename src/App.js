@@ -15,7 +15,6 @@ export default function App() {
   const [isConnected, setConnected] = useState(false);
   const [address, setAddress] = useState(undefined);
   const [walletType, setWalletType] = useState(undefined);
-  const [isLoading, setLoading] = useState(true);
   const [isSelectWalletModalOpen, setSelectWalletModalOpen] = useState(false);
   const [isDepositModalOpen, setDepositModalOpen] = useState(false);
   const [blockchain, setBlockchain] = useState(undefined);
@@ -52,7 +51,6 @@ export default function App() {
   useEffect(() => {
     eventBus.on('account-information', handleAccountInformation);
     eventBus.on('vault-event', (data) => handleEvent(data));
-    eventBus.on('set-loading-state', (data) => setLoading(data.isLoading));
     eventBus.on('is-select-wallet-modal-open', (data) => setSelectWalletModalOpen(data.isSelectWalletOpen));
     eventBus.on('is-deposit-modal-open', (data) => setDepositModalOpen(data.isDepositOpen));
     eventBus.on('change-deposit-amount', (data) => setDepositAmount(customShiftValue(data.depositAmount, 8, true)));
@@ -78,7 +76,6 @@ export default function App() {
     <>
       <Box>
         <Header
-          isLoading={isLoading}
           isConnected={isConnected}
           walletType={walletType}
           walletBalance={walletBalance}
