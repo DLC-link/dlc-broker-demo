@@ -14,7 +14,7 @@ export default function VaultsGrid({
   blockchain,
   initialVaults,
   vaults,
-  bitCoinValue,
+  bitcoinValue,
 }) {
   return (
     <>
@@ -38,10 +38,6 @@ export default function VaultsGrid({
                 <Card
                   key={i}
                   vault={vault}
-                  address={address}
-                  walletType={walletType}
-                  blockchain={blockchain}
-                  bitCoinValue={bitCoinValue}
                   status={vault.raw.status}></Card>
               ))}
             </SimpleGrid>

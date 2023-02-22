@@ -3,6 +3,7 @@ import { abi as dlcBrokerABI } from './abis/dlcBrokerABI';
 import { abi as dlcManagerABI } from './abis/dlcManagerABI';
 import { abi as btcNftABI } from './abis/btcNftABI';
 import eventBus from './utilities/eventBus';
+import { countdown } from './utilities/calculationFunctions';
 
 function startEthObserver() {
   let userAddress;
@@ -20,9 +21,8 @@ function startEthObserver() {
   });
 
   try {
-    const provider = new ethers.providers.WebSocketProvider(
-      `wss://goerli.infura.io/ws/v3/${process.env.REACT_APP_INFURA_KEY}`
-    );
+    const { ethereum } = window;
+    const provider = new ethers.providers.Web3Provider(ethereum);
 
     const dlcBrokerETH = new ethers.Contract(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS, dlcBrokerABI, provider);
     const dlcManagerETH = new ethers.Contract(
@@ -33,40 +33,40 @@ function startEthObserver() {
     const btcNftETH = new ethers.Contract(process.env.REACT_APP_GOERLI_BTC_NFT_ADDRESS, btcNftABI, provider);
 
     dlcBrokerETH.on('StatusUpdate', (...args) => {
-      console.log('StatusUpdate');
-      eventBus.dispatch('vault-event', {
-        status: 'refresh',
-        txId: args[args.length - 1].transactionHash,
-        chain: 'ethereum',
-      });
-    });
-
-    dlcBrokerETH.on('SetupVault', (...args) => {
-      console.log('SetupVault');
-      if (userAddress == args[4].toLowerCase()) {
-        eventBus.dispatch('vault-event', {
-          status: 'setup',
-          txId: args[args.length - 1].transactionHash,
-          chain: 'ethereum',
-        });
+      if (vaultUUIDs.includes(args[1]) && [2, 6].includes(args[2])) {
+        console.log('Updating status in:');
+        countdown(15);
+        setTimeout(
+          () =>
+            eventBus.dispatch('vault-event', {
+              status: 'refresh',
+              txId: args[args.length - 1].transactionHash,
+              chain: 'ethereum',
+            }),
+          20000
+        );
       }
     });
 
-    dlcManagerETH.on(
-      'PostCreateDLC',
-      async () => console.log('PostCreateDLC')
-      // if (vaultUUIDs.includes(args[1])) {
-      //   eventBus.dispatch('vault-event', {
-      //     status: 'ready',
-      //     txId: args[args.length - 1].transactionHash,
-      //     chain: 'ethereum',
-      //   });
-      // }
-    );
+    dlcBrokerETH.on('SetupVault', async (...args) => {
+      if (userAddress === args[4].toLowerCase()) {
+        console.log(`%cVault will be setup for %c${args[4]} %cin:`, 'color: white', 'color: turquoise', 'color: white');
+        countdown(10);
+        setTimeout(
+          () =>
+            eventBus.dispatch('vault-event', {
+              status: 'setup',
+              txId: args[args.length - 1].transactionHash,
+              chain: 'ethereum',
+            }),
+          15000
+        );
+      }
+    });
 
     dlcManagerETH.on('SetStatusFunded', (...args) => {
-      console.log('SetStatusFunded');
       if (vaultUUIDs.includes(args[0])) {
+        console.log(`%cVault %c${args[0]} %cis funded!`, 'color: white', 'color: turquoise', 'color: white');
         eventBus.dispatch('vault-event', {
           status: 'funded',
           txId: args[args.length - 1].transactionHash,
@@ -76,8 +76,8 @@ function startEthObserver() {
     });
 
     btcNftETH.on('Approval', (...args) => {
-      console.log('Approval');
-      if (userAddress == args[0].toLowerCase()) {
+      if (userAddress === args[0].toLowerCase()) {
+        console.log(`%cVault %c${args[0]} %cis approved!`, 'color: white', 'color: turquoise', 'color: white');
         eventBus.dispatch('vault-event', {
           status: 'approved',
           txId: args[args.length - 1].transactionHash,
@@ -87,34 +87,27 @@ function startEthObserver() {
     });
 
     dlcBrokerETH.on('MintBtcNft', (...args) => {
-      console.log('MintBtcNft');
       if (vaultUUIDs.includes(args[0])) {
-        eventBus.dispatch('vault-event', {
-          status: 'minted',
-          txId: args[args.length - 1].transactionHash,
-          chain: 'ethereum',
-          nftPage: 'https://testnets.opensea.io/account',
-        });
+        console.log(`%cMinting NFT for vault %c${args[0]} %cin:`, 'color: white', 'color: turquoise', 'color: white');
+        countdown(60);
+        setTimeout(() => {
+          eventBus.dispatch('vault-event', {
+            status: 'minted',
+            txId: args[args.length - 1].transactionHash,
+            chain: 'ethereum',
+            nftPage: 'https://testnets.opensea.io/account',
+          });
+        }, 65000);
       }
     });
 
     dlcBrokerETH.on('BurnBtcNft', (...args) => {
-      console.log('BurnBtcNft');
       if (vaultUUIDs.includes(args[0])) {
+        console.log(`%cNFT of vault %c${args[0]} %cis burned!`, 'color: white', 'color: turquoise', 'color: white');
         eventBus.dispatch('vault-event', {
           status: 'burned',
           txId: args[args.length - 1].transactionHash,
           chain: 'ethereum',
-        });
-      }
-    });
-
-    dlcManagerETH.on('PostCloseDLC', (...args) => {
-      console.log('CloseDlc');
-      if (vaultUUIDs.includes(args[0])) {
-        eventBus.dispatch('vault-event', {
-          status: 'closed',
-          txId: args[args.length - 1].transactionHash,
         });
       }
     });

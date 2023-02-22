@@ -6,32 +6,40 @@ import eventBus from '../utilities/eventBus';
 import { getAllVaultAndNFTDataForAddress } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 import { RefreshOutlined } from '@mui/icons-material';
+import { filter, map, sum, pipe, length} from 'ramda';
 
 export default function VaultsPage({ isConnected, address, walletType, blockchain, depositAmount, nftQuantity }) {
-  const [bitCoinValue, setBitCoinValue] = useState(0);
-  const [isLoading, setLoading] = useState(true);
-  const [isManualLoading, setManualLoading] = useState(undefined);
+  const [bitcoinValue, setBitcoinValue] = useState(0);
+  const [isLoading, setLoading] = useState([false, false]);
   const [initialVaults, setInitialVaults] = useState([]);
   const [vaults, setVaults] = useState([]);
 
   useEffect(() => {
-    refreshVaultsTable(false);
-    fetchBitcoinPrice().then((bitcoinPrice) => setBitCoinValue(bitcoinPrice));
-    eventBus.on('vault-event', (event) => {
+    refreshVaultsTable();
+    const handleVaultEvent = (event) => {
       switch (event.status) {
         case 'setup':
           initialVaults.shift();
-          refreshVaultsTable(true);
           break;
         case 'initialized':
           initialVaults.push(event.vaultContract);
-          refreshVaultsTable(true);
           break;
-        case 'refresh':
-          refreshVaultsTable(true);
+        default:
           break;
       }
-    });
+      refreshVaultsTable();
+    };
+
+    const fetchData = async () => {
+      try {
+        const bitcoinPrice = await fetchBitcoinPrice();
+        setBitcoinValue(bitcoinPrice);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
+    eventBus.on('vault-event', handleVaultEvent);
   }, []);
 
   const fetchAllVaults = async () => {
@@ -44,28 +52,29 @@ export default function VaultsPage({ isConnected, address, walletType, blockchai
         console.error('Unsupported wallet type!');
         break;
     }
-
+    eventBus.dispatch('vaults', vaults);
     const sortStatusOrder = [0, 4, 3, 2, 1, 5, 7, 6, 8];
     const sortedVaults = vaults.sort(
       (a, b) => sortStatusOrder.indexOf(a.raw.status) - sortStatusOrder.indexOf(b.raw.status)
     );
-
-    eventBus.dispatch('vaults', vaults);
     return sortedVaults;
   };
 
   const countBalance = (vaults) => {
-    let depositAmount = 0;
-    let nftQuantity = 0;
+    const sumDepositAmount = pipe(
+      filter((vault) => [3, 4].includes(vault.raw.status)),
+      map((vault) => vault.raw.vaultCollateral),
+      sum
+    );
 
-    for (const vault of vaults) {
-      if ([3, 4].includes(vault.raw.status)) {
-        depositAmount += Number(vault.raw.vaultCollateral);
-      }
-      if (vault.raw.status === 4) {
-        nftQuantity++;
-      }
-    }
+    const countNFTQuantity = pipe(
+      filter((vault) => vault.raw.status === 4),
+      length
+    );
+
+    const depositAmount = sumDepositAmount(vaults);
+    const nftQuantity = countNFTQuantity(vaults);
+
     eventBus.dispatch('change-deposit-amount', {
       depositAmount: depositAmount,
     });
@@ -75,14 +84,15 @@ export default function VaultsPage({ isConnected, address, walletType, blockchai
   };
 
   const refreshVaultsTable = async (isManual) => {
-    setManualLoading(isManual);
-    setLoading(true);
-    setVaults([]);
-    const vaults = await fetchAllVaults();
-    console.log(vaults)
-    setVaults(vaults);
-    countBalance(vaults);
-    setLoading(false);
+    setLoading([true, isManual]);
+    fetchAllVaults()
+      .then((vaults) => {
+        setVaults(vaults);
+        countBalance(vaults);
+      })
+      .then(() => {
+        setLoading(false, false);
+      });
   };
 
   return (
@@ -97,7 +107,7 @@ export default function VaultsPage({ isConnected, address, walletType, blockchai
                 transform: 'translateY(-2.5px)',
               }}
               variant='outline'
-              isLoading={isLoading && isManualLoading}
+              isLoading={isLoading[0] && isLoading[1]}
               marginLeft='0px'
               height='35px'
               width='35px'
@@ -118,14 +128,14 @@ export default function VaultsPage({ isConnected, address, walletType, blockchai
             nftQuantity={nftQuantity}></Balance>
         </VStack>
         <VaultsGrid
-          isLoading={isLoading}
+          isLoading={isLoading[0]}
           isConnected={isConnected}
           walletType={walletType}
           address={address}
           blockchain={blockchain}
           initialVaults={initialVaults}
           vaults={vaults}
-          bitCoinValue={bitCoinValue}></VaultsGrid>
+          bitcoinValue={bitcoinValue}></VaultsGrid>
       </Collapse>
     </>
   );

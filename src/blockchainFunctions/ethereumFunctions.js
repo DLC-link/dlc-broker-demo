@@ -56,10 +56,7 @@ export async function getAllVaultAndNFTDataForAddress(address) {
   const NFTMetadata = await Promise.all(NFTMetadataPromises);
 
   console.log('NFTs: ');
-  console.log(NFTs);
-
-  console.log('Vaults: ');
-  console.log(formattedVaults);
+  console.table(NFTs);
 
   NFTs.forEach((NFT, i) => {
     formattedVaults.forEach((vault) => {
@@ -71,10 +68,14 @@ export async function getAllVaultAndNFTDataForAddress(address) {
   return formattedVaults;
 }
 
-async function getAllVaultsForAddress(address) {
+export async function getAllVaultsForAddress(address) {
   let formattedVaults = [];
   try {
     const vaults = await dlcBrokerETH.getAllVaultsForAddress(address);
+
+    console.log('Vaults: ');
+    console.table(vaults);
+
     formattedVaults = formatAllVaults(vaults);
   } catch (error) {
     console.error(error);

@@ -19,7 +19,7 @@ import {
   Image,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { customShiftValue, formatCollateralInUSD, formatBitcoinInUSDAmount } from '../utilities/formatFunctions';
+import { customShiftValue, formatCollateralInUSD } from '../utilities/formatFunctions';
 import { setupVault } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 
@@ -52,7 +52,7 @@ export default function DepositModal({ isOpen, closeModal, walletType }) {
   };
 
   const createVaultContract = () => ({
-    BTCDeposit: parseInt(customShiftValue(collateralAmount, 8, false)),
+    BTCDeposit: Math.round((customShiftValue(collateralAmount, 8, false))),
     emergencyRefundTime: 5,
   });
 
