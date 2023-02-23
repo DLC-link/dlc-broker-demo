@@ -6,7 +6,7 @@ import PaidIcon from '@mui/icons-material/Paid';
 
 export default function Status({ status }) {
   switch (status) {
-    case 0:
+    case 'None':
       return (
         <HStack spacing={2}>
           <CurrencyBitcoinIcon sx={{ color: 'orange' }} />
@@ -17,7 +17,7 @@ export default function Status({ status }) {
           </Text>
         </HStack>
       );
-    case 1:
+    case 'NotReady':
       return (
         <HStack spacing={2}>
           <HourglassEmptyIcon sx={{ color: 'orange' }} />
@@ -28,7 +28,7 @@ export default function Status({ status }) {
           </Text>
         </HStack>
       );
-    case 2:
+    case 'Ready':
       return (
         <HStack spacing={2}>
           <CurrencyBitcoinIcon sx={{ color: 'orange' }} />
@@ -39,7 +39,7 @@ export default function Status({ status }) {
           </Text>
         </HStack>
       );
-    case 3:
+    case 'Funded':
       return (
         <HStack spacing={2}>
           <CurrencyBitcoinIcon sx={{ color: 'green' }} />
@@ -50,7 +50,7 @@ export default function Status({ status }) {
           </Text>
         </HStack>
       );
-    case 4:
+    case 'NftIssued':
       return (
         <HStack spacing={2}>
           <CurrencyBitcoinIcon sx={{ color: 'green' }} />
@@ -61,7 +61,7 @@ export default function Status({ status }) {
           </Text>
         </HStack>
       );
-    case 5:
+    case 'PreRepaid':
       return (
         <HStack spacing={2}>
           <HourglassEmptyIcon sx={{ color: 'orange' }} />
@@ -72,7 +72,7 @@ export default function Status({ status }) {
           </Text>
         </HStack>
       );
-    case 6:
+    case 'Repaid':
       return (
         <HStack spacing={2}>
           <PaidIcon sx={{ color: 'green' }} />
@@ -83,7 +83,7 @@ export default function Status({ status }) {
           </Text>
         </HStack>
       );
-    case 7:
+    case 'PreLiquidated':
       return (
         <HStack spacing={2}>
           <HourglassEmptyIcon sx={{ color: 'orange' }} />
@@ -94,7 +94,7 @@ export default function Status({ status }) {
           </Text>
         </HStack>
       );
-    case 8:
+    case 'Liquidated':
       return (
         <HStack spacing={2}>
           <CurrencyExchangeIcon sx={{ color: 'green' }} />

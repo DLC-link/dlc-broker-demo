@@ -44,27 +44,10 @@ export async function setupVault(vaultContract) {
   try {
     dlcBrokerETH
       .setupVault(vaultContract.BTCDeposit, vaultContract.emergencyRefundTime)
-      .then(() => eventBus.dispatch('vault-event', { status: 'initialized', vaultContract: vaultContract }));
+      .then(() => eventBus.dispatch('vault-event', { status: 'Initialized', vaultContract: vaultContract }));
   } catch (error) {
     console.error(error);
   }
-}
-
-export async function getAllVaultAndNFTDataForAddress(address) {
-  const [formattedVaults, NFTs] = await Promise.all([getAllVaultsForAddress(address), getAllNFTsForAddress(address)]);
-  const NFTMetadataPromises = NFTs.map((NFT) => getNFTMetadata(NFT.uri));
-  const NFTMetadata = await Promise.all(NFTMetadataPromises);
-
-  console.log('NFTs:', NFTs);
-
-  NFTs.forEach((NFT, i) => {
-    formattedVaults.forEach((vault) => {
-      if (parseInt(NFT.id) == vault.raw.nftID) {
-        vault.raw.nftImageURL = NFTMetadata[i];
-      }
-    });
-  });
-  return formattedVaults;
 }
 
 export async function getAllVaultsForAddress(address) {
@@ -85,7 +68,7 @@ export async function approveNFTBurn(nftID) {
   try {
     btcNftETH.approve(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS, nftID).then((response) =>
       eventBus.dispatch('vault-event', {
-        status: 'approve-requested',
+        status: 'ApproveRequested',
         txId: response.hash,
         chain: 'ethereum',
       })
@@ -101,17 +84,18 @@ export async function getApproved(nftID) {
   return approved;
 }
 
-async function getAllNFTsForAddress(address) {
+export async function getAllNFTsForAddress(address) {
   let NFTs = [];
   try {
     NFTs = await btcNftETH.getDLCNFTsByOwner(address);
+    console.log('NFTs:', NFTs);
   } catch (error) {
     console.error(error);
   }
   return NFTs;
 }
 
-async function getNFTMetadata(nftURI) {
+export async function getNFTMetadata(nftURI) {
   let imageURL;
   const modifiedNftURI = nftURI.replace('ipfs://', 'https://nftstorage.link/ipfs/');
   try {
@@ -122,7 +106,11 @@ async function getNFTMetadata(nftURI) {
     const image = await fetch(modifiedImageURI);
     imageURL = image.url;
   } catch (error) {
-    console.error(error);
+    if (error.response.status === 504) {
+      getNFTMetadata(nftURI);
+    } else {
+      console.error(error);
+    }
   }
   return imageURL;
 }
@@ -143,7 +131,7 @@ export async function closeVault(vaultContractUUID) {
   try {
     dlcBrokerETH.closeVault(vaultID).then((response) =>
       eventBus.dispatch('vault-event', {
-        status: 'close-requested',
+        status: 'CloseRequested',
         txId: response.hash,
         chain: 'ethereum',
       })

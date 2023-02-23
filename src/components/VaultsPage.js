@@ -3,25 +3,26 @@ import { Text, Collapse, VStack, IconButton, HStack } from '@chakra-ui/react';
 import VaultsGrid from './VaultsGrid';
 import Balance from './Balance';
 import eventBus from '../utilities/eventBus';
-import { getAllVaultAndNFTDataForAddress } from '../blockchainFunctions/ethereumFunctions';
+import { getAllNFTsForAddress, getAllVaultsForAddress } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 import { RefreshOutlined } from '@mui/icons-material';
-import { filter, map, sum, pipe, length} from 'ramda';
+import { filter, map, sum, pipe, length } from 'ramda';
 
 export default function VaultsPage({ isConnected, address, walletType, blockchain, depositAmount, nftQuantity }) {
   const [bitcoinValue, setBitcoinValue] = useState(0);
   const [isLoading, setLoading] = useState([false, false]);
   const [initialVaults, setInitialVaults] = useState([]);
   const [vaults, setVaults] = useState([]);
+  const [NFTs, setNFTs] = useState([]);
 
   useEffect(() => {
     refreshVaultsTable();
     const handleVaultEvent = (event) => {
       switch (event.status) {
-        case 'setup':
+        case 'NotReady':
           initialVaults.shift();
           break;
-        case 'initialized':
+        case 'Initialized':
           initialVaults.push(event.vaultContract);
           break;
         default:
@@ -42,33 +43,45 @@ export default function VaultsPage({ isConnected, address, walletType, blockchai
     eventBus.on('vault-event', handleVaultEvent);
   }, []);
 
-  const fetchAllVaults = async () => {
+  const fetchAllVaultsAndNFTs = async () => {
     let vaults = [];
+    let NFTs = [];
     switch (walletType) {
       case 'metamask':
-        vaults = await getAllVaultAndNFTDataForAddress(address);
+        vaults = await getAllVaultsForAddress(address);
+        NFTs = await getAllNFTsForAddress(address);
         break;
       default:
         console.error('Unsupported wallet type!');
         break;
     }
     eventBus.dispatch('vaults', vaults);
-    const sortStatusOrder = [0, 4, 3, 2, 1, 5, 7, 6, 8];
+    const sortStatusOrder = [
+      'None',
+      'NftIssued',
+      'Funded',
+      'Ready',
+      'NotReady',
+      'PreRepaid',
+      'PreLiquidated',
+      'Repaid',
+      'Liquidated',
+    ];
     const sortedVaults = vaults.sort(
       (a, b) => sortStatusOrder.indexOf(a.raw.status) - sortStatusOrder.indexOf(b.raw.status)
     );
-    return sortedVaults;
+    return { sortedVaults, NFTs };
   };
 
   const countBalance = (vaults) => {
     const sumDepositAmount = pipe(
-      filter((vault) => [3, 4].includes(vault.raw.status)),
+      filter((vault) => ['Funded', 'NftIssued'].includes(vault.raw.status)),
       map((vault) => vault.raw.vaultCollateral),
       sum
     );
 
     const countNFTQuantity = pipe(
-      filter((vault) => vault.raw.status === 4),
+      filter((vault) => vault.raw.status === 'NftIssued'),
       length
     );
 
@@ -85,9 +98,10 @@ export default function VaultsPage({ isConnected, address, walletType, blockchai
 
   const refreshVaultsTable = async (isManual) => {
     setLoading([true, isManual]);
-    fetchAllVaults()
-      .then((vaults) => {
-        setVaults(vaults);
+    fetchAllVaultsAndNFTs()
+      .then(({ sortedVaults, NFTs }) => {
+        setVaults(sortedVaults);
+        setNFTs(NFTs);
         countBalance(vaults);
       })
       .then(() => {
@@ -135,6 +149,7 @@ export default function VaultsPage({ isConnected, address, walletType, blockchai
           blockchain={blockchain}
           initialVaults={initialVaults}
           vaults={vaults}
+          NFTs={NFTs}
           bitcoinValue={bitcoinValue}></VaultsGrid>
       </Collapse>
     </>

@@ -1,11 +1,12 @@
 import { customShiftValue } from '../utilities/formatFunctions';
 import { map } from 'ramda';
+import { vaultStatuses } from '../enums/VaultStatuses';
 
 function formatVault(vaultContract) {
   const rawVaultData = {
     id: parseInt(vaultContract.id._hex),
     uuid: vaultContract.dlcUUID,
-    status: vaultContract.status,
+    status: vaultStatuses[vaultContract.status],
     vaultCollateral: parseInt(vaultContract.vaultCollateral._hex),
     nftID: parseInt(vaultContract.nftId._hex),
     owner: vaultContract.owner,

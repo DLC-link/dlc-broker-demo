@@ -59,7 +59,7 @@ export default function DepositModal({ isOpen, closeModal, walletType }) {
   const sendLoanContract = (vaultContract) => {
     switch (walletType) {
       case 'metamask':
-        setupVault(vaultContract);
+        setupVault(vaultContract).then(() => closeModal())
         break;
       default:
         console.error('Unsupported wallet type!');

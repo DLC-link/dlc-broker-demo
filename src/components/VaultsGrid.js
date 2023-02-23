@@ -9,12 +9,10 @@ import SetupVaultCard from './Cards/SetupVaultCard';
 export default function VaultsGrid({
   isLoading,
   isConnected,
-  walletType,
   address,
-  blockchain,
   initialVaults,
   vaults,
-  bitcoinValue,
+  NFTs,
 }) {
   return (
     <>
@@ -38,6 +36,7 @@ export default function VaultsGrid({
                 <Card
                   key={i}
                   vault={vault}
+                  NFTs={NFTs}
                   status={vault.raw.status}></Card>
               ))}
             </SimpleGrid>
