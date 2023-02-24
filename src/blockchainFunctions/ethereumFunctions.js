@@ -12,8 +12,8 @@ export async function setEthereumProvider() {
     const { ethereum } = window;
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
-    dlcBrokerETH = new ethers.Contract(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS, dlcBrokerABI, signer);
-    btcNftETH = new ethers.Contract(process.env.REACT_APP_GOERLI_BTC_NFT_ADDRESS, btcNftABI, signer);
+    dlcBrokerETH = new ethers.Contract(process.env.REACT_APP_SEPOLIA_DLC_BROKER_ADDRESS, dlcBrokerABI, signer);
+    btcNftETH = new ethers.Contract(process.env.REACT_APP_SEPOLIA_BTC_NFT_ADDRESS, btcNftABI, signer);
   } catch (error) {
     console.error(error);
   }
@@ -66,7 +66,7 @@ export async function getAllVaultsForAddress(address) {
 
 export async function approveNFTBurn(nftID) {
   try {
-    btcNftETH.approve(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS, nftID).then((response) =>
+    btcNftETH.approve(process.env.REACT_APP_SEPOLIA_DLC_BROKER_ADDRESS, nftID).then((response) =>
       eventBus.dispatch('vault-event', {
         status: 'ApproveRequested',
         txId: response.hash,
@@ -80,7 +80,7 @@ export async function approveNFTBurn(nftID) {
 
 export async function getApproved(nftID) {
   const approvedAddresses = await btcNftETH.getApproved(nftID);
-  const approved = approvedAddresses.includes(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS);
+  const approved = approvedAddresses.includes(process.env.REACT_APP_SEPOLIA_DLC_BROKER_ADDRESS);
   return approved;
 }
 
@@ -106,11 +106,7 @@ export async function getNFTMetadata(nftURI) {
     const image = await fetch(modifiedImageURI);
     imageURL = image.url;
   } catch (error) {
-    if (error.response.status === 504) {
-      getNFTMetadata(nftURI);
-    } else {
-      console.error(error);
-    }
+    console.error(error)
   }
   return imageURL;
 }

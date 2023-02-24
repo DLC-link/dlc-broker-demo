@@ -60,7 +60,7 @@ export default function Card({ vault, NFTs, status }) {
       case 'PreLiquidated':
         setAction('pendingVault');
         break;
-      case 6:
+      case 'Repaid':
         setAction('closedVault');
     }
   }, [vault, status]);
@@ -131,7 +131,7 @@ export default function Card({ vault, NFTs, status }) {
                     <CircularProgress
                       isIndeterminate
                       size='100px'
-                      color='primary1'
+                      color='secondary1'
                     />
                   </VStack>
                 )}

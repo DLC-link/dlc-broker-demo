@@ -24,7 +24,7 @@ export default function CustomToast({ isMobile, data }) {
 
   const explorerAddressMap = {
     stacks: `https://explorer.stacks.co/txid/${data.txId}`,
-    ethereum: `https://goerli.etherscan.io/tx/${data.txId}`,
+    ethereum: `https://sepolia.etherscan.io/tx/${data.txId}`,
   };
 
   const success = !(data.status === ('Cancelled' || 'Failed'));

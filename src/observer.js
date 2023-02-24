@@ -52,13 +52,12 @@ function startEthObserver() {
     const { ethereum } = window;
     const provider = new ethers.providers.Web3Provider(ethereum);
 
-    const dlcBrokerETH = new ethers.Contract(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS, dlcBrokerABI, provider);
-    const btcNftETH = new ethers.Contract(process.env.REACT_APP_GOERLI_BTC_NFT_ADDRESS, btcNftABI, provider);
+    const dlcBrokerETH = new ethers.Contract(process.env.REACT_APP_SEPOLIA_DLC_BROKER_ADDRESS, dlcBrokerABI, provider);
+    const btcNftETH = new ethers.Contract(process.env.REACT_APP_SEPOLIA_BTC_NFT_ADDRESS, btcNftABI, provider);
 
     dlcBrokerETH.on('StatusUpdate', (...args) => {
       const vaultUUID = args[1];
       const vaultStatus = vaultStatuses[args[2]];
-      console.log('Incoming status update', args[1], args[2])
       if (vaultUUIDs.includes(vaultUUID)) {
         logStatus(vaultUUID, vaultStatus);
         eventBus.dispatch('vault-event', {
