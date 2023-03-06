@@ -3,18 +3,43 @@ import { abi as dlcBrokerABI } from '../abis/dlcBrokerABI';
 import { abi as btcNftABI } from '../abis/btcNftABI';
 import eventBus from '../utilities/eventBus';
 import { formatAllVaults } from '../utilities/vaultFormatter';
+import { EthereumNetworks } from '../networks/ethereumNetworks';
 
 let dlcBrokerETH;
 let btcNftETH;
+let currentEthereumNetwork;
 
 export async function setEthereumProvider() {
+  const { dlcBrokerAddress, btcNftAddress } = EthereumNetworks[currentEthereumNetwork];
   try {
     const { ethereum } = window;
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
-    dlcBrokerETH = new ethers.Contract(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS, dlcBrokerABI, signer);
-    btcNftETH = new ethers.Contract(process.env.REACT_APP_GOERLI_BTC_NFT_ADDRESS, btcNftABI, signer);
+    const { chainId } = await provider.getNetwork();
+    if (chainId !== currentEthereumNetwork) {
+      await changeEthereumNetwork();
+    }
+    dlcBrokerETH = new ethers.Contract(dlcBrokerAddress, dlcBrokerABI, signer);
+    btcNftETH = new ethers.Contract(btcNftAddress, btcNftABI, signer);
   } catch (error) {
+    console.error(error);
+  }
+}
+
+async function changeEthereumNetwork() {
+  const { ethereum } = window;
+  const formattedChainId = '0x' + currentEthereumNetwork.toString(16);
+  try {
+    eventBus.dispatch('is-info-modal-open', { isInfoModalOpen: true });
+    await ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: formattedChainId }],
+    });
+    window.location.reload();
+  } catch (error) {
+    if (error.code === 4001) {
+      window.location.reload();
+    }
     console.error(error);
   }
 }
@@ -34,6 +59,7 @@ export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
       address: accounts[0],
       blockchain,
     };
+    currentEthereumNetwork = blockchain;
     eventBus.dispatch('account-information', accountInformation);
   } catch (error) {
     console.error(error);
@@ -44,34 +70,13 @@ export async function setupVault(vaultContract) {
   try {
     dlcBrokerETH
       .setupVault(vaultContract.BTCDeposit, vaultContract.emergencyRefundTime)
-      .then(() => eventBus.dispatch('vault-event', { status: 'initialized', vaultContract: vaultContract }));
+      .then(() => eventBus.dispatch('vault-event', { status: 'Initialized', vaultContract: vaultContract }));
   } catch (error) {
     console.error(error);
   }
 }
 
-export async function getAllVaultAndNFTDataForAddress(address) {
-  const [formattedVaults, NFTs] = await Promise.all([getAllVaultsForAddress(address), getAllNFTsForAddress(address)]);
-  const NFTMetadataPromises = NFTs.map((NFT) => getNFTMetadata(NFT.uri));
-  const NFTMetadata = await Promise.all(NFTMetadataPromises);
-
-  console.log('NFTs: ');
-  console.log(NFTs);
-
-  console.log('Vaults: ');
-  console.log(formattedVaults);
-
-  NFTs.forEach((NFT, i) => {
-    formattedVaults.forEach((vault) => {
-      if (parseInt(NFT.id) == vault.raw.nftID) {
-        vault.raw.nftImageURL = NFTMetadata[i];
-      }
-    });
-  });
-  return formattedVaults;
-}
-
-async function getAllVaultsForAddress(address) {
+export async function getAllVaultsForAddress(address) {
   let formattedVaults = [];
   try {
     const vaults = await dlcBrokerETH.getAllVaultsForAddress(address);
@@ -83,10 +88,11 @@ async function getAllVaultsForAddress(address) {
 }
 
 export async function approveNFTBurn(nftID) {
+  const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
   try {
-    btcNftETH.approve(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS, nftID).then((response) =>
+    btcNftETH.approve(dlcBrokerAddress, nftID).then((response) =>
       eventBus.dispatch('vault-event', {
-        status: 'approve-requested',
+        status: 'ApproveRequested',
         txId: response.hash,
         chain: 'ethereum',
       })
@@ -97,12 +103,13 @@ export async function approveNFTBurn(nftID) {
 }
 
 export async function getApproved(nftID) {
+  const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
   const approvedAddresses = await btcNftETH.getApproved(nftID);
-  const approved = approvedAddresses.includes(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS);
+  const approved = approvedAddresses.includes(dlcBrokerAddress);
   return approved;
 }
 
-async function getAllNFTsForAddress(address) {
+export async function getAllNFTsForAddress(address) {
   let NFTs = [];
   try {
     NFTs = await btcNftETH.getDLCNFTsByOwner(address);
@@ -112,7 +119,7 @@ async function getAllNFTsForAddress(address) {
   return NFTs;
 }
 
-async function getNFTMetadata(nftURI) {
+export async function getNFTMetadata(nftURI) {
   let imageURL;
   const modifiedNftURI = nftURI.replace('ipfs://', 'https://nftstorage.link/ipfs/');
   try {
@@ -144,7 +151,7 @@ export async function closeVault(vaultContractUUID) {
   try {
     dlcBrokerETH.closeVault(vaultID).then((response) =>
       eventBus.dispatch('vault-event', {
-        status: 'close-requested',
+        status: 'CloseRequested',
         txId: response.hash,
         chain: 'ethereum',
       })

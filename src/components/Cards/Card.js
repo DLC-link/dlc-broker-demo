@@ -1,37 +1,67 @@
 /*global chrome*/
 
-import { Flex, Text, VStack, TableContainer, Tbody, Table, Tr, Td, Image, Box, Spacer } from '@chakra-ui/react';
+import {
+  Flex,
+  Text,
+  VStack,
+  TableContainer,
+  Tbody,
+  Table,
+  Tr,
+  Td,
+  Image,
+  Box,
+  Spacer,
+  CircularProgress,
+} from '@chakra-ui/react';
 import { easyTruncateAddress } from '../../utilities/formatFunctions';
 import Status from '../Status';
 import { ActionButtons } from '../ActionButtons';
 import { useState, useEffect } from 'react';
-import { getApproved } from '../../blockchainFunctions/ethereumFunctions';
+import { getApproved, getNFTMetadata } from '../../blockchainFunctions/ethereumFunctions';
+import { vaultStatuses } from '../../enums/VaultStatuses';
 
-export default function Card({ vault, status }) {
+export default function Card({ vault, NFTs, status }) {
   const [action, setAction] = useState(undefined);
+  const [isLoading, setLoading] = useState(false);
+
+  function getMatchingNft() {
+    const NFT = NFTs.find((NFT) => {
+      return parseInt(NFT.id._hex) === vault.raw.nftID;
+    });
+    return NFT;
+  }
 
   async function handleApproval() {
     const isApproved = await getApproved(vault.raw.nftID);
     return isApproved;
   }
 
+  async function handleMetadata() {
+    const NFT = getMatchingNft(vault, NFTs);
+    const NFTMetadata = await getNFTMetadata(NFT.uri);
+    vault.raw.nftImageURL = NFTMetadata;
+  }
+
   useEffect(() => {
     switch (status) {
-      case 2:
+      case vaultStatuses.READY:
         setAction('lockVault');
         break;
-      case 4:
+      case vaultStatuses.NFTISSUED:
+        setLoading(true);
+        handleMetadata().then(() => setLoading(false));
         handleApproval().then((isApproved) => {
           setAction(isApproved ? 'closeVault' : 'approveVault');
         });
         break;
-      case 1:
-      case 3:
-      case 5:
-      case 7:
+      case vaultStatuses.NOTREADY:
+      case vaultStatuses.FUNDED:
+      case vaultStatuses.PREREPAID:
+      case vaultStatuses.PRELIQUIDATED:
         setAction('pendingVault');
         break;
-      case 6:
+      case vaultStatuses.REPAID:
         setAction('closedVault');
     }
   }, [vault, status]);
@@ -86,13 +116,27 @@ export default function Card({ vault, status }) {
             </Table>
           </TableContainer>
           <Box padding='5px'>
-            {vault.raw.status === 4 ? (
-              <Image
-                src={vault.raw.nftImageURL}
-                alt='NFT'
-                margin='0px'
-                shadow='dark-lg'
-                boxSize='200px'></Image>
+            {vault.raw.status === 'NftIssued' ? (
+              <>
+                {!isLoading ? (
+                  <Image
+                    src={vault.raw.nftImageURL}
+                    alt='NFT'
+                    margin='0px'
+                    shadow='dark-lg'
+                    boxSize='200px'></Image>
+                ) : (
+                  <VStack
+                    boxSize='200px'
+                    justifyContent='center'>
+                    <CircularProgress
+                      isIndeterminate
+                      size='100px'
+                      color='secondary1'
+                    />
+                  </VStack>
+                )}
+              </>
             ) : (
               <Spacer
                 margin='0px'
