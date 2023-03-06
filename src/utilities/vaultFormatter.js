@@ -3,10 +3,11 @@ import { map } from 'ramda';
 import { vaultStatuses } from '../enums/VaultStatuses';
 
 function formatVault(vaultContract) {
+  const statusLookup = Object.values(vaultStatuses);
   const rawVaultData = {
     id: parseInt(vaultContract.id._hex),
     uuid: vaultContract.dlcUUID,
-    status: vaultStatuses[vaultContract.status],
+    status: statusLookup[vaultContract.status],
     vaultCollateral: parseInt(vaultContract.vaultCollateral._hex),
     nftID: parseInt(vaultContract.nftId._hex),
     owner: vaultContract.owner,

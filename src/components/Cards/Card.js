@@ -45,23 +45,23 @@ export default function Card({ vault, NFTs, status }) {
 
   useEffect(() => {
     switch (status) {
-      case vaultStatuses[2]:
+      case vaultStatuses.READY:
         setAction('lockVault');
         break;
-      case vaultStatuses[4]:
+      case vaultStatuses.NFTISSUED:
         setLoading(true);
         handleMetadata().then(() => setLoading(false));
         handleApproval().then((isApproved) => {
           setAction(isApproved ? 'closeVault' : 'approveVault');
         });
         break;
-      case vaultStatuses[1]:
-      case vaultStatuses[3]:
-      case vaultStatuses[5]:
-      case vaultStatuses[7]:
+      case vaultStatuses.NOTREADY:
+      case vaultStatuses.FUNDED:
+      case vaultStatuses.PREREPAID:
+      case vaultStatuses.PRELIQUIDATED:
         setAction('pendingVault');
         break;
-      case vaultStatuses[6]:
+      case vaultStatuses.REPAID:
         setAction('closedVault');
     }
   }, [vault, status]);

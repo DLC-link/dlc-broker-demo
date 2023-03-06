@@ -24,24 +24,24 @@ eventBus.on('vaults', (vaults) => {
 
 function logStatus(vaultUUID, vaultStatus, vaultOwner) {
   switch (vaultStatus) {
-    case vaultStatuses[0]:
+    case vaultStatuses.NONE:
       break;
-    case vaultStatuses[1]:
+    case vaultStatuses.NOTREADY:
       console.log(`%cVault setup for %c${vaultOwner} %c!`, 'color: white', 'color: turquoise', 'color: white');
       break;
-    case vaultStatuses[2]:
+    case vaultStatuses.READY:
       console.log(`%cVault %c${vaultUUID} %cis ready!`, 'color: white', 'color: turquoise', 'color: white');
       break;
-    case vaultStatuses[3]:
+    case vaultStatuses.FUNDED:
       console.log(`%cVault %c${vaultUUID} %cis funded!`, 'color: white', 'color: turquoise', 'color: white');
       break;
-    case vaultStatuses[4]:
+    case vaultStatuses.NFTISSUED:
       console.log(`%cVault %c${vaultUUID} %cis approved!`, 'color: white', 'color: turquoise', 'color: white');
       break;
-    case vaultStatuses[5]:
+    case vaultStatuses.PREREPAID:
       console.log(`%cClosing vault %c${vaultUUID} %c!`, 'color: white', 'color: turquoise', 'color: white');
       break;
-    case vaultStatuses[6]:
+    case vaultStatuses.REPAID:
       console.log(`%cVault %c${vaultUUID} %cis closed!`, 'color: white', 'color: turquoise', 'color: white');
       break;
     default:
