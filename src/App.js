@@ -10,6 +10,8 @@ import CustomToast from './components/CustomToast';
 import VaultsPage from './components/VaultsPage';
 import { customShiftValue } from './utilities/formatFunctions';
 import { setEthereumProvider } from './blockchainFunctions/ethereumFunctions';
+import { startEthObserver } from './observer';
+import InfoModal from './modals/InfoModal';
 
 export default function App() {
   const [isConnected, setConnected] = useState(false);
@@ -17,10 +19,12 @@ export default function App() {
   const [walletType, setWalletType] = useState(undefined);
   const [isSelectWalletModalOpen, setSelectWalletModalOpen] = useState(false);
   const [isDepositModalOpen, setDepositModalOpen] = useState(false);
+  const [isInfoModalOpen, setInfoModalOpen] = useState(false);
   const [blockchain, setBlockchain] = useState(undefined);
   const [depositAmount, setDepositAmount] = useState(undefined);
   const [nftQuantity, setNftQuantity] = useState(undefined);
   const [walletBalance, setWalletBalance] = useState(0);
+  const [isProviderSet, setProvider] = useState(false);
   const toast = useToast();
 
   const handleEvent = (data) => {
@@ -43,15 +47,23 @@ export default function App() {
 
   useEffect(() => {
     async function setup() {
-      setEthereumProvider().then(() => console.log('Ethereum provider and contracts set!'));
+      setEthereumProvider().then(() => {
+        setProvider(true);
+        startEthObserver();
+        console.log('Ethereum provider and contracts set!');
+      });
     }
-    setup();
-  }, []);
+    if (blockchain !== undefined) {
+      setup();
+    }
+  }, [blockchain]);
 
   useEffect(() => {
     eventBus.on('account-information', handleAccountInformation);
     eventBus.on('vault-event', (data) => handleEvent(data));
+    eventBus.on('provider', (data) => setProvider(data));
     eventBus.on('is-select-wallet-modal-open', (data) => setSelectWalletModalOpen(data.isSelectWalletOpen));
+    eventBus.on('is-info-modal-open', (data) => setInfoModalOpen(data.isInfoModalOpen));
     eventBus.on('is-deposit-modal-open', (data) => setDepositModalOpen(data.isDepositOpen));
     eventBus.on('change-deposit-amount', (data) => setDepositAmount(customShiftValue(data.depositAmount, 8, true)));
     eventBus.on('change-nft-quantity', (data) => setNftQuantity(data.nftQuantity));
@@ -92,10 +104,12 @@ export default function App() {
           isOpen={isSelectWalletModalOpen}
           closeModal={onSelectWalletModalClose}
         />
+        <InfoModal isOpen={isInfoModalOpen}></InfoModal>
         <Intro isConnected={isConnected}></Intro>
         {isConnected && (
           <VaultsPage
             isConnected={isConnected}
+            isProviderSet={isProviderSet}
             walletType={walletType}
             address={address}
             blockchain={blockchain}

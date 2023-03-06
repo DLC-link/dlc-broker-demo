@@ -4,56 +4,60 @@ import { abi as dlcManagerABI } from './abis/dlcManagerABI';
 import { abi as btcNftABI } from './abis/btcNftABI';
 import eventBus from './utilities/eventBus';
 import { vaultStatuses } from './enums/VaultStatuses';
+import { EthereumNetworks } from './networks/ethereumNetworks';
 
-function startEthObserver() {
-  let userAddress;
-  let vaultUUIDs = [];
+let userAddress;
+let currentEthereumNetwork;
+let vaultUUIDs = [];
 
-  function logStatus(vaultUUID, vaultStatus, vaultOwner) {
-    switch (vaultStatus) {
-      case 'None':
-        break;
-      case 'NotReady':
-        console.log(`%cVault setup for %c${vaultOwner} %c!`, 'color: white', 'color: turquoise', 'color: white');
-        break;
-      case 'Ready':
-        console.log(`%cVault %c${vaultUUID} %cis ready!`, 'color: white', 'color: turquoise', 'color: white');
-        break;
-      case 'Funded':
-        console.log(`%cVault %c${vaultUUID} %cis funded!`, 'color: white', 'color: turquoise', 'color: white');
-        break;
-      case 'NftIssued':
-        console.log(`%cVault %c${vaultUUID} %cis approved!`, 'color: white', 'color: turquoise', 'color: white');
-        break;
-      case 'PreRepaid':
-        console.log(`%cClosing vault %c${vaultUUID} %c!`, 'color: white', 'color: turquoise', 'color: white');
-        break;
-      case 'Repaid':
-        console.log(`%cVault %c${vaultUUID} %cis closed!`, 'color: white', 'color: turquoise', 'color: white');
-        break;
-      default:
-        console.log('Unknow status!');
-        break;
-    }
+eventBus.on('account-information', (accountInformation) => {
+  userAddress = accountInformation.address;
+  currentEthereumNetwork = accountInformation.blockchain;
+});
+
+eventBus.on('vaults', (vaults) => {
+  vaultUUIDs = [];
+  vaults.forEach((vault) => {
+    vaultUUIDs.push(vault.raw.uuid);
+  });
+});
+
+function logStatus(vaultUUID, vaultStatus, vaultOwner) {
+  switch (vaultStatus) {
+    case vaultStatuses[0]:
+      break;
+    case vaultStatuses[1]:
+      console.log(`%cVault setup for %c${vaultOwner} %c!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    case vaultStatuses[2]:
+      console.log(`%cVault %c${vaultUUID} %cis ready!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    case vaultStatuses[3]:
+      console.log(`%cVault %c${vaultUUID} %cis funded!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    case vaultStatuses[4]:
+      console.log(`%cVault %c${vaultUUID} %cis approved!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    case vaultStatuses[5]:
+      console.log(`%cClosing vault %c${vaultUUID} %c!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    case vaultStatuses[6]:
+      console.log(`%cVault %c${vaultUUID} %cis closed!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    default:
+      console.log('Unknow status!');
+      break;
   }
+}
 
-  eventBus.on('account-information', (accountInformation) => {
-    userAddress = accountInformation.address;
-  });
-
-  eventBus.on('vaults', (vaults) => {
-    vaultUUIDs = [];
-    vaults.forEach((vault) => {
-      vaultUUIDs.push(vault.raw.uuid);
-    });
-  });
-
+export function startEthObserver() {
   try {
+    const { dlcBrokerAddress, btcNftAddress } = EthereumNetworks[currentEthereumNetwork];
     const { ethereum } = window;
     const provider = new ethers.providers.Web3Provider(ethereum);
 
-    const dlcBrokerETH = new ethers.Contract(process.env.REACT_APP_SEPOLIA_DLC_BROKER_ADDRESS, dlcBrokerABI, provider);
-    const btcNftETH = new ethers.Contract(process.env.REACT_APP_SEPOLIA_BTC_NFT_ADDRESS, btcNftABI, provider);
+    const dlcBrokerETH = new ethers.Contract(dlcBrokerAddress, dlcBrokerABI, provider);
+    const btcNftETH = new ethers.Contract(btcNftAddress, btcNftABI, provider);
 
     dlcBrokerETH.on('StatusUpdate', (...args) => {
       const vaultUUID = args[1];
@@ -94,8 +98,4 @@ function startEthObserver() {
   } catch (error) {
     console.error(error);
   }
-}
-
-export default function startObserver() {
-  startEthObserver();
 }

@@ -24,6 +24,7 @@ export default function Account({ isConnected, walletType, address }) {
 
   const disconnectWallet = () => {
     eventBus.dispatch('account-information', {});
+    eventBus.dispatch('provider', false);
   };
 
   return (

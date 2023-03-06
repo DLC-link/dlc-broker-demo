@@ -8,7 +8,15 @@ import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 import { RefreshOutlined } from '@mui/icons-material';
 import { filter, map, sum, pipe, length } from 'ramda';
 
-export default function VaultsPage({ isConnected, address, walletType, blockchain, depositAmount, nftQuantity }) {
+export default function VaultsPage({
+  isConnected,
+  isProviderSet,
+  address,
+  walletType,
+  blockchain,
+  depositAmount,
+  nftQuantity,
+}) {
   const [bitcoinValue, setBitcoinValue] = useState(0);
   const [isLoading, setLoading] = useState([false, false]);
   const [initialVaults, setInitialVaults] = useState([]);
@@ -16,7 +24,10 @@ export default function VaultsPage({ isConnected, address, walletType, blockchai
   const [NFTs, setNFTs] = useState([]);
 
   useEffect(() => {
-    refreshVaultsTable();
+    if (isProviderSet === true) {
+      refreshVaultsTable();
+    }
+
     const handleVaultEvent = (event) => {
       switch (event.status) {
         case 'NotReady':
@@ -28,7 +39,9 @@ export default function VaultsPage({ isConnected, address, walletType, blockchai
         default:
           break;
       }
-      refreshVaultsTable();
+      if (isProviderSet === true) {
+        refreshVaultsTable();
+      }
     };
 
     const fetchData = async () => {
@@ -41,7 +54,7 @@ export default function VaultsPage({ isConnected, address, walletType, blockchai
     };
     fetchData();
     eventBus.on('vault-event', handleVaultEvent);
-  }, []);
+  }, [isProviderSet]);
 
   const fetchAllVaultsAndNFTs = async () => {
     let vaults = [];
@@ -102,7 +115,7 @@ export default function VaultsPage({ isConnected, address, walletType, blockchai
       .then(({ sortedVaults, NFTs }) => {
         setVaults(sortedVaults);
         setNFTs(NFTs);
-        countBalance(vaults);
+        countBalance(sortedVaults);
       })
       .then(() => {
         setLoading(false, false);
