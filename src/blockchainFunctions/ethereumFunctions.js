@@ -55,8 +55,6 @@ export async function getAllVaultsForAddress(address) {
   try {
     const vaults = await dlcBrokerETH.getAllVaultsForAddress(address);
 
-    console.log('Vaults:', vaults);
-
     formattedVaults = formatAllVaults(vaults);
   } catch (error) {
     console.error(error);
@@ -88,7 +86,6 @@ export async function getAllNFTsForAddress(address) {
   let NFTs = [];
   try {
     NFTs = await btcNftETH.getDLCNFTsByOwner(address);
-    console.log('NFTs:', NFTs);
   } catch (error) {
     console.error(error);
   }
@@ -106,7 +103,7 @@ export async function getNFTMetadata(nftURI) {
     const image = await fetch(modifiedImageURI);
     imageURL = image.url;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
   return imageURL;
 }

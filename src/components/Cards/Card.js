@@ -19,6 +19,7 @@ import Status from '../Status';
 import { ActionButtons } from '../ActionButtons';
 import { useState, useEffect } from 'react';
 import { getApproved, getNFTMetadata } from '../../blockchainFunctions/ethereumFunctions';
+import { vaultStatuses } from '../../enums/VaultStatuses';
 
 export default function Card({ vault, NFTs, status }) {
   const [action, setAction] = useState(undefined);
@@ -44,23 +45,23 @@ export default function Card({ vault, NFTs, status }) {
 
   useEffect(() => {
     switch (status) {
-      case 'Ready':
+      case vaultStatuses[2]:
         setAction('lockVault');
         break;
-      case 'NftIssued':
+      case vaultStatuses[4]:
         setLoading(true);
         handleMetadata().then(() => setLoading(false));
         handleApproval().then((isApproved) => {
           setAction(isApproved ? 'closeVault' : 'approveVault');
         });
         break;
-      case 'NotReady':
-      case 'Funded':
-      case 'PreRepaid':
-      case 'PreLiquidated':
+      case vaultStatuses[1]:
+      case vaultStatuses[3]:
+      case vaultStatuses[5]:
+      case vaultStatuses[7]:
         setAction('pendingVault');
         break;
-      case 'Repaid':
+      case vaultStatuses[6]:
         setAction('closedVault');
     }
   }, [vault, status]);
