@@ -1,5 +1,6 @@
 import { Link, Flex, HStack, Text } from '@chakra-ui/react';
 import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
+import { useEffect } from 'react';
 
 export default function CustomToast({ isMobile, data }) {
   const eventMap = {
@@ -22,14 +23,14 @@ export default function CustomToast({ isMobile, data }) {
     Liquidated: 'Vault liquidated!',
   };
 
-  const explorerAddressMap = {
-    stacks: `https://explorer.stacks.co/txid/${data.txId}`,
-    ethereum: `https://sepolia.etherscan.io/tx/${data.txId}`,
+  const ethereumExplorerAddressMap = {
+    5: `https://goerli.etherscan.io/tx/${data.txId}`,
+    11155111: `https://sepolia.etherscan.io/tx/${data.txId}`,
   };
 
   const success = !(data.status === ('Cancelled' || 'Failed'));
   const message = eventMap[data.status];
-  const explorerAddress = data.status === 'NftIssued' ? data.nftPage : explorerAddressMap[data.chain];
+  const explorerAddress = data.status === 'NftIssued' ? data.nftPage : ethereumExplorerAddressMap[data.chain];
 
   return (
     <Flex>

@@ -9,6 +9,7 @@ import { EthereumNetworks } from './networks/ethereumNetworks';
 let userAddress;
 let currentEthereumNetwork;
 let vaultUUIDs = [];
+const statusLookup = Object.values(vaultStatuses);
 
 eventBus.on('account-information', (accountInformation) => {
   userAddress = accountInformation.address;
@@ -36,7 +37,7 @@ function logStatus(vaultUUID, vaultStatus, vaultOwner) {
       console.log(`%cVault %c${vaultUUID} %cis funded!`, 'color: white', 'color: turquoise', 'color: white');
       break;
     case vaultStatuses.NFTISSUED:
-      console.log(`%cVault %c${vaultUUID} %cis approved!`, 'color: white', 'color: turquoise', 'color: white');
+      console.log(`%cNFT issued for vault %c${vaultUUID} %c!`, 'color: white', 'color: turquoise', 'color: white');
       break;
     case vaultStatuses.PREREPAID:
       console.log(`%cClosing vault %c${vaultUUID} %c!`, 'color: white', 'color: turquoise', 'color: white');
@@ -44,6 +45,8 @@ function logStatus(vaultUUID, vaultStatus, vaultOwner) {
     case vaultStatuses.REPAID:
       console.log(`%cVault %c${vaultUUID} %cis closed!`, 'color: white', 'color: turquoise', 'color: white');
       break;
+    case vaultStatuses.APPROVED:
+      console.log(`%cBurning NFT of %c${vaultUUID} %cis approved!`, 'color: white', 'color: turquoise', 'color: white');
     default:
       console.log('Unknow status!');
       break;
@@ -61,13 +64,13 @@ export function startEthObserver() {
 
     dlcBrokerETH.on('StatusUpdate', (...args) => {
       const vaultUUID = args[1];
-      const vaultStatus = vaultStatuses[args[2]];
+      const vaultStatus = statusLookup[args[2]];
       if (vaultUUIDs.includes(vaultUUID)) {
         logStatus(vaultUUID, vaultStatus);
         eventBus.dispatch('vault-event', {
           status: vaultStatus,
           txId: args[args.length - 1].transactionHash,
-          chain: 'ethereum',
+          chain: currentEthereumNetwork,
         });
       }
     });
@@ -75,11 +78,11 @@ export function startEthObserver() {
     dlcBrokerETH.on('SetupVault', async (...args) => {
       const vaultOwner = args[4].toLowerCase();
       if (userAddress === vaultOwner) {
-        logStatus(undefined, undefined, vaultOwner);
+        logStatus(undefined, vaultStatuses.NOTREADY, vaultOwner);
         eventBus.dispatch('vault-event', {
           status: 'NotReady',
           txId: args[args.length - 1].transactionHash,
-          chain: 'ethereum',
+          chain: currentEthereumNetwork,
         });
       }
     });
@@ -87,11 +90,11 @@ export function startEthObserver() {
     btcNftETH.on('Approval', (...args) => {
       const vaultOwner = args[0].toLowerCase();
       if (userAddress === vaultOwner) {
-        logStatus(undefined, undefined, vaultOwner);
+        logStatus(undefined, vaultStatuses.APPROVED, vaultOwner);
         eventBus.dispatch('vault-event', {
           status: 'Approved',
           txId: args[args.length - 1].transactionHash,
-          chain: 'ethereum',
+          chain: currentEthereumNetwork,
         });
       }
     });
