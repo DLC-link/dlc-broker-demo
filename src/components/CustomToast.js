@@ -1,6 +1,5 @@
 import { Link, Flex, HStack, Text } from '@chakra-ui/react';
 import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
-import { useEffect } from 'react';
 
 export default function CustomToast({ isMobile, data }) {
     const eventMap = {

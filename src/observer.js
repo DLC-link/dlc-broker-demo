@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
 import { abi as dlcBrokerABI } from './abis/dlcBrokerABI';
-import { abi as dlcManagerABI } from './abis/dlcManagerABI';
 import { abi as btcNftABI } from './abis/btcNftABI';
 import eventBus from './utilities/eventBus';
 import { vaultStatuses } from './enums/VaultStatuses';
@@ -82,6 +81,7 @@ function logStatus(vaultUUID, vaultStatus, vaultOwner) {
                 'color: turquoise',
                 'color: white'
             );
+            break;
         default:
             console.log('Unknow status!');
             break;

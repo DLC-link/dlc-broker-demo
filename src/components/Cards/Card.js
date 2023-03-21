@@ -66,6 +66,9 @@ export default function Card({ vault, NFTs, status }) {
                 break;
             case vaultStatuses.REPAID:
                 setAction('closedVault');
+                break;
+            default:
+                break;
         }
     }, [vault, status]);
 

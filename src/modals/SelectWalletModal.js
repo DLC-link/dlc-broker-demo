@@ -7,13 +7,11 @@ import {
     ModalHeader,
     ModalBody,
     ModalCloseButton,
-    Button,
     Text,
     MenuButton,
     MenuItem,
     MenuList,
     Menu,
-    Tooltip,
 } from '@chakra-ui/react';
 import { Image } from '@chakra-ui/react';
 import { requestAndDispatchMetaMaskAccountInformation } from '../blockchainFunctions/ethereumFunctions';
