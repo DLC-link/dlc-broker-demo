@@ -1,3 +1,4 @@
 {
-    "editor.foldingImportsByDefault": true
+    "editor.foldingImportsByDefault": true,
+    "editor.indentSize": 4
 }
