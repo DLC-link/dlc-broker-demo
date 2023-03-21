@@ -8,9 +8,7 @@ import App from './App';
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
-  <ChakraProvider
-    resetCSS
-    theme={appTheme}>
-    <App />
-  </ChakraProvider>
+    <ChakraProvider resetCSS theme={appTheme}>
+        <App />
+    </ChakraProvider>
 );

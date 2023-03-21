@@ -10,153 +10,172 @@ let btcNftETH;
 let currentEthereumNetwork;
 
 export async function setEthereumProvider() {
-  const { dlcBrokerAddress, btcNftAddress } = EthereumNetworks[currentEthereumNetwork];
-  try {
-    const { ethereum } = window;
-    const provider = new ethers.providers.Web3Provider(ethereum);
-    const signer = provider.getSigner();
-    const { chainId } = await provider.getNetwork();
-    if (chainId !== currentEthereumNetwork) {
-      await changeEthereumNetwork();
+    const { dlcBrokerAddress, btcNftAddress } =
+        EthereumNetworks[currentEthereumNetwork];
+    try {
+        const { ethereum } = window;
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const { chainId } = await provider.getNetwork();
+        if (chainId !== currentEthereumNetwork) {
+            await changeEthereumNetwork();
+        }
+        dlcBrokerETH = new ethers.Contract(
+            dlcBrokerAddress,
+            dlcBrokerABI,
+            signer
+        );
+        btcNftETH = new ethers.Contract(btcNftAddress, btcNftABI, signer);
+    } catch (error) {
+        console.error(error);
     }
-    dlcBrokerETH = new ethers.Contract(dlcBrokerAddress, dlcBrokerABI, signer);
-    btcNftETH = new ethers.Contract(btcNftAddress, btcNftABI, signer);
-  } catch (error) {
-    console.error(error);
-  }
 }
 
 async function changeEthereumNetwork() {
-  const { ethereum } = window;
-  const formattedChainId = '0x' + currentEthereumNetwork.toString(16);
-  try {
-    eventBus.dispatch('is-info-modal-open', { isInfoModalOpen: true });
-    await ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: formattedChainId }],
-    });
-    window.location.reload();
-  } catch (error) {
-    if (error.code === 4001) {
-      window.location.reload();
+    const { ethereum } = window;
+    const formattedChainId = '0x' + currentEthereumNetwork.toString(16);
+    try {
+        eventBus.dispatch('is-info-modal-open', { isInfoModalOpen: true });
+        await ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: formattedChainId }],
+        });
+        window.location.reload();
+    } catch (error) {
+        if (error.code === 4001) {
+            window.location.reload();
+        }
+        console.error(error);
     }
-    console.error(error);
-  }
 }
 
 export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
-  try {
-    const { ethereum } = window;
-    if (!ethereum) {
-      alert('Install MetaMask!');
-      return;
+    try {
+        const { ethereum } = window;
+        if (!ethereum) {
+            alert('Install MetaMask!');
+            return;
+        }
+        const accounts = await ethereum.request({
+            method: 'eth_requestAccounts',
+        });
+        const accountInformation = {
+            walletType: 'metamask',
+            address: accounts[0],
+            blockchain,
+        };
+        currentEthereumNetwork = blockchain;
+        eventBus.dispatch('account-information', accountInformation);
+    } catch (error) {
+        console.error(error);
     }
-    const accounts = await ethereum.request({
-      method: 'eth_requestAccounts',
-    });
-    const accountInformation = {
-      walletType: 'metamask',
-      address: accounts[0],
-      blockchain,
-    };
-    currentEthereumNetwork = blockchain;
-    eventBus.dispatch('account-information', accountInformation);
-  } catch (error) {
-    console.error(error);
-  }
 }
 
 export async function setupVault(vaultContract) {
-  try {
-    dlcBrokerETH
-      .setupVault(vaultContract.BTCDeposit, vaultContract.emergencyRefundTime)
-      .then(() => eventBus.dispatch('vault-event', { status: 'Initialized', vaultContract: vaultContract }));
-  } catch (error) {
-    console.error(error);
-  }
+    try {
+        dlcBrokerETH
+            .setupVault(
+                vaultContract.BTCDeposit,
+                vaultContract.emergencyRefundTime
+            )
+            .then(() =>
+                eventBus.dispatch('vault-event', {
+                    status: 'Initialized',
+                    vaultContract: vaultContract,
+                })
+            );
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 export async function getAllVaultsForAddress(address) {
-  let formattedVaults = [];
-  try {
-    const vaults = await dlcBrokerETH.getAllVaultsForAddress(address);
-    formattedVaults = formatAllVaults(vaults);
-  } catch (error) {
-    console.error(error);
-  }
-  return formattedVaults;
+    let formattedVaults = [];
+    try {
+        const vaults = await dlcBrokerETH.getAllVaultsForAddress(address);
+        formattedVaults = formatAllVaults(vaults);
+    } catch (error) {
+        console.error(error);
+    }
+    return formattedVaults;
 }
 
 export async function approveNFTBurn(nftID) {
-  const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
-  try {
-    btcNftETH.approve(dlcBrokerAddress, nftID).then((response) =>
-      eventBus.dispatch('vault-event', {
-        status: 'ApproveRequested',
-        txId: response.hash,
-        chain: 'ethereum',
-      })
-    );
-  } catch (error) {
-    console.error(error);
-  }
+    const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
+    try {
+        btcNftETH.approve(dlcBrokerAddress, nftID).then((response) =>
+            eventBus.dispatch('vault-event', {
+                status: 'ApproveRequested',
+                txId: response.hash,
+                chain: 'ethereum',
+            })
+        );
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 export async function getApproved(nftID) {
-  const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
-  const approvedAddresses = await btcNftETH.getApproved(nftID);
-  const approved = approvedAddresses.includes(dlcBrokerAddress);
-  return approved;
+    const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
+    const approvedAddresses = await btcNftETH.getApproved(nftID);
+    const approved = approvedAddresses.includes(dlcBrokerAddress);
+    return approved;
 }
 
 export async function getAllNFTsForAddress(address) {
-  let NFTs = [];
-  try {
-    NFTs = await btcNftETH.getDLCNFTsByOwner(address);
-  } catch (error) {
-    console.error(error);
-  }
-  return NFTs;
+    let NFTs = [];
+    try {
+        NFTs = await btcNftETH.getDLCNFTsByOwner(address);
+    } catch (error) {
+        console.error(error);
+    }
+    return NFTs;
 }
 
 export async function getNFTMetadata(nftURI) {
-  let imageURL;
-  const modifiedNftURI = nftURI.replace('ipfs://', 'https://nftstorage.link/ipfs/');
-  try {
-    const response = await fetch(modifiedNftURI);
-    const metadata = await response.json();
-    const imageURI = metadata.image;
-    const modifiedImageURI = imageURI.replace('ipfs://', 'https://nftstorage.link/ipfs/');
-    const image = await fetch(modifiedImageURI);
-    imageURL = image.url;
-  } catch (error) {
-    console.error(error);
-  }
-  return imageURL;
+    let imageURL;
+    const modifiedNftURI = nftURI.replace(
+        'ipfs://',
+        'https://nftstorage.link/ipfs/'
+    );
+    try {
+        const response = await fetch(modifiedNftURI);
+        const metadata = await response.json();
+        const imageURI = metadata.image;
+        const modifiedImageURI = imageURI.replace(
+            'ipfs://',
+            'https://nftstorage.link/ipfs/'
+        );
+        const image = await fetch(modifiedImageURI);
+        imageURL = image.url;
+    } catch (error) {
+        console.error(error);
+    }
+    return imageURL;
 }
 
 async function getVaultByUUID(vaultContractUUID) {
-  let vault;
-  try {
-    vault = await dlcBrokerETH.getVaultByUUID(vaultContractUUID);
-  } catch (error) {
-    console.error(error);
-  }
-  return vault;
+    let vault;
+    try {
+        vault = await dlcBrokerETH.getVaultByUUID(vaultContractUUID);
+    } catch (error) {
+        console.error(error);
+    }
+    return vault;
 }
 
 export async function closeVault(vaultContractUUID) {
-  const vault = await getVaultByUUID(vaultContractUUID);
-  const vaultID = vault.id;
-  try {
-    dlcBrokerETH.closeVault(vaultID).then((response) =>
-      eventBus.dispatch('vault-event', {
-        status: 'CloseRequested',
-        txId: response.hash,
-        chain: 'ethereum',
-      })
-    );
-  } catch (error) {
-    console.error(error);
-  }
+    const vault = await getVaultByUUID(vaultContractUUID);
+    const vaultID = vault.id;
+    try {
+        dlcBrokerETH.closeVault(vaultID).then((response) =>
+            eventBus.dispatch('vault-event', {
+                status: 'CloseRequested',
+                txId: response.hash,
+                chain: 'ethereum',
+            })
+        );
+    } catch (error) {
+        console.error(error);
+    }
 }
