@@ -1,3 +1,5 @@
+import { customShiftValue } from './formatFunctions';
+
 export function countCollateralToDebtRatio(collateralAmount, bitcoinValue, vaultLoan, additionalLoan) {
   const collateralInUSD = Math.round(collateralAmount * bitcoinValue);
   const collateralToDebtRatio =

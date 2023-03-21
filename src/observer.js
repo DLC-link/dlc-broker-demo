@@ -3,117 +3,102 @@ import { abi as dlcBrokerABI } from './abis/dlcBrokerABI';
 import { abi as dlcManagerABI } from './abis/dlcManagerABI';
 import { abi as btcNftABI } from './abis/btcNftABI';
 import eventBus from './utilities/eventBus';
+import { vaultStatuses } from './enums/VaultStatuses';
+import { EthereumNetworks } from './networks/ethereumNetworks';
 
-function startEthObserver() {
-  let userAddress;
-  let vaultUUIDs = [];
+let userAddress;
+let currentEthereumNetwork;
+let vaultUUIDs = [];
+const statusLookup = Object.values(vaultStatuses);
 
-  eventBus.on('account-information', (accountInformation) => {
-    userAddress = accountInformation.address;
+eventBus.on('account-information', (accountInformation) => {
+  userAddress = accountInformation.address;
+  currentEthereumNetwork = accountInformation.blockchain;
+});
+
+eventBus.on('vaults', (vaults) => {
+  vaultUUIDs = [];
+  vaults.forEach((vault) => {
+    vaultUUIDs.push(vault.raw.uuid);
   });
+});
 
-  eventBus.on('vaults', (vaults) => {
-    vaultUUIDs = [];
-    vaults.forEach((vault) => {
-      vaultUUIDs.push(vault.raw.uuid);
-    });
-  });
+function logStatus(vaultUUID, vaultStatus, vaultOwner) {
+  switch (vaultStatus) {
+    case vaultStatuses.NONE:
+      break;
+    case vaultStatuses.NOTREADY:
+      console.log(`%cVault setup for %c${vaultOwner} %c!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    case vaultStatuses.READY:
+      console.log(`%cVault %c${vaultUUID} %cis ready!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    case vaultStatuses.FUNDED:
+      console.log(`%cVault %c${vaultUUID} %cis funded!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    case vaultStatuses.NFTISSUED:
+      console.log(`%cNFT issued for vault %c${vaultUUID} %c!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    case vaultStatuses.PREREPAID:
+      console.log(`%cClosing vault %c${vaultUUID} %c!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    case vaultStatuses.REPAID:
+      console.log(`%cVault %c${vaultUUID} %cis closed!`, 'color: white', 'color: turquoise', 'color: white');
+      break;
+    case vaultStatuses.APPROVED:
+      console.log(`%cBurning NFT of %c${vaultUUID} %cis approved!`, 'color: white', 'color: turquoise', 'color: white');
+    default:
+      console.log('Unknow status!');
+      break;
+  }
+}
 
+export function startEthObserver() {
   try {
+    const { dlcBrokerAddress, btcNftAddress } = EthereumNetworks[currentEthereumNetwork];
     const { ethereum } = window;
     const provider = new ethers.providers.Web3Provider(ethereum);
-    const signer = provider.getSigner();
 
-    const dlcBrokerETH = new ethers.Contract(process.env.REACT_APP_GOERLI_DLC_BROKER_ADDRESS, dlcBrokerABI, signer);
-
-    const dlcManagerETH = new ethers.Contract(process.env.REACT_APP_GOERLI_DLC_MANAGER_ADDRESS, dlcManagerABI, signer);
-
-    const btcNftETH = new ethers.Contract(process.env.REACT_APP_GOERLI_BTC_NFT_ADDRESS, btcNftABI, signer);
+    const dlcBrokerETH = new ethers.Contract(dlcBrokerAddress, dlcBrokerABI, provider);
+    const btcNftETH = new ethers.Contract(btcNftAddress, btcNftABI, provider);
 
     dlcBrokerETH.on('StatusUpdate', (...args) => {
-      eventBus.dispatch('vault-event', {
-        status: 'refresh',
-        txId: args[args.length - 1].transactionHash,
-        chain: 'ethereum',
-      });
-    });
-
-    dlcBrokerETH.on('SetupVault', (...args) => {
-      if (userAddress == args[4].toLowerCase()) {
+      const vaultUUID = args[1];
+      const vaultStatus = statusLookup[args[2]];
+      if (vaultUUIDs.includes(vaultUUID)) {
+        logStatus(vaultUUID, vaultStatus);
         eventBus.dispatch('vault-event', {
-          status: 'setup',
+          status: vaultStatus,
           txId: args[args.length - 1].transactionHash,
-          chain: 'ethereum',
+          chain: currentEthereumNetwork,
         });
       }
     });
 
-    dlcManagerETH.on('CreateDLC', (...args) => {
-      console.log('args');
-      console.log(args);
-      if (vaultUUIDs.includes(args[1])) {
+    dlcBrokerETH.on('SetupVault', async (...args) => {
+      const vaultOwner = args[4].toLowerCase();
+      if (userAddress === vaultOwner) {
+        logStatus(undefined, vaultStatuses.NOTREADY, vaultOwner);
         eventBus.dispatch('vault-event', {
-          status: 'ready',
+          status: 'NotReady',
           txId: args[args.length - 1].transactionHash,
-          chain: 'ethereum',
-        });
-      }
-    });
-
-    dlcManagerETH.on('SetStatusFunded', (...args) => {
-      if (vaultUUIDs.includes(args[0])) {
-        eventBus.dispatch('vault-event', {
-          status: 'funded',
-          txId: args[args.length - 1].transactionHash,
-          chain: 'ethereum',
+          chain: currentEthereumNetwork,
         });
       }
     });
 
     btcNftETH.on('Approval', (...args) => {
-      if (userAddress == args[0].toLowerCase()) {
+      const vaultOwner = args[0].toLowerCase();
+      if (userAddress === vaultOwner) {
+        logStatus(undefined, vaultStatuses.APPROVED, vaultOwner);
         eventBus.dispatch('vault-event', {
-          status: 'approved',
+          status: 'Approved',
           txId: args[args.length - 1].transactionHash,
-          chain: 'ethereum',
-        });
-      }
-    });
-
-    dlcBrokerETH.on('MintBtcNft', (...args) => {
-      if (vaultUUIDs.includes(args[0])) {
-        eventBus.dispatch('vault-event', {
-          status: 'minted',
-          txId: args[args.length - 1].transactionHash,
-          chain: 'ethereum',
-          nftPage: 'https://testnets.opensea.io/account',
-        });
-      }
-    });
-
-    dlcBrokerETH.on('BurnBtcNft', (...args) => {
-      if (vaultUUIDs.includes(args[0])) {
-        eventBus.dispatch('vault-event', {
-          status: 'burned',
-          txId: args[args.length - 1].transactionHash,
-          chain: 'ethereum',
-        });
-      }
-    });
-
-    dlcManagerETH.on('CloseDLC', (...args) => {
-      if (vaultUUIDs.includes(args[0])) {
-        eventBus.dispatch('loan-event', {
-          status: 'closed',
-          txId: args[args.length - 1].transactionHash,
+          chain: currentEthereumNetwork,
         });
       }
     });
   } catch (error) {
     console.error(error);
   }
-}
-
-export default function startObserver() {
-  startEthObserver();
 }

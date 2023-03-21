@@ -19,10 +19,9 @@ import {
   Image,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { customShiftValue, formatCollateralInUSD, formatBitcoinInUSDAmount } from '../utilities/formatFunctions';
+import { customShiftValue, formatCollateralInUSD } from '../utilities/formatFunctions';
 import { setupVault } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
-import eventBus from '../utilities/eventBus';
 
 export default function DepositModal({ isOpen, closeModal, walletType }) {
   const [collateralAmount, setCollateralAmount] = useState(undefined);
@@ -53,14 +52,14 @@ export default function DepositModal({ isOpen, closeModal, walletType }) {
   };
 
   const createVaultContract = () => ({
-    BTCDeposit: parseInt(customShiftValue(collateralAmount, 8, false)),
+    BTCDeposit: Math.round((customShiftValue(collateralAmount, 8, false))),
     emergencyRefundTime: 5,
   });
 
   const sendLoanContract = (vaultContract) => {
     switch (walletType) {
       case 'metamask':
-        setupVault(vaultContract);
+        setupVault(vaultContract).then(() => closeModal())
         break;
       default:
         console.error('Unsupported wallet type!');

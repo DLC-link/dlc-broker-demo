@@ -23,7 +23,7 @@ export default function InitialCard({ vault, creator }) {
         justifyContent='center'>
         <VStack margin='15px'>
           <Flex>
-            <Status status={1}></Status>
+            <Status status={'NotReady'}></Status>
           </Flex>
           <TableContainer>
             <Table
@@ -62,14 +62,16 @@ export default function InitialCard({ vault, creator }) {
               margin='0px'
               height='200px'></Spacer>
           </Box>
-          <Button
-            variant='outline'
-            isLoading
-            loadingText='PENDING'
-            color='gray'
-            _hover={{
-              shadow: 'none',
-            }}></Button>
+          <Flex>
+            <Button
+              variant='outline'
+              isLoading
+              loadingText='PENDING'
+              color='gray'
+              _hover={{
+                shadow: 'none',
+              }}></Button>
+          </Flex>
         </VStack>
       </Flex>
     </>
