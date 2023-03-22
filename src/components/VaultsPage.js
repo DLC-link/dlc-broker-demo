@@ -9,7 +9,6 @@ import {
 } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 import { RefreshOutlined } from '@mui/icons-material';
-import { filter, map, sum, pipe, length } from 'ramda';
 
 export default function VaultsPage({
     isConnected,
@@ -92,18 +91,19 @@ export default function VaultsPage({
     };
 
     const countBalance = (vaults) => {
-        const sumDepositAmount = pipe(
-            filter((vault) =>
-                ['Funded', 'NftIssued'].includes(vault.raw.status)
-            ),
-            map((vault) => vault.raw.vaultCollateral),
-            sum
-        );
+        function sumDepositAmount(vaults) {
+            return vaults
+                .filter((vault) =>
+                    ['Funded', 'NftIssued'].includes(vault.raw.status)
+                )
+                .map((vault) => vault.raw.vaultCollateral)
+                .reduce((acc, curr) => acc + curr, 0);
+        }
 
-        const countNFTQuantity = pipe(
-            filter((vault) => vault.raw.status === 'NftIssued'),
-            length
-        );
+        function countNFTQuantity(vaults) {
+            return vaults.filter((vault) => vault.raw.status === 'NftIssued')
+                .length;
+        }
 
         const depositAmount = sumDepositAmount(vaults);
         const nftQuantity = countNFTQuantity(vaults);

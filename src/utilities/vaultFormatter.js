@@ -1,5 +1,4 @@
 import { customShiftValue } from '../utilities/formatFunctions';
-import { map } from 'ramda';
 import { vaultStatuses } from '../enums/VaultStatuses';
 
 function formatVault(vaultContract) {
@@ -29,6 +28,5 @@ function createVaultObject(rawVaultData) {
 }
 
 export function formatAllVaults(vaults) {
-    const handleFormatAllVaults = map(formatVault);
-    return handleFormatAllVaults(vaults);
+    return vaults.map(formatVault);
 }
