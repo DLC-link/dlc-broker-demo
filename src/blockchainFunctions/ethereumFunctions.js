@@ -118,7 +118,11 @@ export async function approveNFTBurn(nftID) {
 export async function getApproved(nftID) {
     const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
     const approvedAddresses = await btcNftETH.getApproved(nftID);
-    const approved = approvedAddresses.includes(dlcBrokerAddress);
+
+    const approvedLowerCase = Array.isArray(approvedAddresses)
+        ? approvedAddresses.map((address) => address.toLowerCase())
+        : [approvedAddresses.toLowerCase()];
+    const approved = approvedLowerCase.includes(dlcBrokerAddress.toLowerCase());
     return approved;
 }
 
@@ -152,6 +156,28 @@ export async function getNFTMetadata(nftURI) {
         console.error(error);
     }
     return imageURL;
+}
+
+export async function getVaultsForNFTs(NFTs, ownedVaults) {
+    let vaults = [];
+    let formattedVaults = [];
+    try {
+        NFTs = NFTs.filter(
+            (nft) =>
+                !ownedVaults.find((vault) => vault.raw.uuid === nft.dlcUUID)
+        );
+        console.log('NFTs owned without owning vault', NFTs);
+        vaults = await Promise.all(
+            NFTs.map(async (nft) => {
+                const vault = await dlcBrokerETH.getVaultByUUID(nft.dlcUUID);
+                return vault;
+            })
+        );
+        formattedVaults = formatAllVaults(vaults);
+    } catch (error) {
+        console.error(error);
+    }
+    return formattedVaults;
 }
 
 async function getVaultByUUID(vaultContractUUID) {

@@ -6,6 +6,7 @@ import eventBus from '../utilities/eventBus';
 import {
     getAllNFTsForAddress,
     getAllVaultsForAddress,
+    getVaultsForNFTs,
 } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 import { RefreshOutlined } from '@mui/icons-material';
@@ -65,28 +66,31 @@ export default function VaultsPage({
             case 'metamask':
                 vaults = await getAllVaultsForAddress(address);
                 NFTs = await getAllNFTsForAddress(address);
+                console.log('Vaults: ', vaults);
+                console.log('NFTs: ', NFTs);
                 break;
             default:
                 console.error('Unsupported wallet type!');
                 break;
         }
-        eventBus.dispatch('vaults', vaults);
-        const sortStatusOrder = [
-            'None',
-            'NftIssued',
-            'Funded',
-            'Ready',
-            'NotReady',
-            'PreRepaid',
-            'PreLiquidated',
-            'Repaid',
-            'Liquidated',
-        ];
-        const sortedVaults = vaults.sort(
-            (a, b) =>
-                sortStatusOrder.indexOf(a.raw.status) -
-                sortStatusOrder.indexOf(b.raw.status)
+
+        // Based on dlcUUIds in the NFTs, we have to also get the corresponding vaults
+        let nftVaults = await getVaultsForNFTs(NFTs, vaults);
+
+        // if we don't own the underlying NFT, we don't want to show the vault, unless it was closed
+        vaults = vaults.filter(
+            (vault) =>
+                NFTs.find((nft) => nft.dlcUUID === vault.raw.uuid) ||
+                vault.raw.status === 'Closed'
         );
+
+        let allVaults = nftVaults.length ? [...vaults, ...nftVaults] : vaults;
+        eventBus.dispatch('vaults', allVaults);
+
+        console.log('All vaults: ', allVaults);
+
+        let sortedVaults = allVaults.sort((a, b) => a.raw.id - b.raw.id);
+
         return { sortedVaults, NFTs };
     };
 
