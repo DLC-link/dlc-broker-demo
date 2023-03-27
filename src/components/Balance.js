@@ -23,7 +23,7 @@ export default function Balance({ depositAmount, nftQuantity }) {
                             fontWeight="extrabold"
                             color="accent"
                         >
-                            Deposit Balance:{' '}
+                            Total Redeemable:{' '}
                         </Text>
                         <Text paddingRight="25px">{depositAmount} BTC</Text>
                         <Text

@@ -77,21 +77,27 @@ export default function VaultsPage({
         // Based on dlcUUIds in the NFTs, we have to also get the corresponding vaults
         let nftVaults = await getVaultsForNFTs(NFTs, vaults);
 
-        // if we don't own the underlying NFT, we don't want to show the vault, unless it was closed
+        // if we don't own the underlying NFT, we don't want to show the vault, unless it is closed or before minting
         vaults = vaults.filter(
             (vault) =>
                 NFTs.find((nft) => nft.dlcUUID === vault.raw.uuid) ||
-                vault.raw.status === 'Closed'
+                ['NotReady', 'Ready', 'Funded', 'Closed'].includes(
+                    vault.raw.status
+                )
         );
 
-        let allVaults = nftVaults.length ? [...vaults, ...nftVaults] : vaults;
-        eventBus.dispatch('vaults', allVaults);
+        let allRedeemable = nftVaults.length
+            ? [...vaults, ...nftVaults]
+            : vaults;
 
-        console.log('All vaults: ', allVaults);
+        eventBus.dispatch('vaults', allRedeemable);
+        console.log('All redeemable: ', allRedeemable);
 
-        let sortedVaults = allVaults.sort((a, b) => a.raw.id - b.raw.id);
+        let sortedRedeemable = allRedeemable.sort(
+            (a, b) => a.raw.id - b.raw.id
+        );
 
-        return { sortedVaults, NFTs };
+        return { sortedRedeemable, NFTs };
     };
 
     const countBalance = (vaults) => {
@@ -123,10 +129,10 @@ export default function VaultsPage({
     const refreshVaultsTable = async (isManual) => {
         setLoading([true, isManual]);
         fetchAllVaultsAndNFTs()
-            .then(({ sortedVaults, NFTs }) => {
-                setVaults(sortedVaults);
+            .then(({ sortedRedeemable, NFTs }) => {
+                setVaults(sortedRedeemable);
                 setNFTs(NFTs);
-                countBalance(sortedVaults);
+                countBalance(sortedRedeemable);
             })
             .then(() => {
                 setLoading(false, false);
