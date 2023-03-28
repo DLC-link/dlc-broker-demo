@@ -11,6 +11,7 @@ import {
 import Card from './Cards/Card';
 import InitialCard from './Cards/InitialCard';
 import SetupVaultCard from './Cards/SetupVaultCard';
+import { useSelector } from 'react-redux';
 
 export default function VaultsGrid({
     isLoading,
@@ -20,6 +21,18 @@ export default function VaultsGrid({
     vaults,
     NFTs,
 }) {
+    const filters = useSelector((state) => state.filters);
+    const account = useSelector((state) => state.account);
+
+    // A function that filters the vaults based on the filters
+    const filteredVaults = vaults.filter((vault) => {
+        const isOwnVault = account.address === vault.owner;
+        return (
+            (isOwnVault && filters.showMinted) ||
+            (!isOwnVault && filters.showReceived)
+        );
+    });
+
     return (
         <>
             <Collapse in={isConnected}>
@@ -35,12 +48,12 @@ export default function VaultsGrid({
                                     creator={address}
                                 ></InitialCard>
                             ))}
-                            {vaults?.map((vault, i) => (
+                            {filteredVaults?.map((vault, i) => (
                                 <Card
                                     key={i}
                                     vault={vault}
                                     NFTs={NFTs}
-                                    status={vault.raw.status}
+                                    status={vault.status}
                                 ></Card>
                             ))}
                         </SimpleGrid>

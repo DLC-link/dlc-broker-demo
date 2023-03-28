@@ -10,6 +10,9 @@ import {
 } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 import { RefreshOutlined } from '@mui/icons-material';
+import Filters from './Filters';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchVaults } from '../store/vaultsSlice';
 
 export default function VaultsPage({
     isConnected,
@@ -25,6 +28,15 @@ export default function VaultsPage({
     const [initialVaults, setInitialVaults] = useState([]);
     const [vaults, setVaults] = useState([]);
     const [NFTs, setNFTs] = useState([]);
+    const dispatch = useDispatch();
+    const vaultsStore = useSelector((state) => state.vaults);
+    const account = useSelector((state) => state.account);
+
+    useEffect(() => {
+        if (vaultsStore.status === 'idle' && vaultsStore.vaults.length === 0) {
+            dispatch(fetchVaults(account.address));
+        }
+    }, [vaultsStore, dispatch, account.address]);
 
     useEffect(() => {
         if (isProviderSet === true) {
@@ -80,14 +92,14 @@ export default function VaultsPage({
         // if we don't own the underlying NFT, we don't want to show the vault, unless it is closed or before minting
         vaults = vaults.filter(
             (vault) =>
-                NFTs.find((nft) => nft.dlcUUID === vault.raw.uuid) ||
+                NFTs.find((nft) => nft.dlcUUID === vault.uuid) ||
                 [
                     'NotReady',
                     'Ready',
                     'Funded',
                     'Closed',
                     'Liquidated',
-                ].includes(vault.raw.status)
+                ].includes(vault.status)
         );
 
         let allRedeemable = nftVaults.length
@@ -95,11 +107,8 @@ export default function VaultsPage({
             : vaults;
 
         eventBus.dispatch('vaults', allRedeemable);
-        console.log('All redeemable: ', allRedeemable);
 
-        let sortedRedeemable = allRedeemable.sort(
-            (a, b) => a.raw.id - b.raw.id
-        );
+        let sortedRedeemable = allRedeemable.sort((a, b) => a.id - b.id);
 
         return { sortedRedeemable, NFTs };
     };
@@ -108,14 +117,14 @@ export default function VaultsPage({
         function sumDepositAmount(vaults) {
             return vaults
                 .filter((vault) =>
-                    ['Funded', 'NftIssued'].includes(vault.raw.status)
+                    ['Funded', 'NftIssued'].includes(vault.status)
                 )
-                .map((vault) => vault.raw.vaultCollateral)
+                .map((vault) => vault.vaultCollateral)
                 .reduce((acc, curr) => acc + curr, 0);
         }
 
         function countNFTQuantity(vaults) {
-            return vaults.filter((vault) => vault.raw.status === 'NftIssued')
+            return vaults.filter((vault) => vault.status === 'NftIssued')
                 .length;
         }
 
@@ -176,6 +185,7 @@ export default function VaultsPage({
                         depositAmount={depositAmount}
                         nftQuantity={nftQuantity}
                     ></Balance>
+                    <Filters></Filters>
                 </VStack>
                 <VaultsGrid
                     isLoading={isLoading[0]}
@@ -184,6 +194,7 @@ export default function VaultsPage({
                     address={address}
                     blockchain={blockchain}
                     initialVaults={initialVaults}
+                    // vaults={vaultsStore.vaults} //TODO: this would be ideal
                     vaults={vaults}
                     NFTs={NFTs}
                     bitcoinValue={bitcoinValue}
