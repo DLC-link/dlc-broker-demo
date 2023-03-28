@@ -81,9 +81,13 @@ export default function VaultsPage({
         vaults = vaults.filter(
             (vault) =>
                 NFTs.find((nft) => nft.dlcUUID === vault.raw.uuid) ||
-                ['NotReady', 'Ready', 'Funded', 'Closed'].includes(
-                    vault.raw.status
-                )
+                [
+                    'NotReady',
+                    'Ready',
+                    'Funded',
+                    'Closed',
+                    'Liquidated',
+                ].includes(vault.raw.status)
         );
 
         let allRedeemable = nftVaults.length

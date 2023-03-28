@@ -4,6 +4,8 @@ import { abi as btcNftABI } from '../abis/btcNftABI';
 import eventBus from '../utilities/eventBus';
 import { formatAllVaults } from '../utilities/vaultFormatter';
 import { EthereumNetworks } from '../networks/ethereumNetworks';
+import { login } from '../store/accountSlice';
+import store from '../store/store';
 
 let dlcBrokerETH;
 let btcNftETH;
@@ -65,7 +67,10 @@ export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
             blockchain,
         };
         currentEthereumNetwork = blockchain;
+        // TODO: remove this after proper store setup
         eventBus.dispatch('account-information', accountInformation);
+
+        store.dispatch(login(accountInformation));
     } catch (error) {
         console.error(error);
     }

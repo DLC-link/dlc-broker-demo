@@ -1,10 +1,11 @@
-import { Text, HStack } from '@chakra-ui/react';
+import { Text, HStack, Tooltip } from '@chakra-ui/react';
 import CurrencyBitcoinIcon from '@mui/icons-material/CurrencyBitcoin';
 import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import PaidIcon from '@mui/icons-material/Paid';
+import { InfoOutlined } from '@mui/icons-material';
 
-export default function Status({ status }) {
+export default function Status({ status, isCreator }) {
     switch (status) {
         case 'None':
             return (
@@ -49,6 +50,14 @@ export default function Status({ status }) {
                     <Text fontSize="12px" color="white">
                         NFT Issued
                     </Text>
+                    {!isCreator && (
+                        <Tooltip
+                            label="This vault was not opened by you. You can redeem the collateral value for WBTC."
+                            fontSize="md"
+                        >
+                            <InfoOutlined sx={{ color: 'yellow' }} />
+                        </Tooltip>
+                    )}
                 </HStack>
             );
         case 'PreRepaid':
@@ -85,6 +94,15 @@ export default function Status({ status }) {
                     <Text fontSize="12px" color="white">
                         Liquidated
                     </Text>
+                    {/* We have to switch the flag here, because ownership has been transferred to the current user during closing */}
+                    {isCreator && (
+                        <Tooltip
+                            label="This vault was not opened by you. You have redeemed the underlying collateral for WBTC."
+                            fontSize="md"
+                        >
+                            <InfoOutlined sx={{ color: 'yellow' }} />
+                        </Tooltip>
+                    )}
                 </HStack>
             );
         default:

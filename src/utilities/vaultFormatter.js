@@ -9,7 +9,7 @@ function formatVault(vaultContract) {
         status: statusLookup[vaultContract.status],
         vaultCollateral: parseInt(vaultContract.vaultCollateral._hex),
         nftID: parseInt(vaultContract.nftId._hex),
-        owner: vaultContract.owner,
+        owner: vaultContract.owner.toLowerCase(),
         nftImageURL: undefined,
     };
     return createVaultObject(rawVaultData);

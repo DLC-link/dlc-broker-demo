@@ -11,9 +11,12 @@ import {
 } from '@chakra-ui/react';
 import { easyTruncateAddress } from '../utilities/formatFunctions';
 import eventBus from '../utilities/eventBus';
+import { useDispatch } from 'react-redux';
+import { logout } from '../store/accountSlice';
 
 export default function Account({ isConnected, walletType, address }) {
     const [walletLogo, setWalletLogo] = useState(undefined);
+    const dispatch = useDispatch();
 
     const walletLogos = {
         metamask: {
@@ -35,7 +38,11 @@ export default function Account({ isConnected, walletType, address }) {
     };
 
     const disconnectWallet = () => {
+        // TODO: remove this after proper store setup
         eventBus.dispatch('account-information', {});
+
+        dispatch(logout());
+
         eventBus.dispatch('provider', false);
     };
 

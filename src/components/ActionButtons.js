@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flex, VStack, Button } from '@chakra-ui/react';
+import { Flex, VStack, Button, Tooltip } from '@chakra-ui/react';
 import {
     approveNFTBurn,
     closeVault,
@@ -52,12 +52,14 @@ export function ActionButtons({ action, vault }) {
             return (
                 <Flex>
                     <VStack>
-                        <Button
-                            variant="outline"
-                            onClick={() => closeVault(vault.raw.uuid)}
-                        >
-                            CLOSE VAULT
-                        </Button>
+                        <Tooltip label="Close the vault and redeem the collateral value on the Bitcoin chain. This will unlock the DLC with a full repayment to you. The NFT will be burned.">
+                            <Button
+                                variant="outline"
+                                onClick={() => closeVault(vault.raw.uuid)}
+                            >
+                                CLOSE VAULT
+                            </Button>
+                        </Tooltip>
                     </VStack>
                 </Flex>
             );
@@ -65,7 +67,14 @@ export function ActionButtons({ action, vault }) {
             return (
                 <Flex>
                     <VStack>
-                        <Button variant="outline">LIQUIDATE VAULT</Button>
+                        <Tooltip label="Liquidate the vault and redeem the collateral value for WBTC. The NFT will be burned.">
+                            <Button
+                                variant="outline"
+                                onClick={() => closeVault(vault.raw.uuid)}
+                            >
+                                REDEEM WBTC
+                            </Button>
+                        </Tooltip>
                     </VStack>
                 </Flex>
             );

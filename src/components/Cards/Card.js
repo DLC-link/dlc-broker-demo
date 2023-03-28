@@ -23,10 +23,21 @@ import {
     getNFTMetadata,
 } from '../../blockchainFunctions/ethereumFunctions';
 import { vaultStatuses } from '../../enums/VaultStatuses';
+import { useSelector } from 'react-redux';
 
 export default function Card({ vault, NFTs, status }) {
     const [action, setAction] = useState(undefined);
     const [isLoading, setLoading] = useState(false);
+    const [isOwnVault, setIsOwnVault] = useState(true);
+    const account = useSelector((state) => state.account);
+
+    useEffect(() => {
+        if (account.address === vault.raw.owner) {
+            setIsOwnVault(true);
+        } else {
+            setIsOwnVault(false);
+        }
+    }, [account, vault]);
 
     function getMatchingNft() {
         const NFT = NFTs.find((NFT) => {
@@ -55,7 +66,13 @@ export default function Card({ vault, NFTs, status }) {
                 setLoading(true);
                 handleMetadata().then(() => setLoading(false));
                 handleApproval().then((isApproved) => {
-                    setAction(isApproved ? 'closeVault' : 'approveVault');
+                    setAction(
+                        isApproved
+                            ? isOwnVault
+                                ? 'closeVault'
+                                : 'liquidateVault'
+                            : 'approveVault'
+                    );
                 });
                 break;
             case vaultStatuses.NOTREADY:
@@ -65,6 +82,7 @@ export default function Card({ vault, NFTs, status }) {
                 setAction('pendingVault');
                 break;
             case vaultStatuses.REPAID:
+            case vaultStatuses.LIQUIDATED:
                 setAction('closedVault');
                 break;
             default:
@@ -88,7 +106,10 @@ export default function Card({ vault, NFTs, status }) {
             >
                 <VStack margin="15px">
                     <Flex>
-                        <Status status={vault.raw.status}></Status>
+                        <Status
+                            status={vault.raw.status}
+                            isCreator={vault.raw.owner === account.address}
+                        ></Status>
                     </Flex>
                     <TableContainer>
                         <Table variant="unstyled" size="sm">
@@ -107,7 +128,7 @@ export default function Card({ vault, NFTs, status }) {
                                 </Tr>
                                 <Tr>
                                     <Td>
-                                        <Text variant="property">Owner</Text>
+                                        <Text variant="property">Creator</Text>
                                     </Td>
                                     <Td>
                                         <Text>
