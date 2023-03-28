@@ -95,6 +95,9 @@ export async function setupVault(vaultContract) {
 }
 
 export async function getAllVaultsForAddress(address) {
+    if (!dlcBrokerETH) {
+        await setEthereumProvider();
+    }
     let formattedVaults = [];
     try {
         const vaults = await dlcBrokerETH.getAllVaultsForAddress(address);
@@ -132,6 +135,9 @@ export async function getApproved(nftID) {
 }
 
 export async function getAllNFTsForAddress(address) {
+    if (!btcNftETH) {
+        await setEthereumProvider();
+    }
     let NFTs = [];
     try {
         NFTs = await btcNftETH.getDLCNFTsByOwner(address);
@@ -168,10 +174,8 @@ export async function getVaultsForNFTs(NFTs, ownedVaults) {
     let formattedVaults = [];
     try {
         NFTs = NFTs.filter(
-            (nft) =>
-                !ownedVaults.find((vault) => vault.raw.uuid === nft.dlcUUID)
+            (nft) => !ownedVaults.find((vault) => vault.uuid === nft.dlcUUID)
         );
-        console.log('NFTs owned without owning vault', NFTs);
         vaults = await Promise.all(
             NFTs.map(async (nft) => {
                 const vault = await dlcBrokerETH.getVaultByUUID(nft.dlcUUID);

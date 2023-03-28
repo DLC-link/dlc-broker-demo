@@ -18,7 +18,7 @@ eventBus.on('account-information', (accountInformation) => {
 eventBus.on('vaults', (vaults) => {
     vaultUUIDs = [];
     vaults.forEach((vault) => {
-        vaultUUIDs.push(vault.raw.uuid);
+        vaultUUIDs.push(vault.uuid);
     });
 });
 

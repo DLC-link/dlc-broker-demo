@@ -41,7 +41,7 @@ export function ActionButtons({ action, vault }) {
                     <VStack>
                         <Button
                             variant="outline"
-                            onClick={() => approveNFTBurn(vault.raw.nftID)}
+                            onClick={() => approveNFTBurn(vault.nftID)}
                         >
                             APPROVE FOR CLOSING
                         </Button>
@@ -55,7 +55,7 @@ export function ActionButtons({ action, vault }) {
                         <Tooltip label="Close the vault and redeem the collateral value on the Bitcoin chain. This will unlock the DLC with a full repayment to you. The NFT will be burned.">
                             <Button
                                 variant="outline"
-                                onClick={() => closeVault(vault.raw.uuid)}
+                                onClick={() => closeVault(vault.uuid)}
                             >
                                 CLOSE VAULT
                             </Button>
@@ -70,7 +70,7 @@ export function ActionButtons({ action, vault }) {
                         <Tooltip label="Liquidate the vault and redeem the collateral value for WBTC. The NFT will be burned.">
                             <Button
                                 variant="outline"
-                                onClick={() => closeVault(vault.raw.uuid)}
+                                onClick={() => closeVault(vault.uuid)}
                             >
                                 REDEEM WBTC
                             </Button>

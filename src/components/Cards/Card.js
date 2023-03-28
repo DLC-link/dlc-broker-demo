@@ -32,7 +32,7 @@ export default function Card({ vault, NFTs, status }) {
     const account = useSelector((state) => state.account);
 
     useEffect(() => {
-        if (account.address === vault.raw.owner) {
+        if (account.address === vault.owner) {
             setIsOwnVault(true);
         } else {
             setIsOwnVault(false);
@@ -41,20 +41,20 @@ export default function Card({ vault, NFTs, status }) {
 
     function getMatchingNft() {
         const NFT = NFTs.find((NFT) => {
-            return parseInt(NFT.id._hex) === vault.raw.nftID;
+            return parseInt(NFT.id._hex) === vault.nftID;
         });
         return NFT;
     }
 
     async function handleApproval() {
-        const isApproved = await getApproved(vault.raw.nftID);
+        const isApproved = await getApproved(vault.nftID);
         return isApproved;
     }
 
     async function handleMetadata() {
         const NFT = getMatchingNft(vault, NFTs);
         const NFTMetadata = await getNFTMetadata(NFT.uri);
-        vault.raw.nftImageURL = NFTMetadata;
+        vault.nftImageURL = NFTMetadata;
     }
 
     useEffect(() => {
@@ -107,8 +107,8 @@ export default function Card({ vault, NFTs, status }) {
                 <VStack margin="15px">
                     <Flex>
                         <Status
-                            status={vault.raw.status}
-                            isCreator={vault.raw.owner === account.address}
+                            status={vault.status}
+                            isCreator={isOwnVault}
                         ></Status>
                     </Flex>
                     <TableContainer>
@@ -120,9 +120,7 @@ export default function Card({ vault, NFTs, status }) {
                                     </Td>
                                     <Td>
                                         <Text>
-                                            {easyTruncateAddress(
-                                                vault.raw.uuid
-                                            )}
+                                            {easyTruncateAddress(vault.uuid)}
                                         </Text>
                                     </Td>
                                 </Tr>
@@ -132,9 +130,7 @@ export default function Card({ vault, NFTs, status }) {
                                     </Td>
                                     <Td>
                                         <Text>
-                                            {easyTruncateAddress(
-                                                vault.raw.owner
-                                            )}
+                                            {easyTruncateAddress(vault.owner)}
                                         </Text>
                                     </Td>
                                 </Tr>
@@ -145,20 +141,18 @@ export default function Card({ vault, NFTs, status }) {
                                         </Text>
                                     </Td>
                                     <Td>
-                                        <Text>
-                                            {vault.formatted.vaultCollateral}
-                                        </Text>
+                                        <Text>{vault.formattedCollateral}</Text>
                                     </Td>
                                 </Tr>
                             </Tbody>
                         </Table>
                     </TableContainer>
                     <Box padding="5px">
-                        {vault.raw.status === 'NftIssued' ? (
+                        {vault.status === 'NftIssued' ? (
                             <>
                                 {!isLoading ? (
                                     <Image
-                                        src={vault.raw.nftImageURL}
+                                        src={vault.nftImageURL}
                                         alt="NFT"
                                         margin="0px"
                                         shadow="dark-lg"
