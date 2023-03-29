@@ -18,62 +18,39 @@ import { easyTruncateAddress } from '../../utilities/formatFunctions';
 import Status from '../Status';
 import { ActionButtons } from '../ActionButtons';
 import { useState, useEffect } from 'react';
-import {
-    getApproved,
-    getNFTMetadata,
-} from '../../blockchainFunctions/ethereumFunctions';
 import { vaultStatuses } from '../../enums/VaultStatuses';
 import { useSelector } from 'react-redux';
+import { selectVaultByUUID } from '../../store/vaultsSlice';
 
-export default function Card({ vault, NFTs, status }) {
+export default function Card({ vaultUUID }) {
     const [action, setAction] = useState(undefined);
     const [isLoading, setLoading] = useState(false);
     const [isOwnVault, setIsOwnVault] = useState(true);
-    const account = useSelector((state) => state.account);
+    const userAddress = useSelector((state) => state.account.address); // and this could be removed
+    const vault = useSelector((state) => selectVaultByUUID(state, vaultUUID));
 
     useEffect(() => {
-        if (account.address === vault.owner) {
+        if (vault && userAddress === vault.owner) {
             setIsOwnVault(true);
         } else {
             setIsOwnVault(false);
         }
-    }, [account, vault]);
-
-    function getMatchingNft() {
-        const NFT = NFTs.find((NFT) => {
-            return parseInt(NFT.id._hex) === vault.nftID;
-        });
-        return NFT;
-    }
-
-    async function handleApproval() {
-        const isApproved = await getApproved(vault.nftID);
-        return isApproved;
-    }
-
-    async function handleMetadata() {
-        const NFT = getMatchingNft(vault, NFTs);
-        const NFTMetadata = await getNFTMetadata(NFT.uri);
-        vault.nftImageURL = NFTMetadata;
-    }
+    }, [userAddress, vault]);
 
     useEffect(() => {
-        switch (status) {
+        if (!vault) return;
+        switch (vault.status) {
             case vaultStatuses.READY:
                 setAction('lockVault');
                 break;
             case vaultStatuses.NFTISSUED:
-                setLoading(true);
-                handleMetadata().then(() => setLoading(false));
-                handleApproval().then((isApproved) => {
-                    setAction(
-                        isApproved
-                            ? isOwnVault
-                                ? 'closeVault'
-                                : 'liquidateVault'
-                            : 'approveVault'
-                    );
-                });
+                setAction(
+                    vault.isApproved
+                        ? isOwnVault
+                            ? 'closeVault'
+                            : 'liquidateVault'
+                        : 'approveVault'
+                );
                 break;
             case vaultStatuses.NOTREADY:
             case vaultStatuses.FUNDED:
@@ -88,101 +65,111 @@ export default function Card({ vault, NFTs, status }) {
             default:
                 break;
         }
-    }, [vault, status]);
+    }, [vault, isOwnVault]);
 
     return (
         <>
-            <Flex
-                marginTop="25px"
-                marginBottom="25px"
-                marginLeft="15px"
-                marginRight="15px"
-                height="450px"
-                width="250px"
-                borderRadius="lg"
-                shadow="dark-lg"
-                bgGradient="linear(to-d, secondary1, secondary2)"
-                justifyContent="center"
-            >
-                <VStack margin="15px">
-                    <Flex>
-                        <Status
-                            status={vault.status}
-                            isCreator={isOwnVault}
-                        ></Status>
-                    </Flex>
-                    <TableContainer>
-                        <Table variant="unstyled" size="sm">
-                            <Tbody>
-                                <Tr>
-                                    <Td>
-                                        <Text variant="property">UUID</Text>
-                                    </Td>
-                                    <Td>
-                                        <Text>
-                                            {easyTruncateAddress(vault.uuid)}
-                                        </Text>
-                                    </Td>
-                                </Tr>
-                                <Tr>
-                                    <Td>
-                                        <Text variant="property">Creator</Text>
-                                    </Td>
-                                    <Td>
-                                        <Text>
-                                            {easyTruncateAddress(vault.owner)}
-                                        </Text>
-                                    </Td>
-                                </Tr>
-                                <Tr>
-                                    <Td>
-                                        <Text variant="property">
-                                            Vault Collateral
-                                        </Text>
-                                    </Td>
-                                    <Td>
-                                        <Text>{vault.formattedCollateral}</Text>
-                                    </Td>
-                                </Tr>
-                            </Tbody>
-                        </Table>
-                    </TableContainer>
-                    <Box padding="5px">
-                        {vault.status === 'NftIssued' ? (
-                            <>
-                                {!isLoading ? (
-                                    <Image
-                                        src={vault.nftImageURL}
-                                        alt="NFT"
-                                        margin="0px"
-                                        shadow="dark-lg"
-                                        boxSize="200px"
-                                    ></Image>
-                                ) : (
-                                    <VStack
-                                        boxSize="200px"
-                                        justifyContent="center"
-                                    >
-                                        <CircularProgress
-                                            isIndeterminate
-                                            size="100px"
-                                            color="secondary1"
-                                        />
-                                    </VStack>
-                                )}
-                            </>
-                        ) : (
-                            <Spacer margin="0px" height="200px"></Spacer>
+            {vault && (
+                <Flex
+                    marginTop="25px"
+                    marginBottom="25px"
+                    marginLeft="15px"
+                    marginRight="15px"
+                    height="450px"
+                    width="250px"
+                    borderRadius="lg"
+                    shadow="dark-lg"
+                    bgGradient="linear(to-d, secondary1, secondary2)"
+                    justifyContent="center"
+                >
+                    <VStack margin="15px">
+                        <Flex>
+                            <Status
+                                status={vault.status}
+                                isCreator={isOwnVault}
+                            ></Status>
+                        </Flex>
+                        <TableContainer>
+                            <Table variant="unstyled" size="sm">
+                                <Tbody>
+                                    <Tr>
+                                        <Td>
+                                            <Text variant="property">UUID</Text>
+                                        </Td>
+                                        <Td>
+                                            <Text>
+                                                {easyTruncateAddress(
+                                                    vault.uuid
+                                                )}
+                                            </Text>
+                                        </Td>
+                                    </Tr>
+                                    <Tr>
+                                        <Td>
+                                            <Text variant="property">
+                                                Creator
+                                            </Text>
+                                        </Td>
+                                        <Td>
+                                            <Text>
+                                                {easyTruncateAddress(
+                                                    vault.owner
+                                                )}
+                                            </Text>
+                                        </Td>
+                                    </Tr>
+                                    <Tr>
+                                        <Td>
+                                            <Text variant="property">
+                                                Vault Collateral
+                                            </Text>
+                                        </Td>
+                                        <Td>
+                                            <Text>
+                                                {vault.formattedCollateral}
+                                            </Text>
+                                        </Td>
+                                    </Tr>
+                                </Tbody>
+                            </Table>
+                        </TableContainer>
+                        <Box padding="5px">
+                            {vault.status === 'NftIssued' ? (
+                                <>
+                                    {!isLoading ? (
+                                        <Image
+                                            src={vault.nftImageURL}
+                                            alt="NFT"
+                                            margin="0px"
+                                            shadow="dark-lg"
+                                            boxSize="200px"
+                                        ></Image>
+                                    ) : (
+                                        <VStack
+                                            boxSize="200px"
+                                            justifyContent="center"
+                                        >
+                                            <CircularProgress
+                                                isIndeterminate
+                                                size="100px"
+                                                color="secondary1"
+                                            />
+                                        </VStack>
+                                    )}
+                                </>
+                            ) : (
+                                <Spacer margin="0px" height="200px"></Spacer>
+                            )}
+                        </Box>
+                        {action !== undefined && (
+                            <ActionButtons
+                                action={action}
+                                vault={vault}
+                            ></ActionButtons>
                         )}
-                    </Box>
-                    {action !== undefined && (
-                        <ActionButtons
-                            action={action}
-                            vault={vault}
-                        ></ActionButtons>
-                    )}
-                </VStack>
-            </Flex>
+                    </VStack>
+                </Flex>
+            )}
         </>
     );
 }

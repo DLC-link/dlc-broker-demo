@@ -4,10 +4,11 @@ import {
     createSelector,
 } from '@reduxjs/toolkit';
 import {
-    getAllVaultsForAddress,
     getVaultsForNFTs,
-    getAllNFTsForAddress,
+    fetchVaultsAndNFTs,
+    processNftIssuedVault,
 } from '../blockchainFunctions/ethereumFunctions';
+import { formatAllVaults } from '../utilities/vaultFormatter';
 
 const initialState = {
     vaults: [],
@@ -26,8 +27,7 @@ export const vaultsSlice = createSlice({
             })
             .addCase(fetchVaults.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                // Add any fetched posts to the array
-                state.vaults = state.vaults.concat(action.payload);
+                state.vaults = action.payload;
             })
             .addCase(fetchVaults.rejected, (state, action) => {
                 state.status = 'failed';
@@ -46,6 +46,10 @@ export default vaultsSlice.reducer;
 // Selectors
 
 export const selectAllVaults = (state) => state.vaults.vaults;
+
+export const selectVaultByUUID = (state, uuid) => {
+    return state.vaults.vaults.find((vault) => vault.uuid === uuid);
+};
 
 export const selectTotalRedeemable = createSelector(
     selectAllVaults,
@@ -70,17 +74,18 @@ export const selectTotalNFTs = createSelector(selectAllVaults, (vaults) => {
 export const fetchVaults = createAsyncThunk(
     'vaults/fetchVaults',
     async (address) => {
-        let NFTs = await getAllNFTsForAddress(address);
+        const { vaults, NFTs } = await fetchVaultsAndNFTs(address);
 
-        let vaults = await getAllVaultsForAddress(address);
-        // Based on dlcUUIds in the NFTs, we have to also get the corresponding vaults
-        let nftVaults = await getVaultsForNFTs(NFTs, vaults);
-        console.log('NFTs owned without owning vault', nftVaults);
+        const formattedVaults = formatAllVaults(vaults);
+        const nftUuids = NFTs.map((nft) => nft.dlcUUID);
 
-        // if we don't own the underlying NFT, we don't want to show the vault, unless it is closed or before minting
-        vaults = vaults.filter(
-            (vault) =>
-                NFTs.find((nft) => nft.dlcUUID === vault.uuid) ||
+        const allVaults = [];
+
+        for (const vault of formattedVaults) {
+            const nftIndex = nftUuids.indexOf(vault.uuid);
+            // if we don't own the underlying NFT, we don't want to show the vault, unless it is closed or before minting
+            if (
+                nftIndex >= 0 ||
                 [
                     'NotReady',
                     'Ready',
@@ -88,12 +93,18 @@ export const fetchVaults = createAsyncThunk(
                     'Closed',
                     'Liquidated',
                 ].includes(vault.status)
-        );
+            ) {
+                const processedVault = await processNftIssuedVault(
+                    vault,
+                    nftIndex >= 0 ? NFTs[nftIndex] : null
+                );
+                allVaults.push(processedVault);
+            }
+        }
 
-        let allVaults = nftVaults.length ? [...vaults, ...nftVaults] : vaults;
-        console.log('All redeemable: ', allVaults);
+        const nftVaults = await getVaultsForNFTs(NFTs, formattedVaults);
 
-        // TODO: we could add the extra info in here already, so we could use selectors to get it
+        allVaults.push(...nftVaults);
 
         return allVaults;
     }

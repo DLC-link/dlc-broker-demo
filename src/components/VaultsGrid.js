@@ -12,18 +12,14 @@ import Card from './Cards/Card';
 import InitialCard from './Cards/InitialCard';
 import SetupVaultCard from './Cards/SetupVaultCard';
 import { useSelector } from 'react-redux';
+import { selectAllVaults } from '../store/vaultsSlice';
 
-export default function VaultsGrid({
-    isLoading,
-    isConnected,
-    address,
-    initialVaults,
-    vaults,
-    NFTs,
-}) {
+export default function VaultsGrid({ isLoading, isConnected, initialVaults }) {
+    const vaults = useSelector(selectAllVaults);
     const filters = useSelector((state) => state.filters);
     const account = useSelector((state) => state.account);
 
+    // This should be handled in a selector
     // A function that filters the vaults based on the filters
     const filteredVaults = vaults.filter((vault) => {
         const isOwnVault = account.address === vault.owner;
@@ -45,16 +41,11 @@ export default function VaultsGrid({
                                 <InitialCard
                                     key={j}
                                     vault={vault}
-                                    creator={address}
+                                    creator={account.address}
                                 ></InitialCard>
                             ))}
                             {filteredVaults?.map((vault, i) => (
-                                <Card
-                                    key={i}
-                                    vault={vault}
-                                    NFTs={NFTs}
-                                    status={vault.status}
-                                ></Card>
+                                <Card key={i} vaultUUID={vault.uuid}></Card>
                             ))}
                         </SimpleGrid>
                     </ScaleFade>

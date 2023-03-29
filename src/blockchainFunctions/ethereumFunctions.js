@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { abi as dlcBrokerABI } from '../abis/dlcBrokerABI';
 import { abi as btcNftABI } from '../abis/btcNftABI';
 import eventBus from '../utilities/eventBus';
-import { formatAllVaults } from '../utilities/vaultFormatter';
+import { formatAllVaults, formatVault } from '../utilities/vaultFormatter';
 import { EthereumNetworks } from '../networks/ethereumNetworks';
 import { login } from '../store/accountSlice';
 import store from '../store/store';
@@ -10,6 +10,12 @@ import store from '../store/store';
 let dlcBrokerETH;
 let btcNftETH;
 let currentEthereumNetwork;
+
+async function initializeEthereumProviders() {
+    if (!dlcBrokerETH || !btcNftETH) {
+        await setEthereumProvider();
+    }
+}
 
 export async function setEthereumProvider() {
     const { dlcBrokerAddress, btcNftAddress } =
@@ -126,6 +132,7 @@ export async function approveNFTBurn(nftID) {
 export async function getApproved(nftID) {
     const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
     const approvedAddresses = await btcNftETH.getApproved(nftID);
+    console.log(approvedAddresses);
 
     const approvedLowerCase = Array.isArray(approvedAddresses)
         ? approvedAddresses.map((address) => address.toLowerCase())
@@ -169,24 +176,43 @@ export async function getNFTMetadata(nftURI) {
     return imageURL;
 }
 
-export async function getVaultsForNFTs(NFTs, ownedVaults) {
-    let vaults = [];
-    let formattedVaults = [];
+export async function processNftIssuedVault(vault, nft) {
+    if (vault.status === 'NftIssued') {
+        vault.nftImageURL = await getNFTMetadata(nft.uri);
+        vault.isApproved = await getApproved(vault.nftID);
+        vault.originalDepositor = nft.originalDepositor;
+    }
+    return vault;
+}
+
+export async function getVaultsForNFTs(NFTs, formattedVaults) {
+    let nftVaults = [];
     try {
-        NFTs = NFTs.filter(
-            (nft) => !ownedVaults.find((vault) => vault.uuid === nft.dlcUUID)
-        );
-        vaults = await Promise.all(
+        nftVaults = await Promise.all(
             NFTs.map(async (nft) => {
+                if (
+                    formattedVaults.find((vault) => vault.uuid === nft.dlcUUID)
+                ) {
+                    return null;
+                }
                 const vault = await dlcBrokerETH.getVaultByUUID(nft.dlcUUID);
-                return vault;
+                const formattedVault = formatVault(vault);
+                return processNftIssuedVault(formattedVault, nft);
             })
         );
-        formattedVaults = formatAllVaults(vaults);
     } catch (error) {
         console.error(error);
     }
-    return formattedVaults;
+    return nftVaults.filter((vault) => vault !== null);
+}
+
+export async function fetchVaultsAndNFTs(address) {
+    await initializeEthereumProviders();
+    const [vaults, NFTs] = await Promise.all([
+        dlcBrokerETH.getAllVaultsForAddress(address),
+        btcNftETH.getDLCNFTsByOwner(address),
+    ]);
+    return { vaults, NFTs };
 }
 
 async function getVaultByUUID(vaultContractUUID) {

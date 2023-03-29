@@ -1,7 +1,7 @@
 import { customShiftValue } from '../utilities/formatFunctions';
 import { vaultStatuses } from '../enums/VaultStatuses';
 
-function formatVault(vaultContract) {
+export function formatVault(vaultContract) {
     const statusLookup = Object.values(vaultStatuses);
     const collateralValue = parseInt(vaultContract.vaultCollateral._hex);
     return {
