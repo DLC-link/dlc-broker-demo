@@ -1,17 +1,23 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import {
+    createSlice,
+    createAsyncThunk,
+    createSelector,
+} from '@reduxjs/toolkit';
 import {
     getAllVaultsForAddress,
     getVaultsForNFTs,
     getAllNFTsForAddress,
 } from '../blockchainFunctions/ethereumFunctions';
 
+const initialState = {
+    vaults: [],
+    status: 'idle',
+    error: null,
+};
+
 export const vaultsSlice = createSlice({
     name: 'vaults',
-    initialState: {
-        vaults: [],
-        status: 'idle',
-        error: null,
-    },
+    initialState: initialState,
     reducers: {},
     extraReducers(builder) {
         builder
@@ -26,7 +32,8 @@ export const vaultsSlice = createSlice({
             .addCase(fetchVaults.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
-            });
+            })
+            .addCase('account/logout', () => initialState);
     },
 });
 
@@ -35,7 +42,30 @@ export const vaultsSlice = createSlice({
 
 export default vaultsSlice.reducer;
 
+/////////////////////////////////////////////////////
+// Selectors
+
 export const selectAllVaults = (state) => state.vaults.vaults;
+
+export const selectTotalRedeemable = createSelector(
+    selectAllVaults,
+    (vaults) => {
+        return vaults
+            .filter((vault) => ['Funded', 'NftIssued'].includes(vault.status))
+            .map((vault) => vault.vaultCollateral)
+            .reduce((acc, curr) => acc + curr, 0);
+    }
+);
+
+export const selectTotalNFTs = createSelector(selectAllVaults, (vaults) => {
+    return vaults.filter((vault) => vault.status === 'NftIssued').length;
+});
+
+// TODO: selector ideas:
+// - select all vaults that are closed/liquidated
+
+/////////////////////////////////////////////////////
+// Data fetching
 
 export const fetchVaults = createAsyncThunk(
     'vaults/fetchVaults',

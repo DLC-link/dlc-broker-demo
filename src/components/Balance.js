@@ -1,7 +1,12 @@
 import React from 'react';
 import { Text, HStack, Flex } from '@chakra-ui/react';
+import { useSelector } from 'react-redux';
+import { selectTotalRedeemable, selectTotalNFTs } from '../store/vaultsSlice';
+import { customShiftValue } from '../utilities/formatFunctions';
 
-export default function Balance({ depositAmount, nftQuantity }) {
+export default function Balance() {
+    const totalRedeemable = useSelector(selectTotalRedeemable);
+    const numberOfNFTs = useSelector(selectTotalNFTs);
     return (
         <>
             <>
@@ -25,7 +30,9 @@ export default function Balance({ depositAmount, nftQuantity }) {
                         >
                             Total Redeemable:{' '}
                         </Text>
-                        <Text paddingRight="25px">{depositAmount} BTC</Text>
+                        <Text paddingRight="25px">
+                            {customShiftValue(totalRedeemable, 8, true)} BTC
+                        </Text>
                         <Text
                             paddingLeft="25px"
                             fontSize="small"
@@ -34,7 +41,7 @@ export default function Balance({ depositAmount, nftQuantity }) {
                         >
                             Owned NFTs:{' '}
                         </Text>
-                        <Text>{nftQuantity}</Text>
+                        <Text>{numberOfNFTs}</Text>
                     </HStack>
                 </Flex>
             </>

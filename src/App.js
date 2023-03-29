@@ -8,7 +8,6 @@ import { Box, useToast } from '@chakra-ui/react';
 import { useState } from 'react';
 import CustomToast from './components/CustomToast';
 import VaultsPage from './components/VaultsPage';
-import { customShiftValue } from './utilities/formatFunctions';
 import { setEthereumProvider } from './blockchainFunctions/ethereumFunctions';
 import { startEthObserver } from './observer';
 import InfoModal from './modals/InfoModal';
@@ -21,9 +20,6 @@ export default function App() {
     const [isDepositModalOpen, setDepositModalOpen] = useState(false);
     const [isInfoModalOpen, setInfoModalOpen] = useState(false);
     const [blockchain, setBlockchain] = useState(undefined);
-    const [depositAmount, setDepositAmount] = useState(undefined);
-    const [nftQuantity, setNftQuantity] = useState(undefined);
-    const [walletBalance, setWalletBalance] = useState(0);
     const [isProviderSet, setProvider] = useState(false);
     const toast = useToast();
 
@@ -69,12 +65,6 @@ export default function App() {
         eventBus.on('is-deposit-modal-open', (data) =>
             setDepositModalOpen(data.isDepositOpen)
         );
-        eventBus.on('change-deposit-amount', (data) =>
-            setDepositAmount(customShiftValue(data.depositAmount, 8, true))
-        );
-        eventBus.on('change-nft-quantity', (data) =>
-            setNftQuantity(data.nftQuantity)
-        );
     }, []);
 
     const handleAccountInformation = (data) => {
@@ -98,9 +88,7 @@ export default function App() {
                 <Header
                     isConnected={isConnected}
                     walletType={walletType}
-                    walletBalance={walletBalance}
                     address={address}
-                    depositAmount={depositAmount}
                 ></Header>
                 <DepositModal
                     walletType={walletType}
@@ -122,8 +110,6 @@ export default function App() {
                         walletType={walletType}
                         address={address}
                         blockchain={blockchain}
-                        depositAmount={depositAmount}
-                        nftQuantity={nftQuantity}
                     ></VaultsPage>
                 )}
             </Box>

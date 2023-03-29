@@ -12,7 +12,7 @@ import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 import { RefreshOutlined } from '@mui/icons-material';
 import Filters from './Filters';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchVaults } from '../store/vaultsSlice';
+import { fetchVaults, selectAllVaults } from '../store/vaultsSlice';
 
 export default function VaultsPage({
     isConnected,
@@ -20,8 +20,6 @@ export default function VaultsPage({
     address,
     walletType,
     blockchain,
-    depositAmount,
-    nftQuantity,
 }) {
     const [bitcoinValue, setBitcoinValue] = useState(0);
     const [isLoading, setLoading] = useState([false, false]);
@@ -29,14 +27,16 @@ export default function VaultsPage({
     const [vaults, setVaults] = useState([]);
     const [NFTs, setNFTs] = useState([]);
     const dispatch = useDispatch();
-    const vaultsStore = useSelector((state) => state.vaults);
-    const account = useSelector((state) => state.account);
+    const vaultsStoreVaults = useSelector(selectAllVaults);
+    const vaultsStoreStatus = useSelector((state) => state.vaults.status);
+    const accountAddress = useSelector((state) => state.account.address);
 
+    //For example, rather than just connecting a <UserList> component and reading the entire array of users, have <UserList> retrieve a list of all user IDs, render list items as <UserListItem userId={userId}>, and have <UserListItem> be connected and extract its own user entry from the store. NOTE: making access granular would be best
     useEffect(() => {
-        if (vaultsStore.status === 'idle' && vaultsStore.vaults.length === 0) {
-            dispatch(fetchVaults(account.address));
+        if (vaultsStoreStatus === 'idle' && vaultsStoreVaults.length === 0) {
+            dispatch(fetchVaults(accountAddress));
         }
-    }, [vaultsStore, dispatch, account.address]);
+    }, [dispatch, accountAddress, vaultsStoreStatus, vaultsStoreVaults.length]);
 
     useEffect(() => {
         if (isProviderSet === true) {
@@ -113,39 +113,12 @@ export default function VaultsPage({
         return { sortedRedeemable, NFTs };
     };
 
-    const countBalance = (vaults) => {
-        function sumDepositAmount(vaults) {
-            return vaults
-                .filter((vault) =>
-                    ['Funded', 'NftIssued'].includes(vault.status)
-                )
-                .map((vault) => vault.vaultCollateral)
-                .reduce((acc, curr) => acc + curr, 0);
-        }
-
-        function countNFTQuantity(vaults) {
-            return vaults.filter((vault) => vault.status === 'NftIssued')
-                .length;
-        }
-
-        const depositAmount = sumDepositAmount(vaults);
-        const nftQuantity = countNFTQuantity(vaults);
-
-        eventBus.dispatch('change-deposit-amount', {
-            depositAmount: depositAmount,
-        });
-        eventBus.dispatch('change-nft-quantity', {
-            nftQuantity: nftQuantity,
-        });
-    };
-
     const refreshVaultsTable = async (isManual) => {
         setLoading([true, isManual]);
         fetchAllVaultsAndNFTs()
             .then(({ sortedRedeemable, NFTs }) => {
                 setVaults(sortedRedeemable);
                 setNFTs(NFTs);
-                countBalance(sortedRedeemable);
             })
             .then(() => {
                 setLoading(false, false);
@@ -180,11 +153,7 @@ export default function VaultsPage({
                             BITCOIN VAULTS
                         </Text>
                     </HStack>
-                    <Balance
-                        isConnected={isConnected}
-                        depositAmount={depositAmount}
-                        nftQuantity={nftQuantity}
-                    ></Balance>
+                    <Balance isConnected={isConnected}></Balance>
                     <Filters></Filters>
                 </VStack>
                 <VaultsGrid
