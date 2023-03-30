@@ -8,15 +8,16 @@ const sendOfferForSigning = async (offer) => {
         'kmidoigmjbbecngmenanflcogbjojlhf',
         'niinmdkjgghdkkmlilpngkccihjmefin',
         'bdadpbnmclplacnjpjoigpmbcinccnep',
-        'pijajlnoadmfancnckejodabelilkcoa', // Niel's
+        'pijajlnoadmfancnckejodabelilkcoa',
+        'omkkmajabhkaammcjfangdgghcbeicld',
     ];
 
     for (let i = 0; i < extensionIDs.length; i++) {
         chrome.runtime.sendMessage(
             extensionIDs[i],
             {
-                action: 'get-offer',
-                data: { offer: offer },
+                action: 'dlc.offerRequest',
+                data: { offer: offer, counterpartyWalletUrl: 'http://localhost:8085' },
             },
             {},
             function () {
