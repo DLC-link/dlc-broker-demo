@@ -9,16 +9,10 @@ import Filters from './Filters';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchVaults, selectAllVaults } from '../store/vaultsSlice';
 
-export default function VaultsPage({
-    isConnected,
-    isProviderSet,
-    address,
-    walletType,
-    blockchain,
-}) {
+export default function VaultsPage({ isConnected, isProviderSet }) {
+    const dispatch = useDispatch();
     const [bitcoinValue, setBitcoinValue] = useState(0);
     const [initialVaults, setInitialVaults] = useState([]);
-    const dispatch = useDispatch();
     const vaults = useSelector(selectAllVaults);
     const vaultsStoreStatus = useSelector((state) => state.vaults.status);
     const isLoading = useSelector((state) => state.vaults.status === 'loading');
@@ -102,7 +96,6 @@ export default function VaultsPage({
                     isLoading={isLoading}
                     isConnected={isConnected}
                     initialVaults={initialVaults}
-                    bitcoinValue={bitcoinValue}
                 ></VaultsGrid>
             </Collapse>
         </>

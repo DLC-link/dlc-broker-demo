@@ -3,6 +3,7 @@ import {
     createAsyncThunk,
     createSelector,
 } from '@reduxjs/toolkit';
+import store from './store';
 import {
     getVaultsForNFTs,
     fetchVaultsAndNFTs,
@@ -14,12 +15,23 @@ const initialState = {
     vaults: [],
     status: 'idle',
     error: null,
+    filters: {
+        showMinted: true,
+        showReceived: true,
+    },
 };
 
 export const vaultsSlice = createSlice({
     name: 'vaults',
     initialState: initialState,
-    reducers: {},
+    reducers: {
+        mintedFilterChanged: (state, action) => {
+            state.filters.showMinted = action.payload;
+        },
+        receivedFilterChanged: (state, action) => {
+            state.filters.showReceived = action.payload;
+        },
+    },
     extraReducers(builder) {
         builder
             .addCase(fetchVaults.pending, (state, action) => {
@@ -38,7 +50,8 @@ export const vaultsSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-// export const { setShowMinted, setShowReceived } = vaultsSlice.actions;
+export const { mintedFilterChanged, receivedFilterChanged } =
+    vaultsSlice.actions;
 
 export default vaultsSlice.reducer;
 
@@ -65,8 +78,22 @@ export const selectTotalNFTs = createSelector(selectAllVaults, (vaults) => {
     return vaults.filter((vault) => vault.status === 'NftIssued').length;
 });
 
-// TODO: selector ideas:
-// - select all vaults that are closed/liquidated
+export const selectFilters = (state) => state.vaults.filters;
+
+export const selectFilteredVaults = createSelector(
+    selectAllVaults,
+    selectFilters,
+    (vaults, filters) => {
+        const userAddress = store.getState().account.address;
+        return vaults.filter((vault) => {
+            const isOwnVault = userAddress === vault.originalDepositor;
+            return (
+                (isOwnVault && filters.showMinted) ||
+                (!isOwnVault && filters.showReceived)
+            );
+        });
+    }
+);
 
 /////////////////////////////////////////////////////
 // Data fetching

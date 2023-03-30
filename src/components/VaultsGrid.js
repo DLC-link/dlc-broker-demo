@@ -12,22 +12,11 @@ import Card from './Cards/Card';
 import InitialCard from './Cards/InitialCard';
 import SetupVaultCard from './Cards/SetupVaultCard';
 import { useSelector } from 'react-redux';
-import { selectAllVaults } from '../store/vaultsSlice';
+import { selectFilteredVaults } from '../store/vaultsSlice';
 
 export default function VaultsGrid({ isLoading, isConnected, initialVaults }) {
-    const vaults = useSelector(selectAllVaults);
-    const filters = useSelector((state) => state.filters);
     const account = useSelector((state) => state.account);
-
-    // This should be handled in a selector
-    // A function that filters the vaults based on the filters
-    const filteredVaults = vaults.filter((vault) => {
-        const isOwnVault = account.address === vault.owner;
-        return (
-            (isOwnVault && filters.showMinted) ||
-            (!isOwnVault && filters.showReceived)
-        );
-    });
+    const filteredVaults = useSelector(selectFilteredVaults);
 
     return (
         <>

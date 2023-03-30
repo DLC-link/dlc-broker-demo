@@ -107,9 +107,6 @@ export default function App() {
                     <VaultsPage
                         isConnected={isConnected}
                         isProviderSet={isProviderSet}
-                        walletType={walletType}
-                        address={address}
-                        blockchain={blockchain}
                     ></VaultsPage>
                 )}
             </Box>

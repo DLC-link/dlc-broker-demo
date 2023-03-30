@@ -180,7 +180,7 @@ export async function processNftIssuedVault(vault, nft) {
     if (vault.status === 'NftIssued') {
         vault.nftImageURL = await getNFTMetadata(nft.uri);
         vault.isApproved = await getApproved(vault.nftID);
-        vault.originalDepositor = nft.originalDepositor;
+        vault.originalDepositor = nft.originalDepositor.toLowerCase();
     }
     return vault;
 }

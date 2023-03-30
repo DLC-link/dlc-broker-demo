@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setShowReceived, setShowMinted } from '../store/filtersSlice';
+import {
+    mintedFilterChanged,
+    receivedFilterChanged,
+} from '../store/vaultsSlice';
 
 import { Text, HStack, Flex, VStack, Switch } from '@chakra-ui/react';
+import { selectFilters } from '../store/vaultsSlice';
 
 export default function Filters() {
-    const filters = useSelector((state) => state.filters);
+    const filters = useSelector(selectFilters);
     const dispatch = useDispatch();
     return (
         <>
@@ -43,7 +47,7 @@ export default function Filters() {
                         size="sm"
                         isChecked={filters.showMinted}
                         onChange={(e) =>
-                            dispatch(setShowMinted(e.target.checked))
+                            dispatch(mintedFilterChanged(e.target.checked))
                         }
                     />
                 </HStack>
@@ -64,7 +68,7 @@ export default function Filters() {
                         size="sm"
                         isChecked={filters.showReceived}
                         onChange={(e) =>
-                            dispatch(setShowReceived(e.target.checked))
+                            dispatch(receivedFilterChanged(e.target.checked))
                         }
                     />
                 </HStack>
