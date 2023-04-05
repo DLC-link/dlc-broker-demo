@@ -9,14 +9,18 @@ const sendOfferForSigning = async (offer) => {
         'niinmdkjgghdkkmlilpngkccihjmefin',
         'bdadpbnmclplacnjpjoigpmbcinccnep',
         'pijajlnoadmfancnckejodabelilkcoa', // Niel's
+        'ciklofdnappakofbgdmklkbmkegkoboh',
     ];
 
     for (let i = 0; i < extensionIDs.length; i++) {
         chrome.runtime.sendMessage(
             extensionIDs[i],
             {
-                action: 'get-offer',
-                data: { offer: offer },
+                action: 'dlc.offerRequest',
+                data: {
+                    offer: offer,
+                    counterpartyWalletUrl: process.env.REACT_APP_WALLET_DOMAIN,
+                },
             },
             {},
             function () {
@@ -37,8 +41,8 @@ export const lockBTC = async (vaultContract) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                uuid: vaultContract.raw.uuid,
-                acceptCollateral: parseInt(vaultContract.raw.vaultCollateral),
+                uuid: vaultContract.uuid,
+                acceptCollateral: parseInt(vaultContract.vaultCollateral),
                 offerCollateral: 1000,
                 totalOutcomes: 100,
             }),

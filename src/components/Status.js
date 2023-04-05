@@ -16,6 +16,7 @@ export default function Status({ status, isCreator }) {
                     </Text>
                 </HStack>
             );
+        case 'Initialized':
         case 'NotReady':
             return (
                 <HStack spacing={2}>
@@ -95,7 +96,7 @@ export default function Status({ status, isCreator }) {
                         Liquidated
                     </Text>
                     {/* We have to switch the flag here, because ownership has been transferred to the current user during closing */}
-                    {isCreator && (
+                    {!isCreator && (
                         <Tooltip
                             label="This vault was not opened by you. You have redeemed the underlying collateral for WBTC."
                             fontSize="md"

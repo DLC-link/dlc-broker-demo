@@ -13,6 +13,7 @@ export function formatVault(vaultContract) {
             customShiftValue(collateralValue, 8, true) + ' BTC',
         nftID: parseInt(vaultContract.nftId._hex),
         owner: vaultContract.owner.toLowerCase(),
+        originalCreator: vaultContract.originalCreator.toLowerCase(),
         nftImageURL: undefined,
     };
 }

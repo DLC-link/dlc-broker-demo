@@ -26,13 +26,13 @@ export default function VaultsGrid({ isLoading, isConnected, initialVaults }) {
                     <ScaleFade in={!isLoading}>
                         <SimpleGrid columns={[1, 4]} spacing={[0, 15]}>
                             <SetupVaultCard></SetupVaultCard>
-                            {initialVaults?.map((vault, j) => (
+                            {/* {initialVaults?.map((vault, j) => (
                                 <InitialCard
                                     key={j}
                                     vault={vault}
                                     creator={account.address}
                                 ></InitialCard>
-                            ))}
+                            ))} */}
                             {filteredVaults?.map((vault, i) => (
                                 <Card key={i} vaultUUID={vault.uuid}></Card>
                             ))}

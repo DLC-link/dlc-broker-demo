@@ -36,7 +36,7 @@ export default function Filters() {
                             fontSize="small"
                             fontWeight="extrabold"
                             as="span"
-                            color="secondary1"
+                            color="primary1"
                         >
                             created by me
                         </Text>

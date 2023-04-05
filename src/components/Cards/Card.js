@@ -18,54 +18,12 @@ import { easyTruncateAddress } from '../../utilities/formatFunctions';
 import Status from '../Status';
 import { ActionButtons } from '../ActionButtons';
 import { useState, useEffect } from 'react';
-import { vaultStatuses } from '../../enums/VaultStatuses';
 import { useSelector } from 'react-redux';
 import { selectVaultByUUID } from '../../store/vaultsSlice';
 
 export default function Card({ vaultUUID }) {
-    const [action, setAction] = useState(undefined);
     const [isLoading, setLoading] = useState(false);
-    const [isOwnVault, setIsOwnVault] = useState(true);
-    const userAddress = useSelector((state) => state.account.address); // and this could be removed
     const vault = useSelector((state) => selectVaultByUUID(state, vaultUUID));
-
-    useEffect(() => {
-        if (vault && userAddress === vault.owner) {
-            setIsOwnVault(true);
-        } else {
-            setIsOwnVault(false);
-        }
-    }, [userAddress, vault]);
-
-    useEffect(() => {
-        if (!vault) return;
-        switch (vault.status) {
-            case vaultStatuses.READY:
-                setAction('lockVault');
-                break;
-            case vaultStatuses.NFTISSUED:
-                setAction(
-                    vault.isApproved
-                        ? isOwnVault
-                            ? 'closeVault'
-                            : 'liquidateVault'
-                        : 'approveVault'
-                );
-                break;
-            case vaultStatuses.NOTREADY:
-            case vaultStatuses.FUNDED:
-            case vaultStatuses.PREREPAID:
-            case vaultStatuses.PRELIQUIDATED:
-                setAction('pendingVault');
-                break;
-            case vaultStatuses.REPAID:
-            case vaultStatuses.LIQUIDATED:
-                setAction('closedVault');
-                break;
-            default:
-                break;
-        }
-    }, [vault, isOwnVault]);
 
     return (
         <>
@@ -79,14 +37,18 @@ export default function Card({ vaultUUID }) {
                     width="250px"
                     borderRadius="lg"
                     shadow="dark-lg"
-                    bgGradient="linear(to-d, secondary1, secondary2)"
+                    bgGradient={
+                        vault.isUserCreated
+                            ? 'linear(to-b, primary1, background2)'
+                            : 'linear(to-b, secondary2, background2)'
+                    }
                     justifyContent="center"
                 >
                     <VStack margin="15px">
                         <Flex>
                             <Status
                                 status={vault.status}
-                                isCreator={isOwnVault}
+                                isCreator={vault.isUserCreated}
                             ></Status>
                         </Flex>
                         <TableContainer>
@@ -161,12 +123,8 @@ export default function Card({ vaultUUID }) {
                                 <Spacer margin="0px" height="200px"></Spacer>
                             )}
                         </Box>
-                        {action !== undefined && (
-                            <ActionButtons
-                                action={action}
-                                vault={vault}
-                            ></ActionButtons>
-                        )}
+
+                        <ActionButtons vaultUUID={vaultUUID}></ActionButtons>
                     </VStack>
                 </Flex>
             )}

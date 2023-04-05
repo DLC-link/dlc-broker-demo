@@ -10,6 +10,7 @@ import {
     processNftIssuedVault,
 } from '../blockchainFunctions/ethereumFunctions';
 import { formatAllVaults } from '../utilities/vaultFormatter';
+import { customShiftValue } from '../utilities/formatFunctions';
 
 const initialState = {
     vaults: [],
@@ -31,6 +32,40 @@ export const vaultsSlice = createSlice({
         receivedFilterChanged: (state, action) => {
             state.filters.showReceived = action.payload;
         },
+        vaultSetupRequested: (state, action) => {
+            const tempVault = {
+                uuid: '',
+                status: 'Initialized',
+                vaultCollateral: action.payload.BTCDeposit,
+                formattedCollateral:
+                    customShiftValue(action.payload.BTCDeposit, 8, true) +
+                    ' BTC',
+                isUserCreated: true,
+            };
+            state.vaults.unshift(tempVault);
+        },
+        vaultStatusChanged: (state, action) => {
+            // TODO: this is not working currently
+            // const { vaultUUID, vaultStatus } = action.payload;
+            // console.log('vaultStatusChanged', vaultUUID, vaultStatus);
+            // if (vaultStatus === 'NotReady') {
+            //     // we get an update on a new vault
+            //     const tempVault = state.vaults.find(
+            //         (v) => v.status === 'Initialized'
+            //     );
+            //     if (tempVault) {
+            //         tempVault.status = 'NotReady';
+            //         tempVault.uuid = vaultUUID;
+            //     }
+            //     return;
+            // }
+            // const existingVault = state.vaults.find(
+            //     (vault) => vault.uuid === vaultUUID
+            // );
+            // if (existingVault) {
+            //     existingVault.status = vaultStatus;
+            // }
+        },
     },
     extraReducers(builder) {
         builder
@@ -39,6 +74,7 @@ export const vaultsSlice = createSlice({
             })
             .addCase(fetchVaults.fulfilled, (state, action) => {
                 state.status = 'succeeded';
+                state.error = null;
                 state.vaults = action.payload;
             })
             .addCase(fetchVaults.rejected, (state, action) => {
@@ -50,15 +86,21 @@ export const vaultsSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { mintedFilterChanged, receivedFilterChanged } =
-    vaultsSlice.actions;
+export const {
+    mintedFilterChanged,
+    receivedFilterChanged,
+    vaultSetupRequested,
+    vaultStatusChanged,
+} = vaultsSlice.actions;
 
 export default vaultsSlice.reducer;
 
 /////////////////////////////////////////////////////
 // Selectors
 
-export const selectAllVaults = (state) => state.vaults.vaults;
+export const selectAllVaults = (state) => {
+    return state.vaults.vaults.slice().sort((a, b) => b.id - a.id);
+};
 
 export const selectVaultByUUID = (state, uuid) => {
     return state.vaults.vaults.find((vault) => vault.uuid === uuid);
@@ -84,12 +126,10 @@ export const selectFilteredVaults = createSelector(
     selectAllVaults,
     selectFilters,
     (vaults, filters) => {
-        const userAddress = store.getState().account.address;
         return vaults.filter((vault) => {
-            const isOwnVault = userAddress === vault.originalDepositor;
             return (
-                (isOwnVault && filters.showMinted) ||
-                (!isOwnVault && filters.showReceived)
+                (vault.isUserCreated && filters.showMinted) ||
+                (!vault.isUserCreated && filters.showReceived)
             );
         });
     }
@@ -102,11 +142,10 @@ export const fetchVaults = createAsyncThunk(
     'vaults/fetchVaults',
     async (address) => {
         const { vaults, NFTs } = await fetchVaultsAndNFTs(address);
-
         const formattedVaults = formatAllVaults(vaults);
         const nftUuids = NFTs.map((nft) => nft.dlcUUID);
 
-        const allVaults = [];
+        let allVaults = [];
 
         for (const vault of formattedVaults) {
             const nftIndex = nftUuids.indexOf(vault.uuid);
@@ -132,6 +171,12 @@ export const fetchVaults = createAsyncThunk(
         const nftVaults = await getVaultsForNFTs(NFTs, formattedVaults);
 
         allVaults.push(...nftVaults);
+
+        const userAddress = store.getState().account.address;
+        allVaults = allVaults.map((vault) => {
+            vault.isUserCreated = vault.originalCreator === userAddress;
+            return vault;
+        });
 
         return allVaults;
     }

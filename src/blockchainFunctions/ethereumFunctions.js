@@ -6,6 +6,7 @@ import { formatAllVaults, formatVault } from '../utilities/vaultFormatter';
 import { EthereumNetworks } from '../networks/ethereumNetworks';
 import { login } from '../store/accountSlice';
 import store from '../store/store';
+import { vaultSetupRequested } from '../store/vaultsSlice';
 
 let dlcBrokerETH;
 let btcNftETH;
@@ -89,12 +90,14 @@ export async function setupVault(vaultContract) {
                 vaultContract.BTCDeposit,
                 vaultContract.emergencyRefundTime
             )
-            .then(() =>
+            .then((e) => {
+                console.log(e);
+                store.dispatch(vaultSetupRequested(vaultContract));
                 eventBus.dispatch('vault-event', {
                     status: 'Initialized',
                     vaultContract: vaultContract,
-                })
-            );
+                });
+            });
     } catch (error) {
         console.error(error);
     }
@@ -132,7 +135,6 @@ export async function approveNFTBurn(nftID) {
 export async function getApproved(nftID) {
     const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
     const approvedAddresses = await btcNftETH.getApproved(nftID);
-    console.log(approvedAddresses);
 
     const approvedLowerCase = Array.isArray(approvedAddresses)
         ? approvedAddresses.map((address) => address.toLowerCase())
@@ -180,7 +182,6 @@ export async function processNftIssuedVault(vault, nft) {
     if (vault.status === 'NftIssued') {
         vault.nftImageURL = await getNFTMetadata(nft.uri);
         vault.isApproved = await getApproved(vault.nftID);
-        vault.originalDepositor = nft.originalDepositor.toLowerCase();
     }
     return vault;
 }
