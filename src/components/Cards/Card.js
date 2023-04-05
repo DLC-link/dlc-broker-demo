@@ -37,12 +37,18 @@ export default function Card({ vaultUUID }) {
                     width="250px"
                     borderRadius="lg"
                     shadow="dark-lg"
+                    backgroundPosition='right'
+                    backgroundSize={'200%'}
+                    transition= 'background-position 500ms ease'
                     bgGradient={
                         vault.isUserCreated
-                            ? 'linear(to-b, primary1, background2)'
-                            : 'linear(to-b, secondary2, background2)'
+                            ? 'linear(to-br, background1, transparent)'
+                            : 'linear(to-br, background2, transparent)'
                     }
                     justifyContent="center"
+                    _hover={{
+                       backgroundPosition:'left',
+                    }}
                 >
                     <VStack margin="15px">
                         <Flex>

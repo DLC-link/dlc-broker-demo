@@ -46,7 +46,7 @@ export default function Status({ status, isCreator }) {
             );
         case 'NftIssued':
             return (
-                <HStack spacing={2}>
+                <HStack spacing={!isCreator ? 4 : 2}>
                     <CurrencyBitcoinIcon sx={{ color: 'green' }} />
                     <Text fontSize="12px" color="white">
                         NFT Issued
@@ -54,9 +54,12 @@ export default function Status({ status, isCreator }) {
                     {!isCreator && (
                         <Tooltip
                             label="This vault was not opened by you. You can redeem the collateral value for WBTC."
-                            fontSize="md"
+                            fontSize={'sm'}
+                            padding={2}
+                            textAlign={'justify'}
+                            borderRadius={'lg'}
                         >
-                            <InfoOutlined sx={{ color: 'yellow' }} />
+                            <InfoOutlined sx={{ color: '#07E8D8' }} />
                         </Tooltip>
                     )}
                 </HStack>
@@ -90,7 +93,7 @@ export default function Status({ status, isCreator }) {
             );
         case 'Liquidated':
             return (
-                <HStack spacing={2}>
+                <HStack spacing={4}>
                     <CurrencyExchangeIcon sx={{ color: 'green' }} />
                     <Text fontSize="12px" color="white">
                         Liquidated
@@ -99,9 +102,12 @@ export default function Status({ status, isCreator }) {
                     {!isCreator && (
                         <Tooltip
                             label="This vault was not opened by you. You have redeemed the underlying collateral for WBTC."
-                            fontSize="md"
+                            fontSize={'sm'}
+                            padding={2}
+                            textAlign={'justify'}
+                            borderRadius={'lg'}
                         >
-                            <InfoOutlined sx={{ color: 'yellow' }} />
+                            <InfoOutlined sx={{ color: '#07E8D8' }} />
                         </Tooltip>
                     )}
                 </HStack>

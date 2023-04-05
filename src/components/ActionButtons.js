@@ -46,7 +46,13 @@ export function ActionButtons({ vaultUUID }) {
                     return (
                         <Flex>
                             <VStack>
-                                <Tooltip label="Close the vault and redeem the collateral value on the Bitcoin chain. This will unlock the DLC with a full repayment to you. The NFT will be burned.">
+                                <Tooltip
+                                    label="Close the vault and redeem the collateral value on the Bitcoin chain. This will unlock the DLC with a full repayment to you. The NFT will be burned."
+                                    fontSize={'sm'}
+                                    padding={2}
+                                    textAlign={'justify'}
+                                    borderRadius={'lg'}
+                                >
                                     <Button
                                         variant="outline"
                                         onClick={() => closeVault(vault.uuid)}
@@ -61,7 +67,13 @@ export function ActionButtons({ vaultUUID }) {
                 return (
                     <Flex>
                         <VStack>
-                            <Tooltip label="Liquidate the vault and redeem the collateral value for WBTC. The NFT will be burned.">
+                            <Tooltip
+                                label="Liquidate the vault and redeem the collateral value for WBTC. The NFT will be burned."
+                                fontSize={'sm'}
+                                padding={2}
+                                textAlign={'justify'}
+                                borderRadius={'lg'}
+                            >
                                 <Button
                                     variant="outline"
                                     onClick={() => closeVault(vault.uuid)}
