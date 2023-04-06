@@ -1,40 +1,44 @@
 import React from 'react';
-import { Text, HStack, Flex } from '@chakra-ui/react';
+import { Text, HStack, Flex, Spacer } from '@chakra-ui/react';
+import { useSelector } from 'react-redux';
+import { selectTotalRedeemable, selectTotalNFTs } from '../store/vaultsSlice';
+import { customShiftValue } from '../utilities/formatFunctions';
 
-export default function Balance({ depositAmount, nftQuantity }) {
+export default function Balance() {
+    const totalRedeemable = useSelector(selectTotalRedeemable);
+    const numberOfNFTs = useSelector(selectTotalNFTs);
     return (
         <>
             <>
                 <Flex
-                    paddingTop="15px"
-                    paddingBottom="15px"
-                    height="15px"
+                    padding='15px'
+                    height="auto"
                     width="350px"
                     border="1px"
                     borderRadius="lg"
                     borderColor="white"
                     shadow="dark-lg"
-                    justifyContent="center"
-                    align="center"
                 >
-                    <HStack>
+                    <HStack justifyContent={'space-between'}>
                         <Text
                             fontSize="small"
                             fontWeight="extrabold"
                             color="accent"
                         >
-                            Deposit Balance:{' '}
+                            Total Redeemable:{' '}
                         </Text>
-                        <Text paddingRight="25px">{depositAmount} BTC</Text>
+                        <Text>
+                            {customShiftValue(totalRedeemable, 8, true)} BTC
+                        </Text>
+                        <Spacer width={'15px'}></Spacer>
                         <Text
-                            paddingLeft="25px"
                             fontSize="small"
                             fontWeight="extrabold"
                             color="accent"
                         >
                             Owned NFTs:{' '}
                         </Text>
-                        <Text>{nftQuantity}</Text>
+                        <Text>{numberOfNFTs}</Text>
                     </HStack>
                 </Flex>
             </>

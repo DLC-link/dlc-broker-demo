@@ -1,30 +1,12 @@
 import {
     VStack,
-    HStack,
     Modal,
     ModalOverlay,
     ModalContent,
     ModalHeader,
     ModalBody,
-    ModalCloseButton,
-    Button,
-    FormControl,
-    FormLabel,
-    FormHelperText,
-    FormErrorMessage,
-    NumberInput,
-    NumberInputField,
-    Flex,
     Text,
-    Image,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
-import {
-    customShiftValue,
-    formatCollateralInUSD,
-} from '../utilities/formatFunctions';
-import { setupVault } from '../blockchainFunctions/ethereumFunctions';
-import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 
 export default function InfoModal({ isOpen }) {
     return (

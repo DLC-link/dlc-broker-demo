@@ -1,34 +1,23 @@
 import { customShiftValue } from '../utilities/formatFunctions';
-import { map } from 'ramda';
 import { vaultStatuses } from '../enums/VaultStatuses';
 
-function formatVault(vaultContract) {
+export function formatVault(vaultContract) {
     const statusLookup = Object.values(vaultStatuses);
-    const rawVaultData = {
+    const collateralValue = parseInt(vaultContract.vaultCollateral._hex);
+    return {
         id: parseInt(vaultContract.id._hex),
         uuid: vaultContract.dlcUUID,
         status: statusLookup[vaultContract.status],
-        vaultCollateral: parseInt(vaultContract.vaultCollateral._hex),
+        vaultCollateral: collateralValue,
+        formattedCollateral:
+            customShiftValue(collateralValue, 8, true) + ' BTC',
         nftID: parseInt(vaultContract.nftId._hex),
-        owner: vaultContract.owner,
+        owner: vaultContract.owner.toLowerCase(),
+        originalCreator: vaultContract.originalCreator.toLowerCase(),
         nftImageURL: undefined,
     };
-    return createVaultObject(rawVaultData);
-}
-
-function createVaultObject(rawVaultData) {
-    const vault = {
-        raw: rawVaultData,
-        formatted: {
-            vaultCollateral:
-                customShiftValue(rawVaultData.vaultCollateral, 8, true) +
-                ' BTC',
-        },
-    };
-    return vault;
 }
 
 export function formatAllVaults(vaults) {
-    const handleFormatAllVaults = map(formatVault);
-    return handleFormatAllVaults(vaults);
+    return vaults.map(formatVault);
 }

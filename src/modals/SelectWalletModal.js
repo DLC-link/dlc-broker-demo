@@ -7,13 +7,11 @@ import {
     ModalHeader,
     ModalBody,
     ModalCloseButton,
-    Button,
     Text,
     MenuButton,
     MenuItem,
     MenuList,
     Menu,
-    Tooltip,
 } from '@chakra-ui/react';
 import { Image } from '@chakra-ui/react';
 import { requestAndDispatchMetaMaskAccountInformation } from '../blockchainFunctions/ethereumFunctions';
@@ -22,6 +20,7 @@ export default function SelectWalletModal({ isOpen, closeModal }) {
     const blockchains = [
         { id: 11155111, name: 'Sepolia Testnet' },
         { id: 5, name: 'Goerli Testnet' },
+        { id: 31337, name: 'Localhost' },
     ];
 
     return (

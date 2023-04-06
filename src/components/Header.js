@@ -1,8 +1,6 @@
 import React from 'react';
-import eventBus from '../utilities/eventBus';
-import { Button, Text, HStack, Flex, Image, Spacer } from '@chakra-ui/react';
+import { Button, HStack, Image, Spacer } from '@chakra-ui/react';
 import Account from './Account';
-import Balance from './Balance';
 
 export default function Header({
     isLoading,
