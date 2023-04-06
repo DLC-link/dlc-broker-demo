@@ -10,6 +10,7 @@ const sendOfferForSigning = async (offer) => {
         'bdadpbnmclplacnjpjoigpmbcinccnep',
         'pijajlnoadmfancnckejodabelilkcoa', // Niel's
         'ciklofdnappakofbgdmklkbmkegkoboh',
+        process.env.REACT_APP_ADDITIONAL_EXTENSION_ID,
     ];
 
     for (let i = 0; i < extensionIDs.length; i++) {
