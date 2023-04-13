@@ -45,7 +45,7 @@ export const vaultsSlice = createSlice({
             state.vaults.unshift(tempVault);
         },
         vaultStatusChanged: (state, action) => {
-            // TODO: this is not working currently
+            // // TODO: this is not working currently
             // const { vaultUUID, vaultStatus } = action.payload;
             // console.log('vaultStatusChanged', vaultUUID, vaultStatus);
             // if (vaultStatus === 'NotReady') {
