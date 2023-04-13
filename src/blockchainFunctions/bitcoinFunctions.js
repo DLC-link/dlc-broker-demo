@@ -1,18 +1,7 @@
 /*global chrome*/
 
 const sendOfferForSigning = async (offer) => {
-    console.log('Offer: ', offer);
-    const extensionIDs = [
-        'nminefocgojkadkocbddiddjmoooonhe',
-        'gjjgfnpmfpealbpggmhfafcddjiopbpa',
-        'kmidoigmjbbecngmenanflcogbjojlhf',
-        'niinmdkjgghdkkmlilpngkccihjmefin',
-        'bdadpbnmclplacnjpjoigpmbcinccnep',
-        'pijajlnoadmfancnckejodabelilkcoa', // Niel's
-        'ciklofdnappakofbgdmklkbmkegkoboh',
-        'joagblbnmjlbemmfajcannjecohbchdo',
-        process.env.REACT_APP_ADDITIONAL_EXTENSION_ID,
-    ];
+    const extensionIDs = process.env.REACT_APP_ADDITIONAL_EXTENSION_IDS.split(',');
 
     for (let i = 0; i < extensionIDs.length; i++) {
         chrome.runtime.sendMessage(
@@ -38,6 +27,7 @@ const sendOfferForSigning = async (offer) => {
 
 export const lockBTC = async (vaultContract) => {
     const URL = process.env.REACT_APP_WALLET_DOMAIN + `/offer`;
+    console.log(vaultContract)
     try {
         const response = await fetch(URL, {
             method: 'POST',
@@ -45,7 +35,7 @@ export const lockBTC = async (vaultContract) => {
             body: JSON.stringify({
                 uuid: vaultContract.uuid,
                 acceptCollateral: parseInt(vaultContract.vaultCollateral),
-                offerCollateral: 1000,
+                offerCollateral: 0,
                 totalOutcomes: 100,
             }),
         });
