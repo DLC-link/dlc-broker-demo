@@ -25,13 +25,19 @@ import {
 } from '../utilities/formatFunctions';
 import { setupVault } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
+import { useSelector } from 'react-redux';
+import { closeDepositModal } from '../store/componentSlice';
+import { useDispatch } from 'react-redux';
 
-export default function DepositModal({ isOpen, closeModal, walletType }) {
+export default function DepositModal() {
     const [collateralAmount, setCollateralAmount] = useState(undefined);
     const [isCollateralError, setCollateralError] = useState(true);
     const [bitCoinInUSDAsString, setBitCoinInUSDAsString] = useState();
     const [bitCoinInUSDAsNumber, setBitCoinInUSDAsNumber] = useState();
     const [USDAmount, setUSDAmount] = useState(0);
+    const walletType = useSelector((state) => state.account.walletType);
+    const isDepositModalOpen = useSelector((state) => state.component.isDepositModalOpen);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         async function fetchData() {
@@ -43,7 +49,7 @@ export default function DepositModal({ isOpen, closeModal, walletType }) {
             });
         }
         fetchData();
-    }, [isOpen]);
+    }, [isDepositModalOpen === true]);
 
     useEffect(() => {
         setUSDAmount(
@@ -69,7 +75,7 @@ export default function DepositModal({ isOpen, closeModal, walletType }) {
     const sendLoanContract = (vaultContract) => {
         switch (walletType) {
             case 'metamask':
-                setupVault(vaultContract).then(() => closeModal());
+                setupVault(vaultContract).then(() => dispatch(closeDepositModal()));
                 break;
             default:
                 console.error('Unsupported wallet type!');
@@ -78,7 +84,7 @@ export default function DepositModal({ isOpen, closeModal, walletType }) {
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={closeModal} isCentered>
+        <Modal isOpen={isDepositModalOpen} onClose={() => dispatch(closeDepositModal())} isCentered>
             <ModalOverlay />
             <ModalContent
                 width="350px"

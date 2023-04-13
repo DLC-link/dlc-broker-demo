@@ -15,8 +15,14 @@ import {
 } from '@chakra-ui/react';
 import { Image } from '@chakra-ui/react';
 import { requestAndDispatchMetaMaskAccountInformation } from '../blockchainFunctions/ethereumFunctions';
+import { useSelector } from 'react-redux';
+import { closeSelectWalletModal } from '../store/componentSlice';
+import { useDispatch } from 'react-redux';
 
-export default function SelectWalletModal({ isOpen, closeModal }) {
+export default function SelectWalletModal() {
+    const isSelectWalletModalOpen = useSelector((state) => state.component.isSelectWalletModalOpen);
+    const dispatch = useDispatch();
+
     const blockchains = [
         { id: 11155111, name: 'Sepolia Testnet' },
         { id: 5, name: 'Goerli Testnet' },
@@ -24,7 +30,7 @@ export default function SelectWalletModal({ isOpen, closeModal }) {
     ];
 
     return (
-        <Modal isOpen={isOpen} onClose={closeModal} isCentered>
+        <Modal isOpen={isSelectWalletModalOpen} onClose={() => dispatch(closeSelectWalletModal())} isCentered>
             <ModalOverlay />
             <ModalContent
                 width="300px"
@@ -68,7 +74,7 @@ export default function SelectWalletModal({ isOpen, closeModal }) {
                                                         requestAndDispatchMetaMaskAccountInformation(
                                                             blockchain.id
                                                         );
-                                                        closeModal();
+                                                        dispatch(closeSelectWalletModal())
                                                     }}
                                                 >
                                                     {blockchain.name}

@@ -1,9 +1,11 @@
 import React from 'react';
 import { Text, Collapse, Image, VStack } from '@chakra-ui/react';
+import { useSelector } from 'react-redux';
 
-export default function Header({ isConnected }) {
+export default function Header() {
+    const address = useSelector((state) => state.account.address);
     return (
-        <Collapse in={!isConnected}>
+        <Collapse in={!address}>
             <VStack
                 marginTop="215px"
                 justifyContent="center"

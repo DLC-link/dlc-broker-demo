@@ -141,6 +141,7 @@ export const selectFilteredVaults = createSelector(
 export const fetchVaults = createAsyncThunk(
     'vaults/fetchVaults',
     async (address) => {
+        console.log(address)
         const { vaults, NFTs } = await fetchVaultsAndNFTs(address);
         const formattedVaults = formatAllVaults(vaults);
         const nftUuids = NFTs.map((nft) => nft.dlcUUID);
@@ -173,11 +174,11 @@ export const fetchVaults = createAsyncThunk(
         allVaults.push(...nftVaults);
 
         const userAddress = store.getState().account.address;
+        console.log(allVaults)
         allVaults = allVaults.map((vault) => {
             vault.isUserCreated = vault.originalCreator === userAddress;
             return vault;
         });
-
         return allVaults;
     }
 );
