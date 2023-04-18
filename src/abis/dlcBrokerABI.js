@@ -24,7 +24,7 @@ export const abi = [
     'function renounceRole(bytes32 role, address account)',
     'function revokeRole(bytes32 role, address account)',
     'function setStatusFunded(bytes32 _uuid)',
-    'function setupVault(uint256 btcDeposit, uint256 emergencyRefundTime) returns (uint256)',
+    'function setupVault(uint256 btcDeposit, uint256 emergencyRefundTime) payable returns (uint256)',
     'function supportsInterface(bytes4 interfaceId) view returns (bool)',
     'function vaultIDsByUUID(bytes32) view returns (uint256)',
     'function vaults(uint256) view returns (uint256 id, bytes32 dlcUUID, uint8 status, uint256 vaultCollateral, uint256 nftId, address owner, address originalCreator)',

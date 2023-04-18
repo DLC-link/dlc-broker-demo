@@ -88,7 +88,8 @@ export async function setupVault(vaultContract) {
         dlcBrokerETH
             .setupVault(
                 vaultContract.BTCDeposit,
-                vaultContract.emergencyRefundTime
+                vaultContract.emergencyRefundTime,
+                { value: ethers.utils.parseEther('0.5') }
             )
             .then((e) => {
                 console.log(e);
