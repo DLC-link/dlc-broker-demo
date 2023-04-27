@@ -77,7 +77,6 @@ export default function VaultsPage() {
                 </VStack>
                 <VaultsGrid
                     isLoading={isLoading}
-                    initialVaults={initialVaults}
                 ></VaultsGrid>
             </Collapse>
         </>

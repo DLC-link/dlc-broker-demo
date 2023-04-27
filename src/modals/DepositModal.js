@@ -26,7 +26,7 @@ import {
 import { setupVault } from '../blockchainFunctions/ethereumFunctions';
 import { fetchBitcoinPrice } from '../blockchainFunctions/bitcoinFunctions';
 import { useSelector } from 'react-redux';
-import { closeDepositModal } from '../store/componentSlice';
+import { toggleDepositModalVisibility } from '../store/componentSlice';
 import { useDispatch } from 'react-redux';
 
 export default function DepositModal() {
@@ -75,7 +75,7 @@ export default function DepositModal() {
     const sendLoanContract = (vaultContract) => {
         switch (walletType) {
             case 'metamask':
-                setupVault(vaultContract).then(() => dispatch(closeDepositModal()));
+                setupVault(vaultContract).then(() => dispatch(toggleDepositModalVisibility(false)));
                 break;
             default:
                 console.error('Unsupported wallet type!');
@@ -84,7 +84,7 @@ export default function DepositModal() {
     };
 
     return (
-        <Modal isOpen={isDepositModalOpen} onClose={() => dispatch(closeDepositModal())} isCentered>
+        <Modal isOpen={isDepositModalOpen} onClose={() => dispatch(toggleDepositModalVisibility(false))} isCentered>
             <ModalOverlay />
             <ModalContent
                 width="350px"

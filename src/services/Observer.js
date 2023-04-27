@@ -82,9 +82,9 @@ export default function Observer() {
     const blockchain = useSelector((state) => state.account.blockchain);
     const vaults = useSelector((state) => state.vaults.vaults);
 
-    let vaultUUIDs = [];
+    let ethereumProvider = null;
 
-    let provider = null;
+    let vaultUUIDs = [];
 
     let dlcBrokerETH = null;
     let btcNftETH = null;
@@ -97,49 +97,52 @@ export default function Observer() {
 
     useEffect(() => {
         if (address && blockchain) {
+            startEthereumObserver();
+        }
+    }, [address, blockchain]);
+
+    function startEthereumObserver() {
+        try {
             const { dlcBrokerAddress, btcNftAddress } =
                 EthereumNetworks[blockchain];
             const { ethereum } = window;
-            provider = new ethers.providers.Web3Provider(ethereum);
+
+            ethereumProvider = new ethers.providers.Web3Provider(ethereum);
 
             dlcBrokerETH = new ethers.Contract(
                 dlcBrokerAddress,
                 dlcBrokerABI,
-                provider
+                ethereumProvider
             );
-            btcNftETH = new ethers.Contract(btcNftAddress, btcNftABI, provider);
-
-            console.log(
-                'Starting Ethereum observer...',
-                dlcBrokerAddress,
-                btcNftAddress
+            btcNftETH = new ethers.Contract(
+                btcNftAddress,
+                btcNftABI,
+                ethereumProvider
             );
-        }
-    }, [address]);
 
-    useEffect(() => {
-        if (dlcBrokerETH && btcNftETH) {
+            console.log('Starting Ethereum observer...');
+
             dlcBrokerETH.on('StatusUpdate', (...args) => {
                 const vaultUUID = args[1];
                 const vaultStatus = statusLookup[args[2]];
-                // TODO: we should only react to events for vaults we have in the store
                 logStatus(vaultUUID, vaultStatus);
                 // store.dispatch(vaultStatusChanged({ vaultUUID, vaultStatus }));
                 // NOTE: for now we just fetch all vaults again
-                store.dispatch(fetchVaults(address));
-                // if (vaultUUIDs.includes(vaultUUID)) {
-                eventBus.dispatch('vault-event', {
-                    status: vaultStatus,
-                    txId: args[args.length - 1].transactionHash,
-                    chain: blockchain,
-                });
+                store.dispatch(fetchVaults());
+                if (vaultUUIDs.includes(vaultUUID)) {
+                    eventBus.dispatch('vault-event', {
+                        status: vaultStatus,
+                        txId: args[args.length - 1].transactionHash,
+                        chain: blockchain,
+                    });
+                }
             });
 
             btcNftETH.on('Approval', (...args) => {
                 const vaultOwner = args[0].toLowerCase();
                 if (address === vaultOwner) {
                     logStatus(undefined, vaultStatuses.APPROVED, vaultOwner);
-                    store.dispatch(fetchVaults(address));
+                    store.dispatch(fetchVaults());
                     eventBus.dispatch('vault-event', {
                         status: 'Approved',
                         txId: args[args.length - 1].transactionHash,
@@ -147,6 +150,8 @@ export default function Observer() {
                     });
                 }
             });
+        } catch (error) {
+            console.error(error);
         }
-    }, [dlcBrokerETH, btcNftETH]);
+    }
 }

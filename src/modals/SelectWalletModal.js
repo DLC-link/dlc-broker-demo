@@ -16,11 +16,13 @@ import {
 import { Image } from '@chakra-ui/react';
 import { requestAndDispatchMetaMaskAccountInformation } from '../blockchainFunctions/ethereumFunctions';
 import { useSelector } from 'react-redux';
-import { closeSelectWalletModal } from '../store/componentSlice';
+import { toggleSelectWalletModalVisibility } from '../store/componentSlice';
 import { useDispatch } from 'react-redux';
 
 export default function SelectWalletModal() {
-    const isSelectWalletModalOpen = useSelector((state) => state.component.isSelectWalletModalOpen);
+    const isSelectWalletModalOpen = useSelector(
+        (state) => state.component.isSelectWalletModalOpen
+    );
     const dispatch = useDispatch();
 
     const blockchains = [
@@ -30,7 +32,11 @@ export default function SelectWalletModal() {
     ];
 
     return (
-        <Modal isOpen={isSelectWalletModalOpen} onClose={() => dispatch(closeSelectWalletModal())} isCentered>
+        <Modal
+            isOpen={isSelectWalletModalOpen}
+            onClose={() => dispatch(toggleSelectWalletModalVisibility(false))}
+            isCentered
+        >
             <ModalOverlay />
             <ModalContent
                 width="300px"
@@ -74,7 +80,11 @@ export default function SelectWalletModal() {
                                                         requestAndDispatchMetaMaskAccountInformation(
                                                             blockchain.id
                                                         );
-                                                        dispatch(closeSelectWalletModal())
+                                                        dispatch(
+                                                            toggleSelectWalletModalVisibility(
+                                                                false
+                                                            )
+                                                        );
                                                     }}
                                                 >
                                                     {blockchain.name}

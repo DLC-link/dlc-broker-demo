@@ -13,7 +13,7 @@ import { easyTruncateAddress } from '../utilities/formatFunctions';
 import { useDispatch } from 'react-redux';
 import { logout } from '../store/accountSlice';
 import { useSelector } from 'react-redux';
-import { openSelectWalletModal } from '../store/componentSlice';
+import { toggleSelectWalletModalVisibility } from '../store/componentSlice';
 
 export default function Account() {
     const [walletLogo, setWalletLogo] = useState(undefined);
@@ -74,7 +74,7 @@ export default function Account() {
                     width="250px"
                     borderRadius="lg"
                     shadow="dark-lg"
-                    onClick={() => dispatch(openSelectWalletModal())}
+                    onClick={() => dispatch(toggleSelectWalletModalVisibility(true))}
                 >
                     <HStack>
                         <WarningIcon boxSize="15px" color="secondary2" />

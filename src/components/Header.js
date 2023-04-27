@@ -1,8 +1,6 @@
 import React from 'react';
 import { Button, HStack, Image, Spacer } from '@chakra-ui/react';
 import Account from './Account';
-import { useSelector } from 'react-redux';
-import store from '../store/store';
 
 export default function Header() {
     return (

@@ -8,28 +8,23 @@ export const componentSlice = createSlice({
         isInfoModalOpen: false,
     },
     reducers: {
-        openDepositModal: (state) => {
-            state.isDepositModalOpen = true;
+        toggleDepositModalVisibility: (state, action) => {
+            console.log('toggleDepositModalVisibility', action.payload)
+            state.isDepositModalOpen = action.payload;
         },
-        closeDepositModal: (state) => {
-            state.isDepositModalOpen = false;
+        toggleSelectWalletModalVisibility: (state, action) => {
+            state.isSelectWalletModalOpen = action.payload;
         },
-        openSelectWalletModal: (state) => {
-            state.isSelectWalletModalOpen = true;
+        toggleInfoModalVisibility: (state, action) => {
+            state.isInfoModalOpen = action.payload;
         },
-        closeSelectWalletModal: (state) => {
-            state.isSelectWalletModalOpen = false;
-        },
-        openInfoModal: (state) => {
-            state.isInfoModalOpen = true;
-        },
-        closeInfoModal: (state) => {
-            state.isInfoModalOpen = false;
-        },
-        
     },
 });
 
-export const { openDepositModal, closeDepositModal, openSelectWalletModal, closeSelectWalletModal, openInfoModal, closeInfoModal } = componentSlice.actions;
+export const {
+    toggleDepositModalVisibility,
+    toggleSelectWalletModalVisibility,
+    toggleInfoModalVisibility,
+} = componentSlice.actions;
 
 export default componentSlice.reducer;
