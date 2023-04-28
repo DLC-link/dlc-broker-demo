@@ -6,10 +6,12 @@ import {
 import store from './store';
 import {
     getVaultsForNFTs,
+    getVaultByUUID,
+    getAllVaultsForAddress,
     fetchVaultsAndNFTs,
     processNftIssuedVault,
 } from '../blockchainFunctions/ethereumFunctions';
-import { formatAllVaults } from '../utilities/vaultFormatter';
+import { formatAllVaults, formatVault } from '../utilities/vaultFormatter';
 import { customShiftValue } from '../utilities/formatFunctions';
 import { vaultStatuses } from '../enums/VaultStatuses';
 
@@ -34,7 +36,7 @@ export const vaultsSlice = createSlice({
             state.filters.showReceived = action.payload;
         },
         vaultSetupRequested: (state, action) => {
-            const tempVault = {
+            const temporaryVault = {
                 uuid: '',
                 status: 'Initialized',
                 vaultCollateral: action.payload.BTCDeposit,
@@ -43,29 +45,7 @@ export const vaultsSlice = createSlice({
                     ' BTC',
                 isUserCreated: true,
             };
-            state.vaults.unshift(tempVault);
-        },
-        vaultStatusChanged: (state, action) => {
-            // // TODO: this is not working currently
-            // const { vaultUUID, vaultStatus } = action.payload;
-            // console.log('vaultStatusChanged', vaultUUID, vaultStatus);
-            // if (vaultStatus === 'NotReady') {
-            //     // we get an update on a new vault
-            //     const tempVault = state.vaults.find(
-            //         (v) => v.status === 'Initialized'
-            //     );
-            //     if (tempVault) {
-            //         tempVault.status = 'NotReady';
-            //         tempVault.uuid = vaultUUID;
-            //     }
-            //     return;
-            // }
-            // const existingVault = state.vaults.find(
-            //     (vault) => vault.uuid === vaultUUID
-            // );
-            // if (existingVault) {
-            //     existingVault.status = vaultStatus;
-            // }
+            state.vaults.unshift(temporaryVault);
         },
     },
     extraReducers(builder) {
@@ -79,6 +59,34 @@ export const vaultsSlice = createSlice({
                 state.vaults = action.payload;
             })
             .addCase(fetchVaults.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(fetchVault.pending, (state, action) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchVault.fulfilled, (state, action) => {
+                console.log('Inside fetchVault.fulfilled');
+
+                let vaultIndex;
+                if (
+                    action.payload.formattedVault.status ===
+                    vaultStatuses.NOTREADY
+                ) {
+                    vaultIndex = state.vaults.findIndex(
+                        (vault) => vault.status === 'Initialized'
+                    );
+                } else {
+                    vaultIndex = state.vaults.findIndex(
+                        (vault) => vault.uuid === action.payload.vaultUUID
+                    );
+                }
+                state.vaults[vaultIndex] = action.payload.formattedVault;
+
+                state.status = 'succeeded';
+                state.error = null;
+            })
+            .addCase(fetchVault.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
@@ -169,3 +177,53 @@ export const fetchVaults = createAsyncThunk('vaults/fetchVaults', async () => {
 
     return allVaults;
 });
+
+export const fetchVault = createAsyncThunk(
+    'vaults/fetchVault',
+    async (payload) => {
+        console.log('Inside fetchVault');
+
+        const vaultUUID = payload.vaultUUID;
+        const vaultStatus = payload.vaultStatus;
+
+        const vaultStatusKey = Object.keys(vaultStatuses)[vaultStatus];
+        const vaultStatusValue = vaultStatuses[vaultStatusKey];
+
+        const address = store.getState().account.address;
+        const { vaults } = store.getState().vaults;
+
+        const storedVaultUUIDs = vaults.map((vault) => vault.uuid);
+        let fetchedVaultUUIDs = [];
+
+        if (vaultStatusValue === vaultStatuses.NOTREADY) {
+            const fetchedVaults = await getAllVaultsForAddress();
+            fetchedVaultUUIDs = fetchedVaults.map((vault) => vault.uuid);
+        }
+
+        if (
+            !(
+                storedVaultUUIDs.includes(vaultUUID) ||
+                fetchedVaultUUIDs.includes(vaultUUID)
+            )
+        ) {
+            return;
+        } else {
+            const vault = await getVaultByUUID(vaultUUID);
+            let formattedVault = formatVault(vault);
+
+            if (vaultStatus === vaultStatuses.NFTISSUED) {
+                const { NFTs } = await fetchVaultsAndNFTs();
+                const NFT = NFTs.find((nft) => nft.dlcUUID === vaultUUID);
+                formattedVault = await processNftIssuedVault(
+                    formattedVault,
+                    NFT
+                );
+            }
+
+            formattedVault.isUserCreated =
+                formattedVault.originalCreator === address;
+
+            return { formattedVault, vaultUUID };
+        }
+    }
+);

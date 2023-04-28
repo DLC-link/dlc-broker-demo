@@ -9,7 +9,6 @@ import {
     ScaleFade,
 } from '@chakra-ui/react';
 import Card from './Cards/Card';
-import InitialCard from './Cards/InitialCard';
 import SetupVaultCard from './Cards/SetupVaultCard';
 import { useSelector } from 'react-redux';
 import { selectFilteredVaults } from '../store/vaultsSlice';

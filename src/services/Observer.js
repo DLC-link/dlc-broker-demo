@@ -4,7 +4,7 @@ import { abi as btcNftABI } from '../abis/btcNftABI';
 import eventBus from '../utilities/eventBus';
 import { vaultStatuses } from '../enums/VaultStatuses';
 import { EthereumNetworks } from '../networks/ethereumNetworks';
-import { fetchVaults } from '../store/vaultsSlice';
+import { fetchVault } from '../store/vaultsSlice';
 import store from '../store/store';
 import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
@@ -76,24 +76,13 @@ function logStatus(vaultUUID, vaultStatus, vaultOwner) {
 }
 
 export default function Observer() {
-    const statusLookup = Object.values(vaultStatuses);
-
     const address = useSelector((state) => state.account.address);
     const blockchain = useSelector((state) => state.account.blockchain);
-    const vaults = useSelector((state) => state.vaults.vaults);
 
-    let ethereumProvider = null;
+    let ethereumProvider;
 
-    let vaultUUIDs = [];
-
-    let dlcBrokerETH = null;
-    let btcNftETH = null;
-
-    useEffect(() => {
-        if (vaults.length !== 0) {
-            vaultUUIDs = vaults.map((vault) => vault.uuid);
-        }
-    }, [vaults]);
+    let dlcBrokerETH;
+    let btcNftETH;
 
     useEffect(() => {
         if (address && blockchain) {
@@ -120,36 +109,34 @@ export default function Observer() {
                 ethereumProvider
             );
 
-            console.log('Starting Ethereum observer...');
-
-            dlcBrokerETH.on('StatusUpdate', (...args) => {
+            dlcBrokerETH.on('StatusUpdate', async (...args) => {
                 const vaultUUID = args[1];
-                const vaultStatus = statusLookup[args[2]];
-                logStatus(vaultUUID, vaultStatus);
-                // store.dispatch(vaultStatusChanged({ vaultUUID, vaultStatus }));
-                // NOTE: for now we just fetch all vaults again
-                store.dispatch(fetchVaults());
-                if (vaultUUIDs.includes(vaultUUID)) {
-                    eventBus.dispatch('vault-event', {
-                        status: vaultStatus,
-                        txId: args[args.length - 1].transactionHash,
-                        chain: blockchain,
-                    });
-                }
+                const vaultStatus = args[2];
+console.log('StatusUpdate', vaultUUID, vaultStatus);
+                store.dispatch(
+                    fetchVault({
+                        vaultUUID: vaultUUID,
+                        vaultStatus: vaultStatus,
+                    })
+                );
             });
 
             btcNftETH.on('Approval', (...args) => {
                 const vaultOwner = args[0].toLowerCase();
+                const vaultUUID = args[1];
+                const vaultStatus = args[2];
+
                 if (address === vaultOwner) {
-                    logStatus(undefined, vaultStatuses.APPROVED, vaultOwner);
-                    store.dispatch(fetchVaults());
-                    eventBus.dispatch('vault-event', {
-                        status: 'Approved',
-                        txId: args[args.length - 1].transactionHash,
-                        chain: blockchain,
-                    });
+                    store.dispatch(
+                        fetchVault({
+                            vaultUUID: vaultUUID,
+                            vaultStatus: vaultStatus,
+                        })
+                    );
                 }
             });
+
+            console.log('Starting Ethereum observer...');
         } catch (error) {
             console.error(error);
         }

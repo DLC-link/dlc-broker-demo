@@ -198,6 +198,19 @@ export async function getVaultsForNFTs(NFTs, formattedVaults) {
     return nftVaults.filter((vault) => vault !== null);
 }
 
+export async function getVaultForNFT(nft, vault) {
+    let formattedVault;
+
+    try {
+        const vault = await dlcBrokerETH.getVaultByUUID(nft.dlcUUID);
+        formattedVault = formatVault(vault);
+        return processNftIssuedVault(formattedVault, nft);
+    } catch (error) {
+        console.error(error);
+    }
+    return formattedVault;
+}
+
 export async function fetchVaultsAndNFTs() {
     const { address } = store.getState().account;
 
@@ -208,7 +221,7 @@ export async function fetchVaultsAndNFTs() {
     return { vaults, NFTs };
 }
 
-async function getVaultByUUID(vaultContractUUID) {
+export async function getVaultByUUID(vaultContractUUID) {
     let vault;
     try {
         vault = await dlcBrokerETH.getVaultByUUID(vaultContractUUID);
