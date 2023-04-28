@@ -7,10 +7,14 @@ import {
     ModalBody,
     Text,
 } from '@chakra-ui/react';
+import { useSelector } from 'react-redux';
 
-export default function InfoModal({ isOpen }) {
+export default function InfoModal() {
+    const isInfoModalOpen = useSelector(
+        (state) => state.component.isInfoModalOpen
+    );
     return (
-        <Modal isOpen={isOpen} isCentered>
+        <Modal isOpen={isInfoModalOpen} isCentered>
             <ModalOverlay />
             <ModalContent
                 width="350px"

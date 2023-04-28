@@ -7,18 +7,13 @@ import { EthereumNetworks } from '../networks/ethereumNetworks';
 import { login } from '../store/accountSlice';
 import store from '../store/store';
 import { vaultSetupRequested } from '../store/vaultsSlice';
+import { toggleInfoModalVisibility } from '../store/componentSlice';
 
 let dlcBrokerETH;
 let btcNftETH;
 let currentEthereumNetwork;
 
-async function initializeEthereumProviders() {
-    if (!dlcBrokerETH || !btcNftETH) {
-        await setEthereumProvider();
-    }
-}
-
-export async function setEthereumProvider() {
+async function setEthereumProvider() {
     const { dlcBrokerAddress, btcNftAddress } =
         EthereumNetworks[currentEthereumNetwork];
     try {
@@ -44,7 +39,7 @@ async function changeEthereumNetwork() {
     const { ethereum } = window;
     const formattedChainId = '0x' + currentEthereumNetwork.toString(16);
     try {
-        eventBus.dispatch('is-info-modal-open', { isInfoModalOpen: true });
+        store.dispatch(toggleInfoModalVisibility(true));
         await ethereum.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: formattedChainId }],
@@ -74,8 +69,8 @@ export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
             blockchain,
         };
         currentEthereumNetwork = blockchain;
-        // TODO: remove this after proper store setup
-        eventBus.dispatch('account-information', accountInformation);
+
+        await setEthereumProvider();
 
         store.dispatch(login(accountInformation));
     } catch (error) {
@@ -103,10 +98,9 @@ export async function setupVault(vaultContract) {
     }
 }
 
-export async function getAllVaultsForAddress(address) {
-    if (!dlcBrokerETH) {
-        await setEthereumProvider();
-    }
+export async function getAllVaultsForAddress() {
+    const address = store.getState().account.address;
+
     let formattedVaults = [];
     try {
         const vaults = await dlcBrokerETH.getAllVaultsForAddress(address);
@@ -143,10 +137,9 @@ export async function getApproved(nftID) {
     return approved;
 }
 
-export async function getAllNFTsForAddress(address) {
-    if (!btcNftETH) {
-        await setEthereumProvider();
-    }
+export async function getAllNFTsForAddress() {
+    const address = store.getState().account.address;
+
     let NFTs = [];
     try {
         NFTs = await btcNftETH.getDLCNFTsByOwner(address);
@@ -179,10 +172,8 @@ export async function getNFTMetadata(nftURI) {
 }
 
 export async function processNftIssuedVault(vault, nft) {
-    if (vault.status === 'NftIssued') {
-        vault.nftImageURL = await getNFTMetadata(nft.uri);
-        vault.isApproved = await getApproved(vault.nftID);
-    }
+    vault.nftImageURL = await getNFTMetadata(nft.uri);
+    vault.isApproved = await getApproved(vault.nftID);
     return vault;
 }
 
@@ -207,8 +198,9 @@ export async function getVaultsForNFTs(NFTs, formattedVaults) {
     return nftVaults.filter((vault) => vault !== null);
 }
 
-export async function fetchVaultsAndNFTs(address) {
-    await initializeEthereumProviders();
+export async function fetchVaultsAndNFTs() {
+    const { address } = store.getState().account;
+
     const [vaults, NFTs] = await Promise.all([
         dlcBrokerETH.getAllVaultsForAddress(address),
         btcNftETH.getDLCNFTsByOwner(address),

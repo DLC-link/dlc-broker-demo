@@ -10,12 +10,15 @@ import {
     MenuItem,
 } from '@chakra-ui/react';
 import { easyTruncateAddress } from '../utilities/formatFunctions';
-import eventBus from '../utilities/eventBus';
 import { useDispatch } from 'react-redux';
 import { logout } from '../store/accountSlice';
+import { useSelector } from 'react-redux';
+import { toggleSelectWalletModalVisibility } from '../store/componentSlice';
 
-export default function Account({ isConnected, walletType, address }) {
+export default function Account() {
     const [walletLogo, setWalletLogo] = useState(undefined);
+    const address = useSelector((state) => state.account.address);
+    const walletType = useSelector((state) => state.account.walletType);
     const dispatch = useDispatch();
 
     const walletLogos = {
@@ -31,24 +34,9 @@ export default function Account({ isConnected, walletType, address }) {
         setWalletLogo(currentWalletLogo);
     }, [walletType]);
 
-    const openSelectWalletModal = () => {
-        eventBus.dispatch('is-select-wallet-modal-open', {
-            isSelectWalletOpen: true,
-        });
-    };
-
-    const disconnectWallet = () => {
-        // TODO: remove this after proper store setup
-        eventBus.dispatch('account-information', {});
-
-        dispatch(logout());
-
-        eventBus.dispatch('provider', false);
-    };
-
     return (
         <Menu>
-            {isConnected ? (
+            {address ? (
                 <>
                     <MenuButton
                         margin="0px"
@@ -75,7 +63,7 @@ export default function Account({ isConnected, walletType, address }) {
                         </HStack>
                     </MenuButton>
                     <MenuList width="250px" margin="0px">
-                        <MenuItem onClick={disconnectWallet}>
+                        <MenuItem onClick={() => dispatch(logout())}>
                             Disconnect Wallet
                         </MenuItem>
                     </MenuList>
@@ -86,7 +74,7 @@ export default function Account({ isConnected, walletType, address }) {
                     width="250px"
                     borderRadius="lg"
                     shadow="dark-lg"
-                    onClick={openSelectWalletModal}
+                    onClick={() => dispatch(toggleSelectWalletModalVisibility(true))}
                 >
                     <HStack>
                         <WarningIcon boxSize="15px" color="secondary2" />

@@ -2,14 +2,7 @@ import React from 'react';
 import { Button, HStack, Image, Spacer } from '@chakra-ui/react';
 import Account from './Account';
 
-export default function Header({
-    isLoading,
-    isConnected,
-    walletType,
-    address,
-    depositAmount,
-    walletBalance,
-}) {
+export default function Header() {
     return (
         <>
             <HStack margin={['15px', '30px']}>
@@ -27,14 +20,7 @@ export default function Header({
                     <Image src="/dlc.link_logo.svg" alt="DLC.Link Logo" />
                 </Button>
                 <Spacer></Spacer>
-                <Account
-                    address={address}
-                    isConnected={isConnected}
-                    walletType={walletType}
-                    isLoading={isLoading}
-                    depositAmount={depositAmount}
-                    walletBalance={walletBalance}
-                ></Account>
+                <Account></Account>
             </HStack>
         </>
     );

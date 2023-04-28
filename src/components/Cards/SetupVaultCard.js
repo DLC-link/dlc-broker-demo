@@ -1,10 +1,9 @@
 import { Flex, Text, VStack } from '@chakra-ui/react';
-import eventBus from '../../utilities/eventBus';
+import { toggleDepositModalVisibility } from '../../store/componentSlice';
+import { useDispatch } from 'react-redux';
 
 export default function SetupVaultCard() {
-    const openDepositModal = () => {
-        eventBus.dispatch('is-deposit-modal-open', { isDepositOpen: true });
-    };
+    const dispatch = useDispatch();
 
     return (
         <>
@@ -28,7 +27,7 @@ export default function SetupVaultCard() {
                     transition: '0.5s',
                     transform: 'translateY(-35px)',
                 }}
-                onClick={openDepositModal}
+                onClick={() => dispatch(toggleDepositModalVisibility(true))}
             >
                 <VStack margin="15px" justifyContent="center">
                     <Text fontSize="9xl">+</Text>

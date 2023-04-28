@@ -14,25 +14,19 @@ import SetupVaultCard from './Cards/SetupVaultCard';
 import { useSelector } from 'react-redux';
 import { selectFilteredVaults } from '../store/vaultsSlice';
 
-export default function VaultsGrid({ isLoading, isConnected, initialVaults }) {
-    const account = useSelector((state) => state.account);
+export default function VaultsGrid() {
     const filteredVaults = useSelector(selectFilteredVaults);
+    const address = useSelector((state) => state.account.address);
+    const isLoading = useSelector((state) => state.vaults.status === 'loading');
 
     return (
         <>
-            <Collapse in={isConnected}>
+            <Collapse in={address}>
                 <VStack justifyContent="center" alignContent="center">
                     <HStack></HStack>
                     <ScaleFade in={!isLoading}>
                         <SimpleGrid columns={[1, 4]} spacing={[0, 15]}>
                             <SetupVaultCard></SetupVaultCard>
-                            {/* {initialVaults?.map((vault, j) => (
-                                <InitialCard
-                                    key={j}
-                                    vault={vault}
-                                    creator={account.address}
-                                ></InitialCard>
-                            ))} */}
                             {filteredVaults?.map((vault, i) => (
                                 <Card key={i} vaultUUID={vault.uuid}></Card>
                             ))}
