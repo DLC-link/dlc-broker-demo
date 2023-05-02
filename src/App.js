@@ -1,38 +1,43 @@
 import SelectWalletModal from './modals/SelectWalletModal';
-import eventBus from './utilities/eventBus';
 import Header from './components/Header';
 import Intro from './components/Intro';
 import React, { useEffect } from 'react';
 import DepositModal from './modals/DepositModal';
-import { Box, useToast } from '@chakra-ui/react';
-import CustomToast from './components/CustomToast';
+import { Box } from '@chakra-ui/react';
+
 import VaultsPage from './components/VaultsPage';
 import InfoModal from './modals/InfoModal';
+import CustomToast from './components/CustomToast';
 import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
-import { toggleDepositModalVisibility } from './store/componentSlice';
+import { useToast } from '@chakra-ui/react';
 
 export default function App() {
     const toast = useToast();
-    const dispatch = useDispatch();
-    const address = useSelector((state) => state.account.address);
 
-    const handleEvent = (data) => {
-        if (!toast.isActive(data.status)) {
-            const isMobile = window.innerWidth <= 768;
+    const address = useSelector((state) => state.account.address);
+    const blockchain = useSelector((state) => state.account.blockchain);
+    const toastEvent = useSelector((state) => state.vaults.toastEvent);
+
+    const handleToast = (toastEvent) => {
+        if (!toast.isActive(toastEvent.status)) {
             return toast({
-                id: data.status,
-                position: isMobile ? 'bottom' : 'top-right',
+                id: toastEvent.status,
                 render: () => (
-                    <CustomToast data={data} isMobile={isMobile}></CustomToast>
+                    <CustomToast
+                        txHash={toastEvent.txHash}
+                        blockchain={blockchain}
+                        status={toastEvent.status}
+                    ></CustomToast>
                 ),
             });
         }
     };
 
     useEffect(() => {
-        eventBus.on('vault-event', (data) => handleEvent(data));
-    }, []);
+        if (toastEvent !== null) {
+            handleToast(toastEvent);
+        }
+    }, [toastEvent]);
 
     return (
         <>

@@ -23,6 +23,7 @@ const initialState = {
         showMinted: true,
         showReceived: true,
     },
+    toastEvent: null,
 };
 
 export const vaultsSlice = createSlice({
@@ -46,6 +47,16 @@ export const vaultsSlice = createSlice({
                 isUserCreated: true,
             };
             state.vaults.unshift(temporaryVault);
+            state.toastEvent = {
+                txHash: null,
+                status: temporaryVault.status,
+            };
+        },
+        vaultEventReceived: (state, action) => {
+            state.toastEvent = {
+                txHash: action.payload.vaultTXHash,
+                status: action.payload.status,
+            };
         },
     },
     extraReducers(builder) {
@@ -65,23 +76,28 @@ export const vaultsSlice = createSlice({
             .addCase(fetchVault.pending, (state, action) => {
                 state.status = 'loading';
             })
-            .addCase(fetchVault.fulfilled, (state, action) => {
-                console.log('Inside fetchVault.fulfilled');
-
+        .addCase(fetchVault.fulfilled, (state, action) => {
                 let vaultIndex;
                 if (
                     action.payload.formattedVault.status ===
                     vaultStatuses.NOTREADY
                 ) {
+                    console.log('Inside fetchVault.fulfilled - NOTREADY');
                     vaultIndex = state.vaults.findIndex(
                         (vault) => vault.status === 'Initialized'
                     );
                 } else {
+                    console.log('Inside fetchVault.fulfilled');
                     vaultIndex = state.vaults.findIndex(
-                        (vault) => vault.uuid === action.payload.vaultUUID
+                        (vault) => vault.uuid === action.payload.formattedVault.uuid
                     );
                 }
                 state.vaults[vaultIndex] = action.payload.formattedVault;
+
+                state.toastEvent = {
+                    txHash: action.payload.vaultTXHash,
+                    status: action.payload.formattedVault.status,
+                };
 
                 state.status = 'succeeded';
                 state.error = null;
@@ -99,6 +115,7 @@ export const {
     receivedFilterChanged,
     vaultSetupRequested,
     vaultStatusChanged,
+    vaultEventReceived,
 } = vaultsSlice.actions;
 
 export default vaultsSlice.reducer;
@@ -185,17 +202,20 @@ export const fetchVault = createAsyncThunk(
 
         const vaultUUID = payload.vaultUUID;
         const vaultStatus = payload.vaultStatus;
+        const vaultTXHash = payload.vaultTXHash;
 
         const vaultStatusKey = Object.keys(vaultStatuses)[vaultStatus];
         const vaultStatusValue = vaultStatuses[vaultStatusKey];
 
         const address = store.getState().account.address;
+
         const { vaults } = store.getState().vaults;
 
         const storedVaultUUIDs = vaults.map((vault) => vault.uuid);
         let fetchedVaultUUIDs = [];
 
         if (vaultStatusValue === vaultStatuses.NOTREADY) {
+            console.log('Inside fetchVault - NOTREADY');
             const fetchedVaults = await getAllVaultsForAddress();
             fetchedVaultUUIDs = fetchedVaults.map((vault) => vault.uuid);
         }
@@ -206,12 +226,16 @@ export const fetchVault = createAsyncThunk(
                 fetchedVaultUUIDs.includes(vaultUUID)
             )
         ) {
+            console.log('Inside fetchVault - vault not found');
             return;
         } else {
             const vault = await getVaultByUUID(vaultUUID);
+            console.log('Inside fetchVault - vault found');
+            console.log(vault)
             let formattedVault = formatVault(vault);
 
             if (vaultStatus === vaultStatuses.NFTISSUED) {
+                console.log('Inside fetchVault - NFTISSUED')
                 const { NFTs } = await fetchVaultsAndNFTs();
                 const NFT = NFTs.find((nft) => nft.dlcUUID === vaultUUID);
                 formattedVault = await processNftIssuedVault(
@@ -223,7 +247,7 @@ export const fetchVault = createAsyncThunk(
             formattedVault.isUserCreated =
                 formattedVault.originalCreator === address;
 
-            return { formattedVault, vaultUUID };
+            return { formattedVault, vaultTXHash };
         }
     }
 );

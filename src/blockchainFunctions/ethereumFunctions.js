@@ -1,12 +1,11 @@
 import { ethers } from 'ethers';
 import { abi as dlcBrokerABI } from '../abis/dlcBrokerABI';
 import { abi as btcNftABI } from '../abis/btcNftABI';
-import eventBus from '../utilities/eventBus';
 import { formatAllVaults, formatVault } from '../utilities/vaultFormatter';
 import { EthereumNetworks } from '../networks/ethereumNetworks';
 import { login } from '../store/accountSlice';
 import store from '../store/store';
-import { vaultSetupRequested } from '../store/vaultsSlice';
+import { vaultEventReceived, vaultSetupRequested } from '../store/vaultsSlice';
 import { toggleInfoModalVisibility } from '../store/componentSlice';
 
 let dlcBrokerETH;
@@ -88,10 +87,6 @@ export async function setupVault(vaultContract) {
             .then((e) => {
                 console.log(e);
                 store.dispatch(vaultSetupRequested(vaultContract));
-                eventBus.dispatch('vault-event', {
-                    status: 'Initialized',
-                    vaultContract: vaultContract,
-                });
             });
     } catch (error) {
         console.error(error);
@@ -114,13 +109,16 @@ export async function getAllVaultsForAddress() {
 export async function approveNFTBurn(nftID) {
     const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
     try {
-        btcNftETH.approve(dlcBrokerAddress, nftID).then((response) =>
-            eventBus.dispatch('vault-event', {
-                status: 'ApproveRequested',
-                txId: response.hash,
-                chain: 'ethereum',
-            })
-        );
+        btcNftETH
+            .approve(dlcBrokerAddress, nftID)
+            .then((response) =>
+                store.dispatch(
+                    vaultEventReceived({
+                        txHash: response.hash,
+                        status: 'ApproveRequested',
+                    })
+                )
+            );
     } catch (error) {
         console.error(error);
     }
@@ -236,11 +234,7 @@ export async function closeVault(vaultContractUUID) {
     const vaultID = vault.id;
     try {
         dlcBrokerETH.closeVault(vaultID).then((response) =>
-            eventBus.dispatch('vault-event', {
-                status: 'CloseRequested',
-                txId: response.hash,
-                chain: 'ethereum',
-            })
+            store.dispatch(vaultEventReceived({ txHash: response.hash, status: 'CloseRequested' }))
         );
     } catch (error) {
         console.error(error);
