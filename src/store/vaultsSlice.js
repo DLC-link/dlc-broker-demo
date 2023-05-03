@@ -73,23 +73,20 @@ export const vaultsSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.error.message;
             })
-            .addCase(fetchVault.pending, (state, action) => {
-                state.status = 'loading';
-            })
-        .addCase(fetchVault.fulfilled, (state, action) => {
+            .addCase(fetchVault.pending, (state, action) => {})
+            .addCase(fetchVault.fulfilled, (state, action) => {
                 let vaultIndex;
                 if (
                     action.payload.formattedVault.status ===
                     vaultStatuses.NOTREADY
                 ) {
-                    console.log('Inside fetchVault.fulfilled - NOTREADY');
                     vaultIndex = state.vaults.findIndex(
                         (vault) => vault.status === 'Initialized'
                     );
                 } else {
-                    console.log('Inside fetchVault.fulfilled');
                     vaultIndex = state.vaults.findIndex(
-                        (vault) => vault.uuid === action.payload.formattedVault.uuid
+                        (vault) =>
+                            vault.uuid === action.payload.formattedVault.uuid
                     );
                 }
                 state.vaults[vaultIndex] = action.payload.formattedVault;
@@ -168,7 +165,6 @@ export const fetchVaults = createAsyncThunk('vaults/fetchVaults', async () => {
 
     for (const vault of formattedVaults) {
         const nftIndex = nftUUIDs.indexOf(vault.uuid);
-        // if we don't own the underlying NFT, we don't want to show the vault, unless it is closed or before minting
 
         if (vault.status === vaultStatuses.NFTISSUED) {
             if (nftIndex >= 0) {
@@ -198,8 +194,6 @@ export const fetchVaults = createAsyncThunk('vaults/fetchVaults', async () => {
 export const fetchVault = createAsyncThunk(
     'vaults/fetchVault',
     async (payload) => {
-        console.log('Inside fetchVault');
-
         const vaultUUID = payload.vaultUUID;
         const vaultStatus = payload.vaultStatus;
         const vaultTXHash = payload.vaultTXHash;
@@ -215,7 +209,6 @@ export const fetchVault = createAsyncThunk(
         let fetchedVaultUUIDs = [];
 
         if (vaultStatusValue === vaultStatuses.NOTREADY) {
-            console.log('Inside fetchVault - NOTREADY');
             const fetchedVaults = await getAllVaultsForAddress();
             fetchedVaultUUIDs = fetchedVaults.map((vault) => vault.uuid);
         }
@@ -226,16 +219,12 @@ export const fetchVault = createAsyncThunk(
                 fetchedVaultUUIDs.includes(vaultUUID)
             )
         ) {
-            console.log('Inside fetchVault - vault not found');
             return;
         } else {
             const vault = await getVaultByUUID(vaultUUID);
-            console.log('Inside fetchVault - vault found');
-            console.log(vault)
             let formattedVault = formatVault(vault);
 
-            if (vaultStatus === vaultStatuses.NFTISSUED) {
-                console.log('Inside fetchVault - NFTISSUED')
+            if (vaultStatusValue === vaultStatuses.NFTISSUED) {
                 const { NFTs } = await fetchVaultsAndNFTs();
                 const NFT = NFTs.find((nft) => nft.dlcUUID === vaultUUID);
                 formattedVault = await processNftIssuedVault(
@@ -246,6 +235,10 @@ export const fetchVault = createAsyncThunk(
 
             formattedVault.isUserCreated =
                 formattedVault.originalCreator === address;
+
+            if (!formattedVault){
+                store.dispatch(fetchVaults());
+            }
 
             return { formattedVault, vaultTXHash };
         }

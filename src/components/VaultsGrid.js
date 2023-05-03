@@ -12,6 +12,7 @@ import Card from './Cards/Card';
 import SetupVaultCard from './Cards/SetupVaultCard';
 import { useSelector } from 'react-redux';
 import { selectFilteredVaults } from '../store/vaultsSlice';
+import { motion } from 'framer-motion';
 
 export default function VaultsGrid() {
     const filteredVaults = useSelector(selectFilteredVaults);
@@ -27,7 +28,14 @@ export default function VaultsGrid() {
                         <SimpleGrid columns={[1, 4]} spacing={[0, 15]}>
                             <SetupVaultCard></SetupVaultCard>
                             {filteredVaults?.map((vault, i) => (
-                                <Card key={i} vaultUUID={vault.uuid}></Card>
+                                <motion.div
+                                    key={`${vault.uuid}${vault.status}`}
+                                    initial={{ x: -300 }}
+                                    animate={{ x: 0 }}
+                                    exit={{ x: 300 }}
+                                >
+                                    <Card vaultUUID={vault.uuid}></Card>
+                                </motion.div>
                             ))}
                         </SimpleGrid>
                     </ScaleFade>

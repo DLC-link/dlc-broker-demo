@@ -166,6 +166,7 @@ export async function getNFTMetadata(nftURI) {
     } catch (error) {
         console.error(error);
     }
+    console.log('imageURL', imageURL)
     return imageURL;
 }
 

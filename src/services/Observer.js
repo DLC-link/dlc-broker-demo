@@ -59,12 +59,14 @@ export default function Observer() {
                 const vaultOwner = args[0].toLowerCase();
                 const vaultUUID = args[1];
                 const vaultStatus = args[2];
+                const vaultTXHash = args[args.length - 1].transactionHash;
 
                 if (address === vaultOwner) {
                     store.dispatch(
                         fetchVault({
                             vaultUUID: vaultUUID,
                             vaultStatus: vaultStatus,
+                            vaultTXHash: vaultTXHash,
                         })
                     );
                 }
