@@ -82,7 +82,8 @@ export async function setupVault(vaultContract) {
         dlcBrokerETH
             .setupVault(
                 vaultContract.BTCDeposit,
-                vaultContract.emergencyRefundTime
+                vaultContract.emergencyRefundTime,
+                { gasLimit: 900000 }
             )
             .then((e) => {
                 console.log(e);
@@ -109,16 +110,14 @@ export async function getAllVaultsForAddress() {
 export async function approveNFTBurn(nftID) {
     const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
     try {
-        btcNftETH
-            .approve(dlcBrokerAddress, nftID)
-            .then((response) =>
-                store.dispatch(
-                    vaultEventReceived({
-                        txHash: response.hash,
-                        status: 'ApproveRequested',
-                    })
-                )
-            );
+        btcNftETH.approve(dlcBrokerAddress, nftID).then((response) =>
+            store.dispatch(
+                vaultEventReceived({
+                    txHash: response.hash,
+                    status: 'ApproveRequested',
+                })
+            )
+        );
     } catch (error) {
         console.error(error);
     }
@@ -233,9 +232,16 @@ export async function closeVault(vaultContractUUID) {
     const vault = await getVaultByUUID(vaultContractUUID);
     const vaultID = vault.id;
     try {
-        dlcBrokerETH.closeVault(vaultID).then((response) =>
-            store.dispatch(vaultEventReceived({ txHash: response.hash, status: 'CloseRequested' }))
-        );
+        dlcBrokerETH
+            .closeVault(vaultID, { gasLimit: 900000 })
+            .then((response) =>
+                store.dispatch(
+                    vaultEventReceived({
+                        txHash: response.hash,
+                        status: 'CloseRequested',
+                    })
+                )
+            );
     } catch (error) {
         console.error(error);
     }

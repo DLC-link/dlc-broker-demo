@@ -73,7 +73,6 @@ export const vaultsSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.error.message;
             })
-            .addCase(fetchVault.pending, (state, action) => {})
             .addCase(fetchVault.fulfilled, (state, action) => {
                 let vaultIndex;
                 if (
@@ -89,6 +88,7 @@ export const vaultsSlice = createSlice({
                             vault.uuid === action.payload.formattedVault.uuid
                     );
                 }
+
                 state.vaults[vaultIndex] = action.payload.formattedVault;
 
                 state.toastEvent = {
@@ -194,9 +194,7 @@ export const fetchVaults = createAsyncThunk('vaults/fetchVaults', async () => {
 export const fetchVault = createAsyncThunk(
     'vaults/fetchVault',
     async (payload) => {
-        const vaultUUID = payload.vaultUUID;
-        const vaultStatus = payload.vaultStatus;
-        const vaultTXHash = payload.vaultTXHash;
+        const { vaultUUID, vaultStatus, vaultTXHash, nftID } = payload;
 
         const vaultStatusKey = Object.keys(vaultStatuses)[vaultStatus];
         const vaultStatusValue = vaultStatuses[vaultStatusKey];
@@ -206,6 +204,8 @@ export const fetchVault = createAsyncThunk(
         const { vaults } = store.getState().vaults;
 
         const storedVaultUUIDs = vaults.map((vault) => vault.uuid);
+        const storedNFTIDs = vaults.map((vault) => vault.nftID);
+
         let fetchedVaultUUIDs = [];
 
         if (vaultStatusValue === vaultStatuses.NOTREADY) {
@@ -216,17 +216,33 @@ export const fetchVault = createAsyncThunk(
         if (
             !(
                 storedVaultUUIDs.includes(vaultUUID) ||
-                fetchedVaultUUIDs.includes(vaultUUID)
+                fetchedVaultUUIDs.includes(vaultUUID) ||
+                storedNFTIDs.includes(nftID)
             )
         ) {
             return;
         } else {
-            const vault = await getVaultByUUID(vaultUUID);
+            let vaultUUIDByNFTID;
+
+            if (nftID) {
+                vaultUUIDByNFTID = vaults.find(
+                    (vault) => vault.nftID === nftID
+                ).uuid;
+            }
+
+            const vault = await getVaultByUUID(
+                nftID ? vaultUUIDByNFTID : vaultUUID
+            );
+
             let formattedVault = formatVault(vault);
 
             if (vaultStatusValue === vaultStatuses.NFTISSUED) {
                 const { NFTs } = await fetchVaultsAndNFTs();
-                const NFT = NFTs.find((nft) => nft.dlcUUID === vaultUUID);
+
+                const NFT = nftID
+                    ? NFTs.find((nft) => nft.dlcUUID === vaultUUIDByNFTID)
+                    : NFTs.find((nft) => nft.dlcUUID === vaultUUID);
+
                 formattedVault = await processNftIssuedVault(
                     formattedVault,
                     NFT

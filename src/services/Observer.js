@@ -56,20 +56,13 @@ export default function Observer() {
             });
 
             btcNftETH.on('Approval', (...args) => {
-                const vaultOwner = args[0].toLowerCase();
-                const vaultUUID = args[1];
-                const vaultStatus = args[2];
-                const vaultTXHash = args[args.length - 1].transactionHash;
-
-                if (address === vaultOwner) {
-                    store.dispatch(
-                        fetchVault({
-                            vaultUUID: vaultUUID,
-                            vaultStatus: vaultStatus,
-                            vaultTXHash: vaultTXHash,
-                        })
-                    );
-                }
+                const nftID = args[3].args.tokenId.toNumber();
+                store.dispatch(
+                    fetchVault({
+                        nftID:nftID,
+                        vaultStatus: 4,
+                    })
+                );
             });
 
             console.log('Starting Ethereum observer...');

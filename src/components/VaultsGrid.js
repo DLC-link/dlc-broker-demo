@@ -30,7 +30,7 @@ export default function VaultsGrid() {
                             <SetupVaultCard></SetupVaultCard>
                             {filteredVaults?.map((vault, i) => (
                                 <motion.div
-                                    key={`${vault.uuid}${vault.status}`}
+                                    key={`${vault.uuid}${vault.status}${vault.isApproved}`}
                                     whileHover={{
                                         scale: 1.025,
                                         transition: { duration: 0.5 },
