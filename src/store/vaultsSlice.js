@@ -236,10 +236,6 @@ export const fetchVault = createAsyncThunk(
             formattedVault.isUserCreated =
                 formattedVault.originalCreator === address;
 
-            if (!formattedVault){
-                store.dispatch(fetchVaults());
-            }
-
             return { formattedVault, vaultTXHash };
         }
     }

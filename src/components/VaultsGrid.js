@@ -7,6 +7,7 @@ import {
     Collapse,
     SimpleGrid,
     ScaleFade,
+    border,
 } from '@chakra-ui/react';
 import Card from './Cards/Card';
 import SetupVaultCard from './Cards/SetupVaultCard';
@@ -30,8 +31,12 @@ export default function VaultsGrid() {
                             {filteredVaults?.map((vault, i) => (
                                 <motion.div
                                     key={`${vault.uuid}${vault.status}`}
-                                    initial={{ x: -300 }}
-                                    animate={{ x: 0 }}
+                                    whileHover={{
+                                        scale: 1.025,
+                                        transition: { duration: 0.5 },
+                                      }}
+                                    initial={{ x: -300, border: '5px dashed rgba(255,255,255, 0.1)', borderRadius: '25px'}}
+                                    animate={{ x: 0, border: '0px' }}
                                     exit={{ x: 300 }}
                                 >
                                     <Card vaultUUID={vault.uuid}></Card>
