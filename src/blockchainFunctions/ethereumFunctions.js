@@ -67,6 +67,7 @@ export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
             address: accounts[0],
             blockchain,
         };
+        console.log(accountInformation)
         currentEthereumNetwork = blockchain;
 
         await setEthereumProvider();
