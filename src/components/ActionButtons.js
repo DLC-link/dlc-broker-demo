@@ -78,7 +78,7 @@ export function ActionButtons({ vaultUUID }) {
                                     variant="outline"
                                     onClick={() => closeVault(vault.uuid)}
                                 >
-                                    REDEEM WBTC
+                                    REDEEM
                                 </Button>
                             </Tooltip>
                         </VStack>

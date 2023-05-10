@@ -9,7 +9,6 @@ export const componentSlice = createSlice({
     },
     reducers: {
         toggleDepositModalVisibility: (state, action) => {
-            console.log('toggleDepositModalVisibility', action.payload)
             state.isDepositModalOpen = action.payload;
         },
         toggleSelectWalletModalVisibility: (state, action) => {

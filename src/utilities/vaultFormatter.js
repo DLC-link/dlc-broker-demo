@@ -19,6 +19,5 @@ export function formatVault(vaultContract) {
 }
 
 export function formatAllVaults(vaults) {
-    console.log(vaults)
     return vaults.map(formatVault);
 }

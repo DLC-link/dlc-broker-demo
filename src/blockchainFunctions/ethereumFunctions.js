@@ -1,12 +1,11 @@
 import { ethers } from 'ethers';
 import { abi as dlcBrokerABI } from '../abis/dlcBrokerABI';
 import { abi as btcNftABI } from '../abis/btcNftABI';
-import eventBus from '../utilities/eventBus';
 import { formatAllVaults, formatVault } from '../utilities/vaultFormatter';
 import { EthereumNetworks } from '../networks/ethereumNetworks';
 import { login } from '../store/accountSlice';
 import store from '../store/store';
-import { vaultSetupRequested } from '../store/vaultsSlice';
+import { vaultEventReceived, vaultSetupRequested } from '../store/vaultsSlice';
 import { toggleInfoModalVisibility } from '../store/componentSlice';
 
 let dlcBrokerETH;
@@ -68,6 +67,7 @@ export async function requestAndDispatchMetaMaskAccountInformation(blockchain) {
             address: accounts[0],
             blockchain,
         };
+        console.log(accountInformation)
         currentEthereumNetwork = blockchain;
 
         await setEthereumProvider();
@@ -83,15 +83,12 @@ export async function setupVault(vaultContract) {
         dlcBrokerETH
             .setupVault(
                 vaultContract.BTCDeposit,
-                vaultContract.emergencyRefundTime
+                vaultContract.emergencyRefundTime,
+                { gasLimit: 900000 }
             )
             .then((e) => {
                 console.log(e);
                 store.dispatch(vaultSetupRequested(vaultContract));
-                eventBus.dispatch('vault-event', {
-                    status: 'Initialized',
-                    vaultContract: vaultContract,
-                });
             });
     } catch (error) {
         console.error(error);
@@ -115,11 +112,12 @@ export async function approveNFTBurn(nftID) {
     const { dlcBrokerAddress } = EthereumNetworks[currentEthereumNetwork];
     try {
         btcNftETH.approve(dlcBrokerAddress, nftID).then((response) =>
-            eventBus.dispatch('vault-event', {
-                status: 'ApproveRequested',
-                txId: response.hash,
-                chain: 'ethereum',
-            })
+            store.dispatch(
+                vaultEventReceived({
+                    txHash: response.hash,
+                    status: 'ApproveRequested',
+                })
+            )
         );
     } catch (error) {
         console.error(error);
@@ -198,6 +196,19 @@ export async function getVaultsForNFTs(NFTs, formattedVaults) {
     return nftVaults.filter((vault) => vault !== null);
 }
 
+export async function getVaultForNFT(nft, vault) {
+    let formattedVault;
+
+    try {
+        const vault = await dlcBrokerETH.getVaultByUUID(nft.dlcUUID);
+        formattedVault = formatVault(vault);
+        return processNftIssuedVault(formattedVault, nft);
+    } catch (error) {
+        console.error(error);
+    }
+    return formattedVault;
+}
+
 export async function fetchVaultsAndNFTs() {
     const { address } = store.getState().account;
 
@@ -208,7 +219,7 @@ export async function fetchVaultsAndNFTs() {
     return { vaults, NFTs };
 }
 
-async function getVaultByUUID(vaultContractUUID) {
+export async function getVaultByUUID(vaultContractUUID) {
     let vault;
     try {
         vault = await dlcBrokerETH.getVaultByUUID(vaultContractUUID);
@@ -222,13 +233,16 @@ export async function closeVault(vaultContractUUID) {
     const vault = await getVaultByUUID(vaultContractUUID);
     const vaultID = vault.id;
     try {
-        dlcBrokerETH.closeVault(vaultID).then((response) =>
-            eventBus.dispatch('vault-event', {
-                status: 'CloseRequested',
-                txId: response.hash,
-                chain: 'ethereum',
-            })
-        );
+        dlcBrokerETH
+            .closeVault(vaultID, { gasLimit: 900000 })
+            .then((response) =>
+                store.dispatch(
+                    vaultEventReceived({
+                        txHash: response.hash,
+                        status: 'CloseRequested',
+                    })
+                )
+            );
     } catch (error) {
         console.error(error);
     }

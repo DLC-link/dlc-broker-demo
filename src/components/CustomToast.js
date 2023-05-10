@@ -1,7 +1,7 @@
 import { Link, Flex, HStack, Text } from '@chakra-ui/react';
 import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
 
-export default function CustomToast({ isMobile, data }) {
+export default function CustomToast({ txHash, blockchain, status }) {
     const eventMap = {
         Initialized: 'Vault initialized!',
         NotReady: 'Vault established!',
@@ -22,24 +22,24 @@ export default function CustomToast({ isMobile, data }) {
         Liquidated: 'Vault liquidated!',
     };
 
-    const ethereumExplorerAddressMap = {
-        5: `https://goerli.etherscan.io/tx/${data.txId}`,
-        11155111: `https://sepolia.etherscan.io/tx/${data.txId}`,
+    const ethereumExplorerURLs = {
+        5: `https://goerli.etherscan.io/tx/${txHash}`,
+        11155111: `https://sepolia.etherscan.io/tx/${txHash}`,
     };
 
-    const success = !(data.status === ('Cancelled' || 'Failed'));
-    const message = eventMap[data.status];
+    const nftExplorerURL = 'https://testnets.opensea.io/account';
+
+    const success = !(status === ('Cancelled' || 'Failed'));
+    const message = eventMap[status];
     const explorerAddress =
-        data.status === 'NftIssued'
-            ? data.nftPage
-            : ethereumExplorerAddressMap[data.chain];
+        status === 'NftIssued'
+            ? nftExplorerURL
+            : ethereumExplorerURLs[blockchain];
 
     return (
         <Flex>
             <Link
-                py={isMobile ? '0px' : '100px'}
-                px={isMobile ? '0px' : '20px'}
-                href={explorerAddress}
+                href={status === 'Initialized' ? '' : explorerAddress}
                 isExternal
                 _hover={{
                     textDecoration: 'none',
@@ -68,13 +68,13 @@ export default function CustomToast({ isMobile, data }) {
                             {message}
                         </Text>
                         {success &&
-                            data.status !== 'Initialized' &&
-                            data.status !== 'NftIssued' && (
+                            status !== 'Initialized' &&
+                            status !== 'NftIssued' && (
                                 <Text fontSize="8px" fontWeight="bold">
                                     Click to show transaction in the explorer!
                                 </Text>
                             )}
-                        {data.status === 'NftIssued' && (
+                        {status === 'NftIssued' && (
                             <Text fontSize="8px" fontWeight="bold">
                                 Click to show NFT on OpenSea!
                             </Text>
