@@ -1,0 +1,8 @@
+sources:
+  - name: dlc-broker
+    handler:
+      graphql:
+        endpoint: https://api.studio.thegraph.com/query/48231/dlc-broker/version/latest
+
+documents:
+  - ./src/queries/getVaults.graphql
