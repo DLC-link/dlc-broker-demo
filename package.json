@@ -3,6 +3,7 @@
     "version": "0.2.1",
     "private": true,
     "dependencies": {
+        "@apollo/client": "^3.7.15",
         "@chakra-ui/icon": "^3.0.11",
         "@chakra-ui/icons": "^2.0.11",
         "@chakra-ui/react": "^2.3.7",
@@ -27,6 +28,7 @@
         "constants-browserify": "^1.0.0",
         "ethers": "^5.7.2",
         "graceful-fs": "^4.2.10",
+        "graphql": "^16.6.0",
         "https-browserify": "^1.0.0",
         "js-ipfs-fetch": "^4.2.3",
         "micro-stacks": "^1.1.4",
@@ -75,5 +77,8 @@
             "last 1 firefox version",
             "last 1 safari version"
         ]
+    },
+    "devDependencies": {
+        "@graphprotocol/client-cli": "^3.0.0"
     }
 }

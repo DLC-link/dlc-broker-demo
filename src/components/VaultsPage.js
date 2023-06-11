@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, Collapse, VStack, IconButton, HStack } from '@chakra-ui/react';
 import VaultsGrid from './VaultsGrid';
 import Balance from './Balance';
@@ -6,6 +6,7 @@ import { RefreshOutlined } from '@mui/icons-material';
 import Filters from './Filters';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchVaults, selectAllVaults } from '../store/vaultsSlice';
+import Leaderboard from './Leaderboard';
 
 export default function VaultsPage() {
     const dispatch = useDispatch();
@@ -19,7 +20,6 @@ export default function VaultsPage() {
             refreshVaultsTable(false);
         }
     }, [address, vaultsStoreStatus, vaults.length]);
-
 
     const refreshVaultsTable = async (isManual) => {
         dispatch(fetchVaults(address));
@@ -55,6 +55,7 @@ export default function VaultsPage() {
                     </HStack>
                     <Balance></Balance>
                     <Filters></Filters>
+                    <Leaderboard></Leaderboard>
                 </VStack>
                 <VaultsGrid
                     isLoading={isLoading}
