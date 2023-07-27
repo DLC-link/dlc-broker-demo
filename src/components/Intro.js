@@ -1,38 +1,30 @@
 import React from 'react';
-import { Text, Collapse, Image, VStack } from '@chakra-ui/react';
-import { useSelector } from 'react-redux';
+import { Text, Image, VStack } from '@chakra-ui/react';
 
-export default function Header() {
-    const address = useSelector((state) => state.account.address);
+export default function Intro() {
+    function getRandomNumber() {
+        return Math.floor(Math.random() * 15) + 1;
+    }
+
+    const randomPicture = getRandomNumber();
+    const randomPictureFileName = `/maintenance_${randomPicture}.png`;
     return (
-        <Collapse in={!address}>
-            <VStack
-                marginTop="215px"
-                justifyContent="center"
-                alignItems="center"
+        <VStack marginTop="215px" justifyContent="center" alignItems="center">
+            <Text
+                height={['25px', '150px']}
+                fontSize={['35px', '150px']}
+                fontWeight="bold"
+                color="accent"
             >
-                <Image
-                    src="/BTC_Graphic_2.png"
-                    position="absolute"
-                    width="950px"
-                    blendMode="screen"
-                ></Image>
-                <Text
-                    height={['25px', '50px']}
-                    fontSize={['25px', '50px']}
-                    fontWeight="semibold"
-                    color="accent"
-                >
-                    Use Native Bitcoin
-                </Text>
-                <Text
-                    fontSize={['25px', '50px']}
-                    fontWeight="normal"
-                    color="white"
-                >
-                    without wrapping
-                </Text>
-            </VStack>
-        </Collapse>
+                Under Construction
+            </Text>
+            <Image
+                src={randomPictureFileName}
+                position="absolute"
+                width="750px"
+                blendMode="screen"
+                borderRadius="full"
+            ></Image>
+        </VStack>
     );
 }
