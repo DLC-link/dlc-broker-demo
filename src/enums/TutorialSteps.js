@@ -1,0 +1,15 @@
+export const TutorialStep = {
+    CONNECTWALLET: 'ConnectWallet',
+    SELECTNETWORK: 'SelectNetwork',
+    SETCOLLATERAL: 'SetCollateral',
+    SETUPVAULT: 'SetupVault',
+    CONFIRMTRANSACTION: 'ConfirmTransaction',
+    WAITFORSETUP: 'WaitForSetup',
+    FUNDVAULT: 'FundVault',
+    WAITFORCONFIRMATION: 'WaitForConfirmation',
+    MINTNFT: 'MintNFT',
+    APPROVENFT: 'ApproveNFT',
+    WAITFORCLOSE: 'WaitForClose',
+    CLOSEVAULT: 'CloseVault',
+    ENDFLOW: 'EndFlow',
+};

@@ -2,50 +2,45 @@
 
 import React from 'react';
 import {
-    VStack,
-    HStack,
+    Flex,
     Collapse,
     SimpleGrid,
     ScaleFade,
-    border,
+    Tooltip,
 } from '@chakra-ui/react';
 import Card from './Cards/Card';
-import SetupVaultCard from './Cards/SetupVaultCard';
 import { useSelector } from 'react-redux';
-import { selectFilteredVaults } from '../store/vaultsSlice';
-import { motion } from 'framer-motion';
+import { useVaults } from '../hooks/useVaults';
+import SetupVaultButton from './SetupVaultButton';
 
 export default function VaultsGrid() {
-    const filteredVaults = useSelector(selectFilteredVaults);
+    const vaults = useVaults();
     const address = useSelector((state) => state.account.address);
     const isLoading = useSelector((state) => state.vaults.status === 'loading');
 
     return (
-        <>
-            <Collapse in={address}>
-                <VStack justifyContent="center" alignContent="center">
-                    <HStack></HStack>
-                    <ScaleFade in={!isLoading}>
-                        <SimpleGrid columns={[1, 4]} spacing={[0, 15]}>
-                            <SetupVaultCard></SetupVaultCard>
-                            {filteredVaults?.map((vault, i) => (
-                                <motion.div
-                                    key={`${vault.uuid}${vault.status}${vault.isApproved}`}
-                                    whileHover={{
-                                        scale: 1.025,
-                                        transition: { duration: 0.5 },
-                                      }}
-                                    initial={{ x: -300, border: '5px dashed rgba(255,255,255, 0.1)', borderRadius: '25px'}}
-                                    animate={{ x: 0, border: '0px' }}
-                                    exit={{ x: 300 }}
-                                >
-                                    <Card vaultUUID={vault.uuid}></Card>
-                                </motion.div>
-                            ))}
-                        </SimpleGrid>
-                    </ScaleFade>
-                </VStack>
-            </Collapse>
-        </>
+        <Collapse in={address}>
+            <Flex justifyContent="center" alignContent="center">
+                <ScaleFade in={!isLoading}>
+                    <SimpleGrid
+                        columns={[1, 2, 3]}
+                        spacing={50}
+                        paddingTop={150}
+                        paddingBottom={150}
+                        paddingLeft={50}
+                        paddingRight={50}
+                        rowGap={25}
+                    >
+                        <SetupVaultButton />
+                        {vaults?.map((vault) => (
+                            <Card
+                                key={`${vault.uuid}${vault.status}`}
+                                vault={vault}
+                            />
+                        ))}
+                    </SimpleGrid>
+                </ScaleFade>
+            </Flex>
+        </Collapse>
     );
 }
