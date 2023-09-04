@@ -10,15 +10,22 @@ import {
     getAllVaultsForAddress,
     fetchVaultsAndNFTs,
     processNftIssuedVault,
+    mintNft,
 } from '../blockchainFunctions/ethereumFunctions';
-import { formatAllVaults, formatVault } from '../utilities/vaultFormatter';
+import {
+    formatAllVaults,
+    formatVault,
+    updateVaultToFundingInProgress,
+} from '../utilities/vaultFormatter';
 import { customShiftValue } from '../utilities/formatFunctions';
 import { vaultStatuses } from '../enums/VaultStatuses';
+import { ToastEvent } from '../components/CustomToast';
 
 const initialState = {
     vaults: [],
     status: 'idle',
     error: null,
+    vaultsWithBTCTransactions: [],
     filters: {
         showMinted: true,
         showReceived: true,
@@ -38,25 +45,39 @@ export const vaultsSlice = createSlice({
         },
         vaultSetupRequested: (state, action) => {
             const temporaryVault = {
-                uuid: '',
-                status: 'Initialized',
-                vaultCollateral: action.payload.BTCDeposit,
+                uuid: '-',
+                status: vaultStatuses.NONE,
+                vaultCollateral: action.payload.vaultContract.BTCDeposit,
                 formattedCollateral:
-                    customShiftValue(action.payload.BTCDeposit, 8, true) +
-                    ' BTC',
+                    customShiftValue(
+                        action.payload.vaultContract.BTCDeposit,
+                        8,
+                        true
+                    ) + ' BTC',
                 isUserCreated: true,
             };
             state.vaults.unshift(temporaryVault);
             state.toastEvent = {
-                txHash: null,
-                status: temporaryVault.status,
+                txHash: action.payload.txHash,
+                status: ToastEvent.SETUPREQUESTED,
             };
         },
         vaultEventReceived: (state, action) => {
+            if (action.payload.status === ToastEvent.ACCEPTSUCCEEDED) {
+                state.vaultsWithBTCTransactions.push([
+                    action.payload.uuid,
+                    action.payload.txHash,
+                ]);
+                fetchVaults();
+            }
             state.toastEvent = {
-                txHash: action.payload.vaultTXHash,
+                txHash: action.payload.txHash,
                 status: action.payload.status,
+                message: action.payload.message,
             };
+        },
+        deleteToastEvent: (state) => {
+            state.toastEvent = null;
         },
     },
     extraReducers(builder) {
@@ -76,11 +97,10 @@ export const vaultsSlice = createSlice({
             .addCase(fetchVault.fulfilled, (state, action) => {
                 let vaultIndex;
                 if (
-                    action.payload.formattedVault.status ===
-                    vaultStatuses.NOTREADY
+                    action.payload.formattedVault.status === vaultStatuses.READY
                 ) {
                     vaultIndex = state.vaults.findIndex(
-                        (vault) => vault.status === 'Initialized'
+                        (vault) => vault.status === 'None'
                     );
                 } else {
                     vaultIndex = state.vaults.findIndex(
@@ -113,6 +133,7 @@ export const {
     vaultSetupRequested,
     vaultStatusChanged,
     vaultEventReceived,
+    deleteToastEvent,
 } = vaultsSlice.actions;
 
 export default vaultsSlice.reducer;
@@ -141,38 +162,47 @@ export const selectTotalNFTs = createSelector(selectAllVaults, (vaults) => {
 
 export const selectFilters = (state) => state.vaults.filters;
 
-export const selectFilteredVaults = createSelector(
-    selectAllVaults,
-    selectFilters,
-    (vaults, filters) => {
-        return vaults.filter((vault) => {
-            return (
-                (vault.isUserCreated && filters.showMinted) ||
-                (!vault.isUserCreated && filters.showReceived)
-            );
-        });
-    }
-);
-
 export const fetchVaults = createAsyncThunk('vaults/fetchVaults', async () => {
-    const address = store.getState().account.address;
+    const { address } = store.getState().account;
+    const { vaultsWithBTCTransactions } = store.getState().vaults;
 
     const { vaults, NFTs } = await fetchVaultsAndNFTs(address);
+
     const formattedVaults = formatAllVaults(vaults);
     const nftUUIDs = NFTs.map((nft) => nft.dlcUUID);
 
-    let allVaults = [];
+    const allVaults = [];
+    for (let i = 0; i < formattedVaults.length; i++) {
+        const vault = formattedVaults[i];
 
-    for (const vault of formattedVaults) {
-        const nftIndex = nftUUIDs.indexOf(vault.uuid);
+        if (vault.status === vaultStatuses.READY) {
+            const matchingVaultWithBTCTransaction =
+                vaultsWithBTCTransactions.find(
+                    (vaultWithBTCTransaction) =>
+                        vault.uuid === vaultWithBTCTransaction[0]
+                );
+            if (matchingVaultWithBTCTransaction) {
+                updateVaultToFundingInProgress(
+                    vault,
+                    matchingVaultWithBTCTransaction[1]
+                );
+            }
+        }
+
+        if (vault.status === vaultStatuses.FUNDED) {
+            await mintNft(vault.uuid);
+        }
 
         if (vault.status === vaultStatuses.NFTISSUED) {
+            const nftIndex = nftUUIDs.indexOf(vault.uuid);
             if (nftIndex >= 0) {
                 const processedVault = await processNftIssuedVault(
                     vault,
                     NFTs[nftIndex]
                 );
                 allVaults.push(processedVault);
+            } else {
+                allVaults.push(vault);
             }
         } else {
             allVaults.push(vault);
@@ -180,15 +210,12 @@ export const fetchVaults = createAsyncThunk('vaults/fetchVaults', async () => {
     }
 
     const nftVaults = await getVaultsForNFTs(NFTs, formattedVaults);
+    const allVaultsWithNfts = [...allVaults, ...nftVaults];
 
-    allVaults.push(...nftVaults);
-
-    allVaults = allVaults.map((vault) => {
+    return allVaultsWithNfts.map((vault) => {
         vault.isUserCreated = vault.originalCreator === address;
         return vault;
     });
-
-    return allVaults;
 });
 
 export const fetchVault = createAsyncThunk(
@@ -208,7 +235,7 @@ export const fetchVault = createAsyncThunk(
 
         let fetchedVaultUUIDs = [];
 
-        if (vaultStatusValue === vaultStatuses.NOTREADY) {
+        if (vaultStatusValue === vaultStatuses.READY) {
             const fetchedVaults = await getAllVaultsForAddress();
             fetchedVaultUUIDs = fetchedVaults.map((vault) => vault.uuid);
         }

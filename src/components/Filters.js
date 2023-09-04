@@ -25,7 +25,7 @@ export default function Filters() {
         <>
             <Button
                 variant={'outline'}
-                width={'350px'}
+                width={'275px'}
                 onClick={() => setShowFilters(!showFilters)}
             >
                 SHOW FILTERS
@@ -34,7 +34,7 @@ export default function Filters() {
                 <VStack
                     padding="15px"
                     height="auto"
-                    width="350px"
+                    width="275px"
                     border="1px"
                     borderRadius="lg"
                     borderColor="white"
@@ -43,16 +43,15 @@ export default function Filters() {
                     alignItems="justify"
                 >
                     <HStack justify="space-between">
-                            <Text
-                                fontSize="small"
-                                fontWeight="extrabold"
-                                as="span"
-                                color="accent"
-                            >
-                                CREATED BY ME
-                            </Text>
+                        <Text
+                            fontSize="small"
+                            fontWeight="bold"
+                            as="span"
+                            color="white"
+                        >
+                            CREATED BY ME
+                        </Text>
                         <Switch
-                            colorScheme="teal"
                             size="sm"
                             isChecked={filters.showMinted}
                             onChange={(e) =>
@@ -61,14 +60,14 @@ export default function Filters() {
                         />
                     </HStack>
                     <HStack justify="space-between">
-                            <Text
-                                fontSize="small"
-                                fontWeight="extrabold"
-                                as="span"
-                                color='accent'
-                            >
-                                NOT CREATED BY ME
-                            </Text>
+                        <Text
+                            fontSize="small"
+                            fontWeight="extrabold"
+                            as="span"
+                            color="white"
+                        >
+                            NOT CREATED BY ME
+                        </Text>
                         <Switch
                             colorScheme="teal"
                             size="sm"

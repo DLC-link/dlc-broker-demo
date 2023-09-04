@@ -3,21 +3,33 @@ import { vaultStatuses } from '../enums/VaultStatuses';
 
 export function formatVault(vaultContract) {
     const statusLookup = Object.values(vaultStatuses);
-    const collateralValue = parseInt(vaultContract.vaultCollateral._hex);
     return {
         id: parseInt(vaultContract.id._hex),
         uuid: vaultContract.dlcUUID,
         status: statusLookup[vaultContract.status],
-        vaultCollateral: collateralValue,
+        vaultCollateral: parseInt(vaultContract.vaultCollateral._hex),
         formattedCollateral:
-            customShiftValue(collateralValue, 8, true) + ' BTC',
+            customShiftValue(
+                parseInt(vaultContract.vaultCollateral._hex),
+                8,
+                true
+            ) + ' BTC',
         nftID: parseInt(vaultContract.nftId._hex),
         owner: vaultContract.owner.toLowerCase(),
         originalCreator: vaultContract.originalCreator.toLowerCase(),
         nftImageURL: undefined,
+        attestorList: vaultContract.attestorList,
+        txHash: '',
     };
 }
 
 export function formatAllVaults(vaults) {
+    console.log('vaults', vaults);
     return vaults.map(formatVault);
+}
+
+export function updateVaultToFundingInProgress(vault, vaultTXHash) {
+    vault.txHash = vaultTXHash;
+    vault.status = vaultStatuses.PREFUNDED;
+    console.log('Updated Vault', vault);
 }

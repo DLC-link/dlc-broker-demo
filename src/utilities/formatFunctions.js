@@ -32,7 +32,8 @@ export function hexToBytes(hex) {
 }
 
 export function formatCollateralInUSD(collateralAmount, bitcoinValue) {
-    return new Intl.NumberFormat().format(bitcoinValue * collateralAmount);
+    const collateralInUSD = bitcoinValue * collateralAmount;
+    return new Intl.NumberFormat().format(collateralInUSD.toFixed(2));
 }
 
 export function formatBitcoinInUSDAmount(bitcoinValue) {

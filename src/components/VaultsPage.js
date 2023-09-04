@@ -1,35 +1,33 @@
-import React, { useEffect } from 'react';
-import { Text, Collapse, VStack, IconButton, HStack } from '@chakra-ui/react';
-import VaultsGrid from './VaultsGrid';
-import Balance from './Balance';
+import { Collapse, HStack, IconButton, Text, VStack } from '@chakra-ui/react';
 import { RefreshOutlined } from '@mui/icons-material';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useOnMount } from '../hooks/useOnMount';
+import { fetchBitcoinValue } from '../store/externalDataSlice';
+import { fetchVaults } from '../store/vaultsSlice';
+import Balance from './Balance';
 import Filters from './Filters';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchVaults, selectAllVaults } from '../store/vaultsSlice';
+import VaultsGrid from './VaultsGrid';
 
 export default function VaultsPage() {
     const dispatch = useDispatch();
-    const vaults = useSelector(selectAllVaults);
-    const vaultsStoreStatus = useSelector((state) => state.vaults.status);
     const isLoading = useSelector((state) => state.vaults.status === 'loading');
     const address = useSelector((state) => state.account.address);
 
-    useEffect(() => {
-        if (vaultsStoreStatus === 'idle' && vaults.length === 0 && address) {
-            refreshVaultsTable(false);
-        }
-    }, [address, vaultsStoreStatus, vaults.length]);
+    useOnMount(() => {
+        refreshVaultsTable();
+    });
 
-
-    const refreshVaultsTable = async (isManual) => {
+    const refreshVaultsTable = async () => {
         dispatch(fetchVaults(address));
+        dispatch(fetchBitcoinValue());
     };
 
     return (
         <>
             <Collapse in={address}>
-                <VStack marginBottom="50px">
-                    <HStack justifyContent="center">
+                <VStack>
+                    <HStack width={275}>
                         <IconButton
                             _hover={{
                                 borderColor: 'accent',
@@ -38,27 +36,23 @@ export default function VaultsPage() {
                             }}
                             variant="outline"
                             isLoading={isLoading}
-                            marginLeft="0px"
+                            marginLeft={0}
                             height="35px"
                             width="35px"
                             borderRadius="lg"
                             borderColor="white"
                             color="white"
-                            icon={
-                                <RefreshOutlined color="inherit"></RefreshOutlined>
-                            }
+                            icon={<RefreshOutlined color="inherit" />}
                             onClick={() => refreshVaultsTable(true)}
-                        ></IconButton>
-                        <Text fontSize="3xl" fontWeight="extrabold">
+                        />
+                        <Text fontSize="2xl" fontWeight="extrabold">
                             BITCOIN VAULTS
                         </Text>
                     </HStack>
-                    <Balance></Balance>
-                    <Filters></Filters>
+                    <Balance />
+                    <Filters />
                 </VStack>
-                <VaultsGrid
-                    isLoading={isLoading}
-                ></VaultsGrid>
+                <VaultsGrid isLoading={isLoading} />
             </Collapse>
         </>
     );
