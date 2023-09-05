@@ -6,8 +6,13 @@ import { vaultEventReceived } from '../store/vaultsSlice';
 import { fetchVaults } from '../store/vaultsSlice';
 
 const createURLParams = (bitcoinContractOffer, attestorURLs) => {
+    const { blockchain } = store.getState().account;
+    const URL =
+        blockchain === 31337
+            ? process.env.REACT_APP_DEVNET_WALLET_DOMAIN
+            : process.env.REACT_APP_TESTNET_WALLET_DOMAIN;
     const counterPartyWalletDetails = {
-        counterpartyWalletURL: process.env.REACT_APP_WALLET_DOMAIN,
+        counterpartyWalletURL: URL,
         counterpartyWalletName: 'DLC.Link',
         counterpartyWalletIcon:
             'https://dlc-public-assets.s3.amazonaws.com/DLC.Link_logo_icon_color.svg',

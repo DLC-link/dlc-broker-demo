@@ -121,6 +121,8 @@ export default function useTutorialStep() {
             case vaultStatuses.FUNDED:
                 currentTutorialStep = TutorialStep.MINTNFT;
                 break;
+            case vaultStatuses.PREFUNDED:
+                currentTutorialStep = TutorialStep.WAITFORCONFIRMATION;
             case vaultStatuses.NFTISSUED:
                 if (currentTutorialVault.isApproved) {
                     currentTutorialStep = TutorialStep.CLOSEVAULT;
