@@ -24,12 +24,10 @@ export function formatVault(vaultContract) {
 }
 
 export function formatAllVaults(vaults) {
-    console.log('vaults', vaults);
     return vaults.map(formatVault);
 }
 
 export function updateVaultToFundingInProgress(vault, vaultTXHash) {
     vault.txHash = vaultTXHash;
     vault.status = vaultStatuses.PREFUNDED;
-    console.log('Updated Vault', vault);
 }
