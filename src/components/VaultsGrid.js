@@ -7,11 +7,13 @@ import {
     SimpleGrid,
     ScaleFade,
     Tooltip,
+    Button,
 } from '@chakra-ui/react';
 import Card from './Cards/Card';
 import { useSelector } from 'react-redux';
 import { useVaults } from '../hooks/useVaults';
 import SetupVaultButton from './SetupVaultButton';
+import { mintNft } from '../blockchainFunctions/ethereumFunctions';
 
 export default function VaultsGrid() {
     const vaults = useVaults();
@@ -20,6 +22,15 @@ export default function VaultsGrid() {
 
     return (
         <Collapse in={address}>
+            <Button
+                onClick={() =>
+                    mintNft(
+                        '0x4883abd936508ec2aa832b56012e2f9187764811c28cfc57c49ffd0ec057d4a6'
+                    )
+                }
+            >
+                MINT
+            </Button>
             <Flex justifyContent="center" alignContent="center">
                 <ScaleFade in={!isLoading}>
                     <SimpleGrid

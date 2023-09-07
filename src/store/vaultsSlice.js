@@ -190,7 +190,7 @@ export const fetchVaults = createAsyncThunk('vaults/fetchVaults', async () => {
         }
 
         if (vault.status === vaultStatuses.FUNDED) {
-            await mintNft(vault.uuid);
+            mintNft(vault.uuid);
         }
 
         if (vault.status === vaultStatuses.NFTISSUED) {

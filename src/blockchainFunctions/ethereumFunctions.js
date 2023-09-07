@@ -345,7 +345,7 @@ export async function mintNft(uuid) {
     const collateralInSats = vault.vaultCollateral.toLocaleString('en-US');
 
     const font = await Jimp.loadFont(
-        'http://localhost:3000/fonts/open-sans-32-white/open-sans-32-white.fnt'
+        'https://github.com/jimp-dev/jimp/tree/main/packages/jimp/fonts/open-sans/open-sans-32-white/open-sans-32-white.fnt'
     );
 
     const nftImage = await Jimp.read(fetchURL);
