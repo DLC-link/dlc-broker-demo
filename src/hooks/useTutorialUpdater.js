@@ -20,8 +20,6 @@ export default function useTutorialStep() {
 
     const { vaultsWithBTCTransactions } = useSelector((state) => state.vaults);
 
-    console.log('vaultsWithBTCTransactions', vaultsWithBTCTransactions);
-
     const isDepositModalOpen = useSelector(
         (state) => state.component.isDepositModalOpen
     );

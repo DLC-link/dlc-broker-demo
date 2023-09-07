@@ -5,14 +5,17 @@ import { ToastEvent } from '../components/CustomToast';
 import { vaultEventReceived } from '../store/vaultsSlice';
 import { fetchVaults } from '../store/vaultsSlice';
 
+const routerWalletURLMap = {
+    5: process.env.REACT_APP_TESTNET_ETHEREUM_WALLET_DOMAIN,
+    11155111: process.env.REACT_APP_TESTNET_ETHEREUM_WALLET_DOMAIN,
+    31337: process.env.REACT_APP_DEVNET_ETHEREUM_WALLET_DOMAIN,
+};
+
 const createURLParams = (bitcoinContractOffer, attestorURLs) => {
     const { blockchain } = store.getState().account;
-    const URL =
-        blockchain === 31337
-            ? process.env.REACT_APP_DEVNET_WALLET_DOMAIN
-            : process.env.REACT_APP_TESTNET_WALLET_DOMAIN;
+    const routerWalletURL = routerWalletURLMap[blockchain];
     const counterPartyWalletDetails = {
-        counterpartyWalletURL: URL,
+        counterpartyWalletURL: routerWalletURL,
         counterpartyWalletName: 'DLC.Link',
         counterpartyWalletIcon:
             'https://dlc-public-assets.s3.amazonaws.com/DLC.Link_logo_icon_color.svg',
@@ -53,14 +56,13 @@ export const fetchBitcoinContractOfferFromCounterpartyWallet = async (
     vaultContract
 ) => {
     const { blockchain } = store.getState().account;
-    const URL =
-        blockchain === 31337
-            ? process.env.REACT_APP_DEVNET_WALLET_DOMAIN + `/offer`
-            : process.env.REACT_APP_TESTNET_WALLET_DOMAIN + `/offer`;
+
+    const routerWalletURL = routerWalletURLMap[blockchain];
+    const routerWalletOfferEndpoint = `${routerWalletURL}/offer`;
 
     const attestorListJSON = JSON.stringify(vaultContract.attestorList);
     try {
-        const response = await fetch(URL, {
+        const response = await fetch(routerWalletOfferEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
