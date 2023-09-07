@@ -333,7 +333,6 @@ export async function mintNft(uuid) {
 
     const nftID = await btcNftETH.getNextMintId();
     const vault = await getVaultByUUID(uuid);
-    console.log('Got next NFT ID as ' + nftID);
 
     const NFT_STORAGE_TOKEN = process.env.REACT_APP_NFT_STORAGE_TOKEN;
     const client = new NFTStorage({ token: NFT_STORAGE_TOKEN });
@@ -345,7 +344,7 @@ export async function mintNft(uuid) {
     const collateralInSats = vault.vaultCollateral.toLocaleString('en-US');
 
     const font = await Jimp.loadFont(
-        'http://localhost:3000/fonts/open-sans-32-white/open-sans-32-white.fnt'
+        'https://dlc-public-assets.s3.amazonaws.com/btc-nft-images/open-sans-32-white/open-sans-32-white.fnt'
     );
 
     const nftImage = await Jimp.read(fetchURL);
